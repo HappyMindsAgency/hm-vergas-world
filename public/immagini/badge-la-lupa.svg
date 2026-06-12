@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="c"><rect x="54" y="74" width="404" height="302" rx="48"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#fff"/>
+  <path d="M0 0h512v190H0z" fill="#9a58ff"/>
+  <circle cx="86" cy="418" r="86" fill="#b9f46b"/>
+  <image href="banda_di_verga_pagina_01.jpg" x="54" y="74" width="404" height="302" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/>
+  <rect x="126" y="392" width="260" height="58" rx="29" fill="#ff7a2f"/>
+  <text x="256" y="430" text-anchor="middle" font-family="Nunito, Arial" font-size="34" font-weight="900" fill="#fff">La Lupa</text>
+</svg>

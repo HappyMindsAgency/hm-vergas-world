@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="c"><rect x="48" y="72" width="416" height="310" rx="50"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#fff"/>
+  <rect width="512" height="512" fill="#30c8ff"/>
+  <path d="M0 372c100-32 186 34 286 0s148-28 226 8v132H0z" fill="#1a3a5c" opacity=".9"/>
+  <image href="malavoglia.jpg" x="48" y="72" width="416" height="310" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/>
+  <rect x="100" y="400" width="312" height="58" rx="29" fill="#ffe24c"/>
+  <text x="256" y="438" text-anchor="middle" font-family="Nunito, Arial" font-size="28" font-weight="900" fill="#1a3a5c">I Malavoglia</text>
+</svg>

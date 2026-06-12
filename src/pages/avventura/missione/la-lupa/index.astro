@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+import "../../../../styles/adventure.css";
+
+const body = "<main id=\"main-content\" class=\"mission-page\">\n      <header class=\"mission-header\">\n        <div>\n          <p data-mission-story>La Lupa</p>\n          <strong><span data-question-index>1</span> / 5</strong>\n        </div>\n        <div class=\"mission-progress\"><span data-mission-progress></span></div>\n      </header>\n      <section class=\"quiz-card\">\n        <h1 data-question-text></h1>\n        <div class=\"options-grid\" data-options-grid></div>\n        <p class=\"quiz-feedback\" data-quiz-feedback></p>\n        <button class=\"next-question\" type=\"button\" data-next-question hidden>Prossima domanda →</button>\n      </section>\n      <section class=\"mission-complete\" data-mission-complete hidden>\n        <div class=\"falling-badge\" data-complete-badge></div>\n        <h1 data-complete-title>Hai conquistato il badge!</h1>\n        <a href=\"/avventura/passaporto\">Torna al Passaporto</a>\n      </section>\n    </main>";
+---
+
+<BaseLayout
+  title="Missione | Verga's World"
+  fonts="adventure"
+  scripts={[{ src: "/scripts/quiz-data.js" }, { src: "/scripts/adventure.js" }]}
+  page="mission"
+>
+  <Fragment set:html={body} />
+
+</BaseLayout>

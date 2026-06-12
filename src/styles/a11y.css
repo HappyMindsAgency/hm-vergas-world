@@ -1,0 +1,42 @@
+/* Site-wide accessibility helpers (WCAG 2.1 AA).
+   Loaded globally by BaseLayout. Intentionally minimal to avoid clashing
+   with the existing hand-written page stylesheets. */
+
+/* Visible keyboard focus for every interactive element (WCAG 2.4.7).
+   :focus-visible only shows the ring for keyboard users, not mouse clicks. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid #1a3a5c;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Utility: hide visually but keep available to screen readers. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Respect users who ask for less motion (WCAG 2.3.3). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Make sure decorative scrollbars never trap keyboard focus silently:
+   ensure target of in-page links is offset from any sticky header. */
+:target {
+  scroll-margin-top: 80px;
+}

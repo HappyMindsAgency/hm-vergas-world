@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="c"><rect x="70" y="54" width="372" height="326" rx="54"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#fff"/>
+  <path d="M0 0h512v512H0z" fill="#9a7cff"/>
+  <circle cx="88" cy="414" r="86" fill="#ffe24c"/>
+  <image href="marco.jpg" x="70" y="54" width="372" height="326" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/>
+  <rect x="92" y="398" width="328" height="58" rx="29" fill="#fff"/>
+  <text x="256" y="436" text-anchor="middle" font-family="Nunito, Arial" font-size="27" font-weight="900" fill="#1a3a5c">Il segreto di Marco</text>
+</svg>

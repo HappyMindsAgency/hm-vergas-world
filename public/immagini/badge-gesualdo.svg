@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="c"><rect x="44" y="72" width="424" height="306" rx="44"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#fff"/>
+  <rect width="512" height="512" fill="#b9f46b"/>
+  <circle cx="426" cy="410" r="88" fill="#ff4fa3"/>
+  <image href="incontro%20con%20gesualdo.jpg" x="44" y="72" width="424" height="306" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/>
+  <rect x="68" y="396" width="376" height="58" rx="29" fill="#fff"/>
+  <text x="256" y="434" text-anchor="middle" font-family="Nunito, Arial" font-size="27" font-weight="900" fill="#1a3a5c">Mastro-don Gesualdo</text>
+</svg>

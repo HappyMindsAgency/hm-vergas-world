@@ -1,0 +1,302 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/styles.css";
+---
+
+<BaseLayout
+  title="Verga's World | Casa Verga Vizzini"
+  description="Esplora Vizzini e l'universo narrativo verghiano attraverso 7 storie, avatar animati, indizi nascosti e video da sbloccare al museo."
+  fonts="main"
+  scripts={[
+    { src: "/scripts/characters.js", defer: true },
+    { src: "/scripts/app.js", defer: true },
+  ]}
+>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="Verga's World home">
+      <span class="brand-mark">VW</span>
+      <span>
+        <strong>Verga's World</strong>
+        <small>Casa Verga, Vizzini</small>
+      </span>
+    </a>
+    <img class="header-project-logo" src="/immagini/Logo di Progetto Borgo cunziria.jpg" alt="Logo del progetto Borgo della Cunziria" width="120" height="60" />
+    <nav aria-label="Sezioni principali">
+      <a href="#scuole">Porto la mia classe</a>
+      <a href="/insegnante/login">Area insegnanti</a>
+      <a class="nav-cta" href="/avventura">Ho il Codice Avventura!</a>
+      <a href="#famiglie">Vengo con la famiglia</a>
+      <a href="/borgo-cunziria">Borgo Cunziria</a>
+    </nav>
+    <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="kid-menu" aria-label="Apri menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div id="kid-menu" class="kid-menu" data-kid-menu hidden>
+      <a href="#mappa">Esplora la mappa</a>
+      <a href="#characters-strip-title">Conosci i personaggi</a>
+      <a href="#video-vault">7 storie al Museo</a>
+      <a href="/borgo-cunziria">Borgo Cunziria</a>
+      <a href="#indizio">L'Indizio di Verga</a>
+      <a href="#famiglie">Vengo con la famiglia</a>
+      <a href="#scuole">Porto la mia classe</a>
+      <a href="/insegnante/login">Area insegnanti</a>
+      <a class="nav-cta" href="/avventura">Ho il Codice Avventura!</a>
+    </div>
+  </header>
+
+  <aside class="kid-rail" aria-label="Navigazione rapida" hidden>
+    <a class="rail-logo" href="#home" aria-label="Verga's World">
+      <span>VERGA</span>
+      <span>KIDS</span>
+    </a>
+    <a class="rail-button is-current" href="#mappa" aria-label="Mappa">⌂</a>
+    <a class="rail-button" href="#indizio" aria-label="Gioco">◆</a>
+    <a class="rail-button" href="#codice" aria-label="Codice">?</a>
+    <a class="rail-button" href="#video-vault" aria-label="Video">▶</a>
+    <a class="rail-button" href="#scuole" aria-label="Scuole">★</a>
+  </aside>
+
+  <main id="main-content">
+    <section class="map-hero section-wave-bottom" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="kicker">La mappa interattiva del museo</p>
+        <h1 id="hero-title">Verga's World</h1>
+        <p>
+          Esplora Vizzini e l'universo narrativo verghiano attraverso 7 storie,
+          avatar animati, indizi nascosti e video da sbloccare al museo.
+        </p>
+      </div>
+
+      <section id="mappa" class="story-map" aria-label="Mappa illustrata interattiva di Vizzini">
+        <img class="map-bg-image" src="/immagini/vizzini.jpg" alt="" fetchpriority="high" decoding="async" />
+        <div class="map-sky" aria-hidden="true"></div>
+        <div class="map-sun" aria-hidden="true"></div>
+        <div class="map-hill hill-left" aria-hidden="true"></div>
+        <div class="map-hill hill-right" aria-hidden="true"></div>
+        <div class="map-road" aria-hidden="true"></div>
+
+        <button class="map-area area-casa is-active" type="button" data-story="casa">
+          <span class="area-ill house-icon"></span>
+          <span>Casa Verga</span>
+        </button>
+        <button class="map-area area-piazza" type="button" data-story="liberta">
+          <span class="area-ill square-icon"></span>
+          <span>La Piazza</span>
+        </button>
+        <button class="map-area area-campagna" type="button" data-story="roba">
+          <span class="area-ill wheat-icon"></span>
+          <span>La Campagna</span>
+        </button>
+        <button class="map-area area-mare" type="button" data-story="malavoglia">
+          <span class="area-ill wave-icon"></span>
+          <span>Il Mare</span>
+        </button>
+        <button class="map-area area-vicolo" type="button" data-story="rosso">
+          <span class="area-ill mine-icon"></span>
+          <span>Il Vicolo</span>
+        </button>
+        <button class="map-area area-teatro" type="button" data-story="gramigna">
+          <span class="area-ill mask-icon"></span>
+          <span>Il Teatro</span>
+        </button>
+        <button class="map-area area-festa" type="button" data-story="cavalleria">
+          <span class="area-ill cart-icon"></span>
+          <span>La Festa</span>
+        </button>
+
+        <button class="map-area character-pointer area-carletto" type="button" data-character="carletto" aria-label="Presenta Carletto">
+          <img src="/immagini/carletto.jpg" alt="" width="64" height="64" loading="lazy" decoding="async" />
+          <span>Carletto</span>
+        </button>
+        <button class="map-area character-pointer area-caterina" type="button" data-character="caterina" aria-label="Presenta Caterina">
+          <img src="/immagini/caterina.svg" alt="" width="64" height="64" loading="lazy" decoding="async" />
+          <span>Caterina</span>
+        </button>
+
+        <button class="hidden-object" type="button" data-hidden-object aria-label="Oggetto misterioso da trovare" data-clue-icon>
+          <span aria-hidden="true">🎩</span>
+        </button>
+      </section>
+
+      <div class="hero-actions">
+        <a id="prenota" class="button primary" href="#scuole">Prenota la visita</a>
+        <a class="button secondary" href="/avventura">Ho un Codice Avventura</a>
+      </div>
+    </section>
+
+    <section class="adventure-code-strip" aria-labelledby="adventure-code-title">
+      <div class="section-heading">
+        <h2 id="adventure-code-title">Ho un codice avventura</h2>
+        <p>Durante la visita al museo e anche dopo, i visitatori possono usare il codice avventura per sbloccare i contenuti video e fare giochi didattici.</p>
+      </div>
+      <div class="adventure-code-copy">
+        <p>Il codice ti apre una porta speciale: video esclusivi, attività interattive e proposte didattiche pensate per continuare l'esperienza anche a casa o a scuola.</p>
+        <a class="button primary" href="/avventura">Scopri come funziona</a>
+      </div>
+    </section>
+
+    <svg viewBox="0 0 1440 80" class="section-wave-divider" aria-hidden="true">
+      <path fill="var(--color-bg-alt)" d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z"></path>
+    </svg>
+
+    <!-- Clue game: find hidden object on map daily -->
+    <section id="indizio" class="clue-game" aria-labelledby="clue-title">
+      <div class="clue-intro">
+        <p class="section-label">Gioco aperto</p>
+        <h2 id="clue-title">L'Indizio di Verga</h2>
+        <p>
+          Ogni giorno sulla mappa si nasconde un oggetto. Trovalo cliccando la zona giusta:
+          avrai un piccolo assaggio dell'esplorazione che continua con il Codice Avventura.
+        </p>
+      </div>
+      <article class="card clue-panel" data-clue-panel>
+        <span class="clue-object" data-clue-object>Cappello</span>
+        <h3>Oggetto del giorno</h3>
+        <p data-clue-text>
+          Cerca il cappello sulla mappa. Appartiene a un personaggio in viaggio tra le storie di Vizzini.
+        </p>
+      </article>
+    </section>
+
+    <section class="characters-strip" aria-labelledby="characters-strip-title">
+      <div class="section-heading">
+        <h2 id="characters-strip-title">Personaggi — Incontra i protagonisti</h2>
+        <p>Ogni personaggio ha una breve presentazione: scopri chi incontrerai nelle storie.</p>
+      </div>
+      <div class="characters-controls">
+        <button type="button" class="cards-button cards-prev" aria-label="Personaggi precedenti" data-cards-prev>&larr;</button>
+        <div class="cards-row" role="list">
+          <article class="character-card" role="listitem" tabindex="0">
+            <img src="/immagini/carletto.jpg" alt="Carletto, esploratore curioso" width="200" height="200" loading="lazy" decoding="async" />
+            <div class="card-body">
+              <h3>Carletto</h3>
+              <p>Curioso esploratore che trova indizi e guida i bambini.</p>
+            </div>
+          </article>
+          <article class="character-card" role="listitem" tabindex="0">
+            <img src="/immagini/caterina.svg" alt="Caterina, attenta osservatrice" width="200" height="200" loading="lazy" decoding="async" />
+            <div class="card-body">
+              <h3>Caterina</h3>
+              <p>Attenta osservatrice, accompagna i piccoli nelle scoperte.</p>
+            </div>
+          </article>
+          <article class="character-card" role="listitem" tabindex="0">
+            <img src="/immagini/palazzo di verga.jpg" alt="Giovanni Verga, il narratore" width="200" height="200" loading="lazy" decoding="async" />
+            <div class="card-body">
+              <h3>Verga</h3>
+              <p>Il narratore che intreccia i luoghi con le storie.</p>
+            </div>
+          </article>
+          <article class="character-card" role="listitem" tabindex="0">
+            <img src="/immagini/incontro con gesualdo.jpg" alt="Mastro-don Gesualdo" width="200" height="200" loading="lazy" decoding="async" />
+            <div class="card-body">
+              <h3>Gesualdo</h3>
+              <p>Personaggio complesso: lavoro, ambizione e desiderio di riscatto.</p>
+            </div>
+          </article>
+          <article class="character-card" role="listitem" tabindex="0">
+            <img src="/immagini/malpelo.jpg" alt="Rosso Malpelo" width="200" height="200" loading="lazy" decoding="async" />
+            <div class="card-body">
+              <h3>Rosso Malpelo</h3>
+              <p>Coraggioso, parla di diversità e resilienza.</p>
+            </div>
+          </article>
+        </div>
+        <button type="button" class="cards-button cards-next" aria-label="Personaggi successivi" data-cards-next>&rarr;</button>
+      </div>
+    </section>
+
+    <section id="video-vault" class="video-vault" aria-labelledby="video-vault-title">
+      <div class="section-heading">
+        <h2 id="video-vault-title">7 storie ti aspettano al Museo</h2>
+      </div>
+      <div class="video-grid">
+        <article><div class="video-copy"><strong>La casa delle storie</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/palazzo di verga.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+        <article><div class="video-copy"><strong>La voce della piazza</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/chiesa.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+        <article><div class="video-copy"><strong>Il campo di Mazzaro</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/cumulo robe piazza.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+        <article><div class="video-copy"><strong>La barca dei Malavoglia</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/malavoglia.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+        <article><div class="video-copy"><strong>Il vicolo di Rosso</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/PALAZZO Verga_Vizzini_corridoio variante1.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+        <article><div class="video-copy"><strong>Il sentiero di Gramigna</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/incontro con gesualdo.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+        <article><div class="video-copy"><strong>La festa del paese</strong><button class="button unlock" type="button"><span class="mini-lock" aria-hidden="true"></span><span class="unlock-text">Sblocca con il codice avventura</span></button></div><img src="/immagini/banda_di_verga_pagina_14.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" /></article>
+      </div>
+    </section>
+
+    <section class="visit-planner" aria-labelledby="visit-planner-title">
+      <div class="section-heading">
+        <h2 id="visit-planner-title">Pianifica la tua visita al museo</h2>
+        <p>Scopri subito la proposta per famiglie con bambini e l'offerta didattica per le scuole.</p>
+      </div>
+      <div class="visit-cards">
+        <article id="famiglie" class="card visit-card">
+          <img src="/immagini/carletto.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" />
+          <div class="card-body">
+            <h3>Vengo con la famiglia</h3>
+            <p>Un percorso pensato per le famiglie con bambini, con attività interattive e suggerimenti per vivere al meglio il museo.</p>
+            <a class="button secondary" href="/famiglie">Vai alla proposta</a>
+          </div>
+        </article>
+        <article id="scuole" class="card visit-card">
+          <img src="/immagini/palazzo di verga.jpg" alt="" width="320" height="200" loading="lazy" decoding="async" />
+          <div class="card-body">
+            <h3>Porto la mia classe</h3>
+            <p>Materiali, percorso educativo e organizzazione della visita per le scuole, con una proposta didattica su misura.</p>
+            <a class="button secondary" href="/scuole">Vai alla proposta</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- Success modal: found the daily clue -->
+  <div class="clue-success-modal" data-clue-success-modal aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="clue-success-heading">
+    <div class="modal-overlay" data-modal-overlay></div>
+    <div class="modal-panel" role="document">
+      <button class="modal-close" data-clue-close aria-label="Chiudi">×</button>
+      <div class="modal-icon" aria-hidden="true">✨</div>
+      <div class="modal-content">
+        <h3 id="clue-success-heading">Bravo! Hai trovato l'indizio!</h3>
+        <p data-clue-success-text>Clicca di nuovo sull'oggetto per confermarlo.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Character detail modal -->
+  <div class="character-modal" data-character-modal aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="character-modal-title">
+    <div class="modal-overlay" data-modal-overlay></div>
+    <div class="modal-panel" role="document">
+      <button class="modal-close" data-modal-close aria-label="Chiudi">×</button>
+      <div class="modal-media"><img src="" alt="" data-modal-image width="320" height="320" /></div>
+      <div class="modal-content">
+        <h3 id="character-modal-title" data-modal-title></h3>
+        <p data-modal-desc></p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer" aria-label="Footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="/immagini/borgo-cunziria.png" alt="Logo Borgo Cunziria" width="64" height="64" loading="lazy" decoding="async" onerror="this.style.display='none'" />
+        <div class="footer-brand-text">
+          <strong>Borgo della Cunziria</strong>
+          <small>Progetto realizzato dalle menti felici di HappyMinds e Panebarco</small>
+        </div>
+      </div>
+
+      <nav class="footer-nav" aria-label="Link del footer">
+        <a href="#mappa">Mappa</a>
+        <a href="#characters-strip-title">Personaggi</a>
+        <a href="#video-vault">Storie</a>
+        <a href="#indizio">Indizio</a>
+        <a href="/insegnante/login">Area insegnanti</a>
+        <a href="/avventura">Codice Avventura</a>
+      </nav>
+    </div>
+    <div class="footer-bottom">
+      <small>© <span id="year"></span> Verga's World — Progetto educativo</small>
+    </div>
+  </footer>
+  <script is:inline>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</BaseLayout>

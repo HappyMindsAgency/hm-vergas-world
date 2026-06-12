@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import "../../styles/adventure.css";
+
+const body = "<main id=\"main-content\" class=\"entry-page\">\n      <a class=\"back-link\" href=\"/\">Verga's World</a>\n      <section class=\"entry-card\">\n        <div class=\"guide-sign\" aria-hidden=\"true\">\n          <img decoding=\"async\" loading=\"lazy\" src=\"/immagini/Logo di Progetto Borgo cunziria.jpg\" alt=\"Logo Borgo della Cunziria\" />\n        </div>\n        <p class=\"eyebrow\">Passaporto dell'Avventura</p>\n        <h1>Hai il Codice Avventura?</h1>\n        <p class=\"subtitle\">Inseriscilo qui e parti per la missione!</p>\n        <form class=\"entry-form\" data-entry-form>\n          <label>\n            Codice\n            <input data-code-input maxlength=\"12\" placeholder=\"ES: PASS-2026\" autocomplete=\"off\" />\n          </label>\n          <label>\n            Nome esploratore\n            <input data-name-input maxlength=\"20\" placeholder=\"Come ti chiami?\" autocomplete=\"off\" />\n          </label>\n          <p class=\"form-error\" data-form-error hidden>! Codice non valido o scaduto.</p>\n          <button type=\"submit\">Entra nel Passaporto!</button>\n        </form>\n      </section>\n    </main>";
+---
+
+<BaseLayout
+  title="Codice Avventura | Verga's World"
+  fonts="adventure"
+  scripts={[{ src: "/scripts/adventure.js" }]}
+  page="entry"
+>
+  <Fragment set:html={body} />
+
+</BaseLayout>

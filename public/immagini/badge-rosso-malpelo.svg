@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="c"><rect x="78" y="54" width="356" height="336" rx="52"/></clipPath>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#fff"/>
+  <path d="M0 330c130-60 245-38 512-120v302H0z" fill="#ff7a4f"/>
+  <circle cx="96" cy="98" r="64" fill="#ffe24c"/>
+  <image href="malpelo.jpg" x="78" y="54" width="356" height="336" preserveAspectRatio="xMidYMid slice" clip-path="url(#c)"/>
+  <rect x="86" y="406" width="340" height="56" rx="28" fill="#fff"/>
+  <text x="256" y="443" text-anchor="middle" font-family="Nunito, Arial" font-size="28" font-weight="900" fill="#1a3a5c">Rosso Malpelo</text>
+</svg>

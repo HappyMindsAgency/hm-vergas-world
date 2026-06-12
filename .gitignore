@@ -91,6 +91,13 @@ out
 .nuxt
 dist
 
+# Astro
+.astro/
+dist/
+
+# Pre-migration HTML originals (archived, superseded by src/pages/*.astro)
+legacy-html/
+
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js

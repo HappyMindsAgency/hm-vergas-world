@@ -1,0 +1,100 @@
+---
+import "../styles/a11y.css";
+
+export interface ScriptRef {
+  src: string;
+  defer?: boolean;
+}
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Which Google Fonts set to load. "none" loads no webfont. */
+  fonts?: "main" | "adventure" | "none";
+  /** Public scripts to load (in order), e.g. ["/scripts/app.js"]. */
+  scripts?: ScriptRef[];
+  /** Value for <body data-page="...">, used by adventure.js page dispatch. */
+  page?: string;
+  /** Extra class on <body>. */
+  bodyClass?: string;
+}
+
+const {
+  title,
+  description = "Verga's World — la mappa interattiva del museo Casa Verga di Vizzini: 7 storie, personaggi, indizi e missioni per bambini.",
+  fonts = "main",
+  scripts = [],
+  page,
+  bodyClass,
+} = Astro.props;
+
+const fontHref =
+  fonts === "none"
+    ? null
+    : fonts === "adventure"
+      ? "https://fonts.googleapis.com/css2?family=Abel&family=Source+Serif+4:wght@400;500;600;700&display=swap"
+      : "https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Lexend:wght@300;400;500;600;700;800;900&display=swap";
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#1A3A5C" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="it_IT" />
+
+    {
+      fontHref && (
+        <>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+          <link rel="preload" as="style" href={fontHref} />
+          <link href={fontHref} rel="stylesheet" />
+        </>
+      )
+    }
+
+    <slot name="head" />
+  </head>
+  <body class={bodyClass} data-page={page}>
+    <a class="skip-link" href="#main-content">Vai al contenuto principale</a>
+    <slot />
+    {
+      scripts.map((s) => (
+        <script is:inline src={s.src} defer={s.defer} />
+      ))
+    }
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: 8px;
+    top: -48px;
+    z-index: 1000;
+    padding: 10px 18px;
+    border-radius: 0 0 12px 12px;
+    background: #1a3a5c;
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: top 0.15s ease;
+  }
+  .skip-link:focus {
+    top: 0;
+    outline: 3px solid #f2c94c;
+    outline-offset: 2px;
+  }
+</style>

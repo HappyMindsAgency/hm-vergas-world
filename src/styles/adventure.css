@@ -1,0 +1,567 @@
+@import url('https://fonts.googleapis.com/css2?family=Abel&family=Source+Serif+4:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Primari */
+  --color-brand: #4E98CA;
+  --color-accent: #E84C35;
+  --color-warm: #F2C94C;
+
+  /* Backgrounds */
+  --color-bg: #F8F4EC;
+  --color-bg-alt: #F3EEE5;
+  --color-bg-dark: #352516;
+
+  /* Superfici */
+  --color-surface: #FFFFFF;
+  --color-surface-warm: #FFF8EE;
+
+  /* Testo */
+  --color-text: #352516;
+  --color-text-light: #555555;
+  --color-text-inv: #FFFFFF;
+
+  /* Funzionali */
+  --color-success: #3A8C5C;
+  --color-error: #C0392B;
+  --color-locked: #BBBBBB;
+  --color-soft-red: var(--color-error);
+  --color-paper: var(--color-surface);
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 100px;
+  --radius-blob: 60% 40% 50% 60% / 50% 60% 40% 50%;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --font-title: "Abel", Arial, Helvetica, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 100px;
+  --radius-blob: 60% 40% 50% 60% / 50% 60% 40% 50%;
+  --font-body: "Lexend", Arial, Helvetica, sans-serif;
+  --font-title: "Fredericka the Great", Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--color-text);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(242, 201, 76, 0.26), transparent 22%),
+    radial-gradient(circle at 86% 8%, rgba(224, 123, 42, 0.12), transparent 24%),
+    var(--color-bg);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  color: var(--color-brand);
+  font-family: var(--font-title);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.entry-page,
+.mission-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 24px;
+}
+
+.back-link,
+.passport-header a,
+.mission-complete a {
+  display: inline-flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-brand);
+  font-weight: 900;
+}
+
+.back-link {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  padding: 10px 14px;
+}
+
+.entry-card {
+  width: min(100%, 560px);
+  padding: clamp(28px, 6vw, 56px);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 250, 241, 0.92);
+  box-shadow: 0 26px 70px rgba(26, 58, 92, 0.14);
+  text-align: center;
+}
+
+.guide-sign svg,
+.guide-sign img {
+  width: 200px;
+  max-width: 70%;
+}
+
+.eyebrow {
+  margin: 12px 0 8px;
+  color: var(--color-success);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+.entry-card h1,
+.mission-complete h1 {
+  color: var(--color-brand);
+  font-family: var(--font-title);
+  font-size: clamp(2.3rem, 8vw, 4.4rem);
+  line-height: 0.95;
+}
+
+.subtitle {
+  color: var(--color-accent);
+  font-size: 1.28rem;
+  font-style: italic;
+  font-weight: 900;
+}
+
+.entry-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.entry-form label,
+.info-line {
+  display: grid;
+  gap: 8px;
+  color: var(--color-brand);
+  font-weight: 900;
+  text-align: left;
+}
+
+.entry-form input {
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  background: #fff;
+  color: var(--color-text);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 0 2px rgba(26, 58, 92, 0.08);
+}
+
+.entry-form label:last-of-type input {
+  text-transform: none;
+}
+
+.entry-form button,
+.explorer-card button,
+.mission-complete a {
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 16px 22px;
+  background: var(--color-accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 900;
+  transition: transform 180ms ease;
+}
+
+.entry-form button:hover,
+.entry-form button:focus-visible,
+.explorer-card button:hover,
+.mission-complete a:hover {
+  transform: scale(1.03);
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-soft-red);
+  font-weight: 900;
+  text-align: center;
+}
+
+.passport-page {
+  min-height: 100vh;
+  padding: clamp(18px, 4vw, 42px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.96)),
+    radial-gradient(circle at 12% 16%, rgba(242, 201, 76, 0.32), transparent 22%),
+    radial-gradient(circle at 92% 24%, rgba(224, 123, 42, 0.1), transparent 24%),
+    var(--color-bg);
+}
+
+.passport-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.passport-header a {
+  padding: 10px 14px;
+}
+
+.passport-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.explorer-card,
+.badges-area,
+.quiz-card {
+  border-radius: var(--radius-lg);
+  background: var(--color-paper);
+  box-shadow: 0 24px 60px rgba(26, 58, 92, 0.12);
+}
+
+.explorer-card {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 28px;
+  text-align: center;
+}
+
+.avatar-initial {
+  display: grid;
+  width: 112px;
+  height: 112px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 4rem;
+  font-weight: 900;
+}
+
+.explorer-card h1 {
+  margin-bottom: 0;
+  color: var(--color-brand);
+  font-family: var(--font-title);
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.rank-pill {
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(74, 124, 89, 0.12);
+  color: var(--color-success);
+  font-weight: 900;
+}
+
+.progress-copy {
+  color: var(--color-brand);
+  font-weight: 900;
+}
+
+.progress-track,
+.mission-progress {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(26, 58, 92, 0.12);
+}
+
+.progress-track span,
+.mission-progress span {
+  display: block;
+  width: 0%;
+  height: 12px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--color-accent), #e87335);
+  transition: width 280ms ease;
+}
+
+.badges-area {
+  padding: clamp(20px, 4vw, 34px);
+}
+
+.section-title p {
+  margin-bottom: 4px;
+  color: var(--color-accent);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.section-title h2 {
+  color: var(--color-brand);
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1;
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 18px;
+  justify-items: center;
+}
+
+.badge-card {
+  display: grid;
+  width: min(100%, 176px);
+  min-height: 208px;
+  place-items: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  background: #fff;
+  color: var(--color-brand);
+  cursor: pointer;
+  text-align: center;
+  font-weight: 900;
+  box-shadow: 0 18px 34px rgba(26, 58, 92, 0.1);
+}
+
+.badge-card img {
+  width: 132px;
+  height: 132px;
+  object-fit: cover;
+  border-radius: 28px;
+}
+
+.badge-card.locked {
+  cursor: default;
+  filter: grayscale(1);
+  opacity: 0.62;
+}
+
+.badge-card.available {
+  outline: 0;
+  background: linear-gradient(180deg, #fff, #fff8ee);
+}
+
+.badge-card.completed {
+  background: linear-gradient(135deg, #fff, #f7dfa0);
+  color: var(--color-brand);
+  animation: glow 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 0 rgba(196, 134, 26, 0);
+  }
+  to {
+    box-shadow: 0 0 24px rgba(196, 134, 26, 0.55);
+  }
+}
+
+.passport-footer {
+  margin-top: 28px;
+  border-radius: 24px;
+  padding: 20px;
+  background: rgba(74, 124, 89, 0.1);
+  color: var(--color-brand);
+  font-weight: 900;
+}
+
+.celebration {
+  background: linear-gradient(135deg, #fff3a2, #f3b85f);
+}
+
+.badge-modal {
+  width: min(460px, calc(100% - 28px));
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: 26px;
+  background: var(--color-paper);
+  box-shadow: 0 26px 70px rgba(26, 58, 92, 0.24);
+}
+
+.badge-modal::backdrop {
+  background: rgba(26, 58, 92, 0.32);
+}
+
+.badge-modal button {
+  float: right;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 8px 12px;
+  background: var(--color-bg);
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.badge-modal img {
+  width: 120px;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  object-fit: cover;
+}
+
+.mission-page {
+  align-content: center;
+}
+
+.mission-header {
+  width: min(100%, 920px);
+  margin-bottom: 18px;
+}
+
+.mission-header div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--color-brand);
+  font-weight: 900;
+}
+
+.mission-header p {
+  margin-bottom: 8px;
+}
+
+.quiz-card {
+  width: min(100%, 920px);
+  padding: clamp(24px, 5vw, 48px);
+}
+
+.quiz-card h1 {
+  color: var(--color-brand);
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.05;
+  text-align: center;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.option-card {
+  min-height: 96px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  background: #fff;
+  color: var(--color-brand);
+  cursor: pointer;
+  font-weight: 900;
+  text-align: left;
+}
+
+.option-card.correct {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.option-card.wrong {
+  background: var(--color-soft-red);
+  color: #fff;
+}
+
+.quiz-feedback {
+  min-height: 30px;
+  margin: 18px 0 0;
+  color: var(--color-brand);
+  font-size: 1.2rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.next-question {
+  display: block;
+  width: fit-content;
+  min-height: 52px;
+  margin: 18px auto 0;
+  border: 0;
+  border-radius: var(--radius-blob);
+  padding: 12px 24px;
+  background: var(--color-accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.next-question[hidden] {
+  display: none;
+}
+
+.mission-complete {
+  width: min(100%, 640px);
+  border-radius: var(--radius-lg);
+  padding: 38px;
+  background: var(--color-paper);
+  box-shadow: 0 24px 60px rgba(26, 58, 92, 0.12);
+  text-align: center;
+}
+
+.falling-badge {
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 24px;
+  border-radius: 38px;
+  background: linear-gradient(135deg, var(--color-accent), #e87335);
+  animation: badgeDrop 700ms cubic-bezier(0.2, 1.2, 0.4, 1) both;
+}
+
+@keyframes badgeDrop {
+  from {
+    transform: translateY(-160px) rotate(-12deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) rotate(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 780px) {
+  .passport-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .badge-grid {
+    grid-template-columns: repeat(2, minmax(100px, 1fr));
+  }
+
+  .badge-card {
+    width: min(100%, 150px);
+    min-height: 184px;
+  }
+
+  .badge-card img {
+    width: 112px;
+    height: 112px;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
