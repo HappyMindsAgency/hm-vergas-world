@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(wait)",
+      "Read(//c/Users/vitol/AppData/Local/Temp/claude/c--Users-vitol-Documents-MyRepo-hm-vergas-world/38823a58-221b-4bd1-a26c-28f4c5f36433/tasks/**)",
+      "Bash(echo \"EXIT:$?\")",
+      "PowerShell(npm install @astrojs/vercel; \"EXITCODE: $LASTEXITCODE\")",
+      "Bash(npm ls *)",
+      "Bash(npm config *)",
+      "Bash(node -e \"import\\('@astrojs/vercel'\\).then\\(\\(\\)=>console.log\\('IMPORT OK'\\)\\).catch\\(e=>console.log\\('IMPORT FAIL:', e.message\\)\\)\")",
+      "Bash(curl -sS -o /dev/null -w \"%{http_code}\\\\n\" https://registry.npmjs.org/@vercel/oidc)",
+      "Bash(node -e \"console.log\\('astro import:', !!require\\('astro/package.json'\\).version, require\\('astro/package.json'\\).version\\)\")",
+      "Bash(node -e \"const l=require\\('./package-lock.json'\\); console.log\\(JSON.stringify\\(l.packages[''].dependencies\\)\\)\")"
+    ]
+  }
+}
