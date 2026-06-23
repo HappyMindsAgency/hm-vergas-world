@@ -2,7 +2,6 @@
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import "../../../styles/teacher.css";
 
-const body = "<div class=\"teacher-layout\">\n      <aside class=\"teacher-sidebar\">\n        <a class=\"sidebar-logo\" href=\"/\"><span class=\"brand-mark\">VW</span><span><strong>Verga's World</strong><small>Docenti</small></span></a>\n        <div class=\"teacher-meta\"><strong>Prof.ssa Rossi</strong><span>Classe 2B · I.C. Vizzini</span></div>\n        <nav class=\"sidebar-nav\"><a href=\"/insegnante/dashboard\">Dashboard</a><a class=\"is-active\" href=\"/insegnante/classe\">La mia classe</a><a href=\"/insegnante/materiali\">Materiali</a><a href=\"/insegnante/impostazioni\">Impostazioni</a></nav>\n        <a class=\"sidebar-exit\" href=\"/insegnante/login\">Esci</a>\n      </aside>\n      <main id=\"main-content\" class=\"teacher-main\">\n        <header class=\"page-header\">\n          <h1>La classe 2B</h1>\n          <p><strong>18 bambini attivi</strong> su 23 hanno inserito il codice almeno una volta.</p>\n        </header>\n        <div class=\"filters\"><button class=\"is-active\" type=\"button\">Tutti</button><button type=\"button\">In corso</button><button type=\"button\">Completato</button></div>\n        <section class=\"student-table\" aria-label=\"Tabella bambini\">\n          <div class=\"student-head\"><span>Nome esploratore</span><span>Missioni</span><span>Badge</span><span>Ultima attività</span></div>\n          <div class=\"student-row\"><strong>Giulia</strong><span>5/7</span><span>★★★★★</span><span>oggi</span></div>\n          <div class=\"student-row\"><strong>Marco</strong><span>3/7</span><span>★★★</span><span>ieri</span></div>\n          <div class=\"student-row is-complete\"><strong>Sofia</strong><span>7/7 🏆</span><span>★★★★★★★</span><span>oggi</span></div>\n          <div class=\"student-row\"><strong>Luca</strong><span>2/7</span><span>★★</span><span>ieri</span></div>\n          <div class=\"student-row\"><strong>Nina</strong><span class=\"muted-italic\">Non ancora iniziato</span><span>—</span><span>oggi</span></div>\n        </section>\n      </main>\n    </div>\n    <nav class=\"bottom-nav\"><a href=\"/insegnante/dashboard\"><span>⌂</span>Dashboard</a><a href=\"/insegnante/classe\"><span>●</span>Classe</a><a href=\"/insegnante/materiali\"><span>□</span>Materiali</a><a href=\"/insegnante/login\"><span>↗</span>Esci</a></nav>";
 ---
 
 <BaseLayout
@@ -10,6 +9,30 @@ const body = "<div class=\"teacher-layout\">\n      <aside class=\"teacher-sideb
   fonts="main"
   scripts={[]}
 >
-  <Fragment set:html={body} />
+  <div class="teacher-layout">
+        <aside class="teacher-sidebar">
+          <a class="sidebar-logo" href="/"><span class="brand-mark">VW</span><span><strong>Verga's World</strong><small>Docenti</small></span></a>
+          <div class="teacher-meta"><strong>Prof.ssa Rossi</strong><span>Classe 2B · I.C. Vizzini</span></div>
+          <nav class="sidebar-nav"><a href="/insegnante/dashboard">Dashboard</a><a class="is-active" href="/insegnante/classe">La mia classe</a><a href="/insegnante/materiali">Materiali</a><a href="/insegnante/impostazioni">Impostazioni</a></nav>
+          <a class="sidebar-exit" href="/insegnante/login">Esci</a>
+        </aside>
+        <main id="main-content" class="teacher-main">
+          <header class="page-header">
+            <h1>La classe 2B</h1>
+            <p><strong>18 bambini attivi</strong> su 23 hanno inserito il codice almeno una volta.</p>
+          </header>
+          <div class="filters"><button class="is-active" type="button">Tutti</button><button type="button">In corso</button><button type="button">Completato</button></div>
+          <section class="student-table" aria-label="Tabella bambini">
+            <div class="student-head"><span>Nome esploratore</span><span>Missioni</span><span>Badge</span><span>Ultima attività</span></div>
+            <div class="student-row"><strong>Giulia</strong><span>5/7</span><span>★★★★★</span><span>oggi</span></div>
+            <div class="student-row"><strong>Marco</strong><span>3/7</span><span>★★★</span><span>ieri</span></div>
+            <div class="student-row is-complete"><strong>Sofia</strong><span>7/7 🏆</span><span>★★★★★★★</span><span>oggi</span></div>
+            <div class="student-row"><strong>Luca</strong><span>2/7</span><span>★★</span><span>ieri</span></div>
+            <div class="student-row"><strong>Nina</strong><span class="muted-italic">Non ancora iniziato</span><span>—</span><span>oggi</span></div>
+          </section>
+        </main>
+      </div>
+      <nav class="bottom-nav"><a href="/insegnante/dashboard"><span>⌂</span>Dashboard</a><a href="/insegnante/classe"><span>●</span>Classe</a><a href="/insegnante/materiali"><span>□</span>Materiali</a><a href="/insegnante/login"><span>↗</span>Esci</a></nav>
+
 
 </BaseLayout>

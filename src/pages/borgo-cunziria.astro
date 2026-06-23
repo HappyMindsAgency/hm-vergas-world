@@ -2,7 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import "../styles/styles.css";
 
-const body = "<header class=\"topbar\">\r\n      <a class=\"brand\" href=\"/\" aria-label=\"Verga's World home\">\r\n        <span class=\"brand-mark\">VW</span>\r\n        <span>\r\n          <strong>Verga's World</strong>\r\n          <small>Casa Verga, Vizzini</small>\r\n        </span>\r\n      </a>\r\n      <img decoding=\"async\" loading=\"lazy\" class=\"header-project-logo\" src=\"/immagini/Logo di Progetto Borgo cunziria.jpg\" alt=\"Logo progetto Borgo della Cunziria\" />\r\n      <nav aria-label=\"Navigazione principale\">\r\n        <a href=\"/\">Home</a>\r\n        <a href=\"/famiglie\">Famiglie</a>\r\n        <a href=\"/scuole\">Scuole</a>\r\n      </nav>\r\n      <button class=\"menu-toggle\" type=\"button\" data-menu-toggle aria-expanded=\"false\" aria-controls=\"kid-menu\" aria-label=\"Apri menu\">\r\n        <span></span>\r\n        <span></span>\r\n        <span></span>\r\n      </button>\r\n      <div id=\"kid-menu\" class=\"kid-menu\" data-kid-menu hidden>\r\n        <a href=\"/\">Home</a>\r\n        <a href=\"/famiglie\">Vengo con la famiglia</a>\r\n        <a href=\"/scuole\">Porto la mia classe</a>\r\n        <a href=\"/borgo-cunziria\">Borgo Cunziria</a>\r\n        <a class=\"nav-cta\" href=\"/avventura\">Ho il Codice Avventura!</a>\r\n      </div>\r\n    </header>\r\n\r\n    <main id=\"main-content\">\r\n      <section class=\"section-heading\" style=\"padding:36px clamp(18px,5vw,64px); text-align:center;\">\r\n        <p class=\"kicker\">Il Borgo</p>\r\n        <h1>Borgo della Cunziria</h1>\r\n        <p>Scopri la storia, il patrimonio e il ruolo del Borgo della Cunziria nella vita culturale di Vizzini.</p>\r\n      </section>\r\n\r\n      <section class=\"card\" style=\"max-width:980px; margin:0 auto 28px; overflow:hidden;\">\r\n        <img decoding=\"async\" loading=\"lazy\" src=\"/immagini/vizzini.jpg\" alt=\"Veduta del Borgo di Cunziria\" style=\"width:100%; height:360px; object-fit:cover; display:block;\" />\r\n        <div class=\"card-body\">\r\n          <h2>Una piazza, molte vite</h2>\r\n          <p>La Cunziria è un luogo storico legato alle attività tessili, alle fiere e alle tradizioni popolari. Le sue architetture e i vicoli custodiscono memorie di lavoro e comunità.</p>\r\n        </div>\r\n      </section>\r\n\r\n      <section class=\"card\" style=\"max-width:980px; margin:0 auto 28px; overflow:hidden;\">\r\n        <div class=\"card-body\">\r\n          <h2>La storia del Borgo</h2>\r\n          <p>Nel corso dei secoli il Borgo della Cunziria si è sviluppato attorno alle botteghe e alle attività artigiane. Oggi è al centro di iniziative di conservazione e valorizzazione del patrimonio locale.</p>\r\n        </div>\r\n      </section>\r\n\r\n      <section class=\"card\" style=\"max-width:980px; margin:0 auto 28px; overflow:hidden;\">\r\n        <img decoding=\"async\" loading=\"lazy\" src=\"/immagini/palazzo di verga.jpg\" alt=\"Casa Verga\" style=\"width:100%; height:300px; object-fit:cover; display:block;\" />\r\n        <div class=\"card-body\">\r\n          <h2>Museo Verga</h2>\r\n          <p>Il Museo Verga ospita collezioni e percorsi che raccontano le storie e i luoghi di Giovanni Verga e della comunità di Vizzini. Il progetto educativo \"Verga's World\" integra letture, video e attività per i visitatori di tutte le età.</p>\r\n        </div>\r\n      </section>\r\n\r\n      <section class=\"card\" style=\"max-width:980px; margin:0 auto 48px; overflow:hidden;\">\r\n        <div class=\"card-body\">\r\n          <h2>Progetto PNRR per Vizzini</h2>\r\n          <p>Il progetto PNRR sostiene interventi di rigenerazione culturale e infrastrutturale nel territorio, con iniziative volte a valorizzare luoghi come la Cunziria e a promuovere il patrimonio storico e turistico. Il Museo Verga è parte di queste attività, con azioni dedicate all'accessibilità e alle attività didattiche.</p>\r\n          <p>Per informazioni dettagliate sui bandi e sulle azioni del PNRR rivolte a Vizzini, contatta l'ufficio culturale del Comune o visita il sito istituzionale.</p>\r\n        </div>\r\n      </section>\r\n\r\n      <div style=\"text-align:center; margin-bottom:40px;\">\r\n        <a class=\"button secondary\" href=\"/\">Torna alla home</a>\r\n      </div>\r\n    </main>";
 ---
 
 <BaseLayout
@@ -10,6 +9,76 @@ const body = "<header class=\"topbar\">\r\n      <a class=\"brand\" href=\"/\" a
   fonts="none"
   scripts={[{ src: "/scripts/app.js" }]}
 >
-  <Fragment set:html={body} />
+  <header class="topbar">
+        <a class="brand" href="/" aria-label="Verga's World home">
+          <span class="brand-mark">VW</span>
+          <span>
+            <strong>Verga's World</strong>
+            <small>Casa Verga, Vizzini</small>
+          </span>
+        </a>
+        <img decoding="async" loading="lazy" class="header-project-logo" src="/immagini/Logo di Progetto Borgo cunziria.jpg" alt="Logo progetto Borgo della Cunziria" />
+        <nav aria-label="Navigazione principale">
+          <a href="/">Home</a>
+          <a href="/famiglie">Famiglie</a>
+          <a href="/scuole">Scuole</a>
+        </nav>
+        <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="kid-menu" aria-label="Apri menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div id="kid-menu" class="kid-menu" data-kid-menu hidden>
+          <a href="/">Home</a>
+          <a href="/famiglie">Vengo con la famiglia</a>
+          <a href="/scuole">Porto la mia classe</a>
+          <a href="/borgo-cunziria">Borgo Cunziria</a>
+          <a class="nav-cta" href="/avventura">Ho il Codice Avventura!</a>
+        </div>
+      </header>
+
+      <main id="main-content">
+        <section class="section-heading" style="padding:36px clamp(18px,5vw,64px); text-align:center;">
+          <p class="kicker">Il Borgo</p>
+          <h1>Borgo della Cunziria</h1>
+          <p>Scopri la storia, il patrimonio e il ruolo del Borgo della Cunziria nella vita culturale di Vizzini.</p>
+        </section>
+
+        <section class="card" style="max-width:980px; margin:0 auto 28px; overflow:hidden;">
+          <img decoding="async" loading="lazy" src="/immagini/vizzini.jpg" alt="Veduta del Borgo di Cunziria" style="width:100%; height:360px; object-fit:cover; display:block;" />
+          <div class="card-body">
+            <h2>Una piazza, molte vite</h2>
+            <p>La Cunziria è un luogo storico legato alle attività tessili, alle fiere e alle tradizioni popolari. Le sue architetture e i vicoli custodiscono memorie di lavoro e comunità.</p>
+          </div>
+        </section>
+
+        <section class="card" style="max-width:980px; margin:0 auto 28px; overflow:hidden;">
+          <div class="card-body">
+            <h2>La storia del Borgo</h2>
+            <p>Nel corso dei secoli il Borgo della Cunziria si è sviluppato attorno alle botteghe e alle attività artigiane. Oggi è al centro di iniziative di conservazione e valorizzazione del patrimonio locale.</p>
+          </div>
+        </section>
+
+        <section class="card" style="max-width:980px; margin:0 auto 28px; overflow:hidden;">
+          <img decoding="async" loading="lazy" src="/immagini/palazzo di verga.jpg" alt="Casa Verga" style="width:100%; height:300px; object-fit:cover; display:block;" />
+          <div class="card-body">
+            <h2>Museo Verga</h2>
+            <p>Il Museo Verga ospita collezioni e percorsi che raccontano le storie e i luoghi di Giovanni Verga e della comunità di Vizzini. Il progetto educativo "Verga's World" integra letture, video e attività per i visitatori di tutte le età.</p>
+          </div>
+        </section>
+
+        <section class="card" style="max-width:980px; margin:0 auto 48px; overflow:hidden;">
+          <div class="card-body">
+            <h2>Progetto PNRR per Vizzini</h2>
+            <p>Il progetto PNRR sostiene interventi di rigenerazione culturale e infrastrutturale nel territorio, con iniziative volte a valorizzare luoghi come la Cunziria e a promuovere il patrimonio storico e turistico. Il Museo Verga è parte di queste attività, con azioni dedicate all'accessibilità e alle attività didattiche.</p>
+            <p>Per informazioni dettagliate sui bandi e sulle azioni del PNRR rivolte a Vizzini, contatta l'ufficio culturale del Comune o visita il sito istituzionale.</p>
+          </div>
+        </section>
+
+        <div style="text-align:center; margin-bottom:40px;">
+          <a class="button secondary" href="/">Torna alla home</a>
+        </div>
+      </main>
+
 
 </BaseLayout>

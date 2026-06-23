@@ -2,7 +2,6 @@
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import "../../../styles/adventure.css";
 
-const body = "<main id=\"main-content\" class=\"passport-page\">\n      <header class=\"passport-header\">\n        <a href=\"/\">Verga's World</a>\n        <a href=\"/avventura\">Cambia codice</a>\n      </header>\n      <section class=\"passport-layout\">\n        <aside class=\"explorer-card\">\n          <div class=\"avatar-initial\" data-avatar-initial>V</div>\n          <h1 data-explorer-name>Esploratore</h1>\n          <span class=\"rank-pill\" data-rank>Esploratore Principiante</span>\n          <div class=\"progress-copy\"><span data-completed-count>0</span> / 7 missioni completate</div>\n          <div class=\"progress-track\"><span data-progress-bar></span></div>\n          <button type=\"button\" data-change-name>Cambia nome</button>\n        </aside>\n        <section class=\"badges-area\">\n          <div class=\"section-title\">\n            <p>Il tuo passaporto</p>\n            <h2>I 7 badge</h2>\n          </div>\n          <div class=\"badge-grid\" data-badge-grid></div>\n          <div class=\"passport-footer\" data-passport-footer></div>\n        </section>\n      </section>\n    </main>\n    <dialog class=\"badge-modal\" data-badge-modal>\n      <button type=\"button\" data-close-modal>Chiudi</button>\n      <img decoding=\"async\" loading=\"lazy\" data-modal-img alt=\"\" />\n      <h2 data-modal-title></h2>\n      <p data-modal-text></p>\n    </dialog>";
 ---
 
 <BaseLayout
@@ -11,6 +10,36 @@ const body = "<main id=\"main-content\" class=\"passport-page\">\n      <header 
   scripts={[{ src: "/scripts/adventure.js" }]}
   page="passport"
 >
-  <Fragment set:html={body} />
+  <main id="main-content" class="passport-page">
+        <header class="passport-header">
+          <a href="/">Verga's World</a>
+          <a href="/avventura">Cambia codice</a>
+        </header>
+        <section class="passport-layout">
+          <aside class="explorer-card">
+            <div class="avatar-initial" data-avatar-initial>V</div>
+            <h1 data-explorer-name>Esploratore</h1>
+            <span class="rank-pill" data-rank>Esploratore Principiante</span>
+            <div class="progress-copy"><span data-completed-count>0</span> / 7 missioni completate</div>
+            <div class="progress-track"><span data-progress-bar></span></div>
+            <button type="button" data-change-name>Cambia nome</button>
+          </aside>
+          <section class="badges-area">
+            <div class="section-title">
+              <p>Il tuo passaporto</p>
+              <h2>I 7 badge</h2>
+            </div>
+            <div class="badge-grid" data-badge-grid></div>
+            <div class="passport-footer" data-passport-footer></div>
+          </section>
+        </section>
+      </main>
+      <dialog class="badge-modal" data-badge-modal>
+        <button type="button" data-close-modal>Chiudi</button>
+        <img decoding="async" loading="lazy" data-modal-img alt="" />
+        <h2 data-modal-title></h2>
+        <p data-modal-text></p>
+      </dialog>
+
 
 </BaseLayout>

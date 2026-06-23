@@ -2,7 +2,6 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import "../../styles/teacher.css";
 
-const body = "<main id=\"main-content\" class=\"auth-card\" data-invite-card>\n      <a class=\"auth-logo\" href=\"/\" aria-label=\"Verga's World\">\n        <span class=\"brand-mark\">VW</span>\n        <span><strong>Verga's World</strong><small>Invito docente</small></span>\n      </a>\n      <h1>Attiva il tuo accesso</h1>\n      <p>Imposta la password per entrare nel cruscotto della tua classe. L'accesso e possibile solo tramite invito del museo.</p>\n      <form class=\"auth-form\" action=\"../insegnante/dashboard/index.html\">\n        <label class=\"field\">Email<input type=\"email\" name=\"email\" autocomplete=\"email\" required /></label>\n        <label class=\"field\">Password da impostare<input type=\"password\" name=\"password\" autocomplete=\"new-password\" required /></label>\n        <button class=\"primary-button\" type=\"submit\">Attiva cruscotto</button>\n      </form>\n      <div class=\"error-note\" data-invalid-token hidden>\n        Invito non valido o scaduto. Scrivi a museo@vergasworld.it per ricevere un nuovo link.\n      </div>\n    </main>";
 ---
 
 <BaseLayout
@@ -11,6 +10,22 @@ const body = "<main id=\"main-content\" class=\"auth-card\" data-invite-card>\n 
   scripts={[{ src: "/scripts/teacher.js" }]}
   bodyClass="auth-page"
 >
-  <Fragment set:html={body} />
+  <main id="main-content" class="auth-card" data-invite-card>
+        <a class="auth-logo" href="/" aria-label="Verga's World">
+          <span class="brand-mark">VW</span>
+          <span><strong>Verga's World</strong><small>Invito docente</small></span>
+        </a>
+        <h1>Attiva il tuo accesso</h1>
+        <p>Imposta la password per entrare nel cruscotto della tua classe. L'accesso e possibile solo tramite invito del museo.</p>
+        <form class="auth-form" action="../insegnante/dashboard/index.html">
+          <label class="field">Email<input type="email" name="email" autocomplete="email" required /></label>
+          <label class="field">Password da impostare<input type="password" name="password" autocomplete="new-password" required /></label>
+          <button class="primary-button" type="submit">Attiva cruscotto</button>
+        </form>
+        <div class="error-note" data-invalid-token hidden>
+          Invito non valido o scaduto. Scrivi a museo@vergasworld.it per ricevere un nuovo link.
+        </div>
+      </main>
+
 
 </BaseLayout>
