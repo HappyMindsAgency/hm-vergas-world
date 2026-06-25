@@ -1,0 +1,221 @@
+---
+// Materiali utili (§9.2): carica / rinomina / assegna categoria / elimina.
+// File su Supabase Storage (bucket "materiali"); metadati in tabella materials.
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+import { getMaterials } from "../../../lib/admin/data";
+import { MATERIAL_CATEGORY_LABELS } from "../../../config/admin";
+import { MATERIAL_CATEGORIES } from "../../../config/game";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const materials = await getMaterials();
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+function fmtDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("it-IT");
+}
+---
+
+<MuseoLayout title="Materiali utili | Area Museo" active="/museo/materiali" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3"><a href="/museo">Dashboard</a> / Materiali</nav>
+
+  <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="font-heading museo-title display-6 mb-1">Materiali utili</h1>
+      <p class="mb-0" style="color:var(--museo-ink)">Carica e organizza i materiali da assegnare ai docenti.</p>
+    </div>
+    <button class="btn btn-museo-red px-3 py-2" data-bs-toggle="modal" data-bs-target="#uploadModal">+ Carica materiale</button>
+  </header>
+
+  <div id="page-alert" class="alert d-none" role="alert"></div>
+
+  <section class="museo-card p-3 mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg"><input id="m-search" class="form-control" type="search" placeholder="Cerca materiale…" /></div>
+      <div class="col-lg-auto">
+        <select id="m-cat" class="form-select">
+          <option value="">Categoria: Tutte</option>
+          {Object.entries(MATERIAL_CATEGORY_LABELS).map(([v, label]) => <option value={v}>{label}</option>)}
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="museo-card p-4">
+    {materials.length === 0 ? (
+      <p class="mb-0 text-center py-4" style="color:rgba(55,65,81,.6)">Nessun materiale caricato. Usa "Carica materiale".</p>
+    ) : (
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead><tr class="stat-label"><th>Nome</th><th>Categoria</th><th>Caricato</th><th class="text-end">Azioni</th></tr></thead>
+          <tbody>
+            {materials.map((m) => (
+              <tr class="materiale-row" data-id={m.id} data-nome={m.nome.toLowerCase()} data-cat={m.category}>
+                <td class="fw-semibold material-name">{m.nome}</td>
+                <td><span class="pill-blue">{MATERIAL_CATEGORY_LABELS[m.category]}</span></td>
+                <td>{fmtDate(m.created_at)}</td>
+                <td class="text-end">
+                  <button
+                    class="btn btn-sm btn-outline-museo-blue btn-rename"
+                    data-id={m.id}
+                    data-nome={m.nome}
+                    data-cat={m.category}
+                  >Modifica</button>
+                  <button class="btn btn-sm btn-outline-museo-red btn-delete" data-id={m.id} data-nome={m.nome}>Elimina</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+  <!-- Upload -->
+  <div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0">Carica materiale</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="upload-form">
+          <div class="modal-body">
+            <div id="up-alert" class="alert alert-danger d-none" role="alert"></div>
+            <div class="mb-3">
+              <label class="form-label stat-label" for="up-nome">Nome</label>
+              <input class="form-control" id="up-nome" name="nome" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label stat-label" for="up-cat">Categoria</label>
+              <select class="form-select" id="up-cat" name="category" required>
+                {MATERIAL_CATEGORIES.map((c) => <option value={c}>{MATERIAL_CATEGORY_LABELS[c]}</option>)}
+              </select>
+            </div>
+            <div class="mb-1">
+              <label class="form-label stat-label" for="up-file">File</label>
+              <input class="form-control" id="up-file" name="file" type="file" required />
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4" id="up-submit">Carica</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rinomina / categoria -->
+  <div class="modal fade" id="renameModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0">Modifica materiale</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="rename-form">
+          <input type="hidden" id="rn-id" />
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label stat-label" for="rn-nome">Nome</label>
+              <input class="form-control" id="rn-nome" required />
+            </div>
+            <div class="mb-1">
+              <label class="form-label stat-label" for="rn-cat">Categoria</label>
+              <select class="form-select" id="rn-cat">
+                {MATERIAL_CATEGORIES.map((c) => <option value={c}>{MATERIAL_CATEGORY_LABELS[c]}</option>)}
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4">Salva</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { Modal } from "bootstrap";
+
+    const pageAlert = document.getElementById("page-alert")!;
+    function notify(msg: string, ok = true) {
+      pageAlert.classList.remove("d-none", "alert-success", "alert-danger");
+      pageAlert.classList.add(ok ? "alert-success" : "alert-danger");
+      pageAlert.textContent = msg;
+    }
+
+    // Upload (multipart)
+    const upForm = document.getElementById("upload-form") as HTMLFormElement;
+    const upAlert = document.getElementById("up-alert")!;
+    const upSubmit = document.getElementById("up-submit") as HTMLButtonElement;
+    upForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      upAlert.classList.add("d-none");
+      upSubmit.disabled = true;
+      const res = await fetch("/api/materiali", { method: "POST", body: new FormData(upForm) });
+      const body = await res.json().catch(() => ({}));
+      upSubmit.disabled = false;
+      if (res.ok) window.location.reload();
+      else {
+        upAlert.classList.remove("d-none");
+        upAlert.textContent = body.error ?? "Caricamento non riuscito.";
+      }
+    });
+
+    // Rinomina / categoria
+    const rnModalEl = document.getElementById("renameModal")!;
+    const rnModal = new Modal(rnModalEl);
+    document.querySelectorAll<HTMLButtonElement>(".btn-rename").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        (document.getElementById("rn-id") as HTMLInputElement).value = btn.dataset.id!;
+        (document.getElementById("rn-nome") as HTMLInputElement).value = btn.dataset.nome!;
+        (document.getElementById("rn-cat") as HTMLSelectElement).value = btn.dataset.cat!;
+        rnModal.show();
+      });
+    });
+    document.getElementById("rename-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const id = (document.getElementById("rn-id") as HTMLInputElement).value;
+      const res = await fetch(`/api/materiali/${id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nome: (document.getElementById("rn-nome") as HTMLInputElement).value,
+          category: (document.getElementById("rn-cat") as HTMLSelectElement).value,
+        }),
+      });
+      if (res.ok) window.location.reload();
+      else notify("Modifica non riuscita.", false);
+    });
+
+    // Elimina
+    document.querySelectorAll<HTMLButtonElement>(".btn-delete").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm(`Eliminare "${btn.dataset.nome}"? L'azione è irreversibile.`)) return;
+        const res = await fetch(`/api/materiali/${btn.dataset.id}`, { method: "DELETE" });
+        if (res.ok) window.location.reload();
+        else notify("Eliminazione non riuscita.", false);
+      });
+    });
+
+    // Filtri
+    const mSearch = document.getElementById("m-search") as HTMLInputElement;
+    const mCat = document.getElementById("m-cat") as HTMLSelectElement;
+    function filterRows() {
+      const q = mSearch.value.toLowerCase();
+      const cat = mCat.value;
+      document.querySelectorAll<HTMLTableRowElement>(".materiale-row").forEach((r) => {
+        const ok = (!q || r.dataset.nome!.includes(q)) && (!cat || r.dataset.cat === cat);
+        r.style.display = ok ? "" : "none";
+      });
+    }
+    mSearch?.addEventListener("input", filterRows);
+    mCat?.addEventListener("change", filterRows);
+  </script>
+</MuseoLayout>

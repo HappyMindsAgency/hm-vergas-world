@@ -1,0 +1,66 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/styles.css";
+---
+
+<BaseLayout
+  title="Privacy policy | Verga's World"
+  description="Informativa sul trattamento dei dati personali del progetto Verga's World — Casa Museo Giovanni Verga, Vizzini."
+  fonts="main"
+>
+  <Header />
+
+  <main id="main-content">
+    <article class="legal-page">
+      <p class="kicker">Note legali</p>
+      <h1>Privacy policy</h1>
+      <p class="legal-updated">Ultimo aggiornamento: giugno 2026</p>
+
+      <section>
+        <h2>Titolare del trattamento</h2>
+        <p>
+          Il titolare del trattamento dei dati personali è il museo R.I.V.I.V.I. — Casa Museo
+          Giovanni Verga, Vizzini. Per ogni richiesta relativa ai tuoi dati puoi contattare il
+          museo ai recapiti indicati sul sito istituzionale.
+        </p>
+      </section>
+
+      <section>
+        <h2>Dati raccolti</h2>
+        <p>
+          Il frontend pubblico di Verga's World non richiede registrazione e non raccoglie dati
+          personali identificativi. Le aree riservate (docenti e alunni) trattano i soli dati
+          necessari alla gestione delle classi e dei percorsi didattici, secondo le finalità
+          descritte al momento della raccolta.
+        </p>
+      </section>
+
+      <section>
+        <h2>Finalità e base giuridica</h2>
+        <p>
+          I dati sono trattati per erogare i servizi del progetto educativo, gestire gli account
+          di docenti e alunni e monitorare l'avanzamento delle attività. Il trattamento si fonda
+          sull'esecuzione del servizio richiesto e sul legittimo interesse del museo a finalità
+          didattiche.
+        </p>
+      </section>
+
+      <section>
+        <h2>Diritti dell'interessato</h2>
+        <p>
+          Hai diritto di accedere ai tuoi dati, chiederne la rettifica o la cancellazione,
+          limitarne il trattamento e opporti allo stesso. Per esercitare questi diritti contatta
+          il titolare ai recapiti del museo.
+        </p>
+      </section>
+
+      <div class="legal-back">
+        <a class="button secondary" href="/">Torna alla home</a>
+      </div>
+    </article>
+  </main>
+
+  <Footer />
+</BaseLayout>

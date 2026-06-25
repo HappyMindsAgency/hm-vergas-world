@@ -1,38 +1,109 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
-import "../../styles/adventure.css";
+// Login Area Alunni (brief §9.4) — Bootstrap, ReservedLayout (ADR-11). NESSUNA
+// Supabase Auth: credenziali = codice classe + nome alunno (ADR-2). Il login
+// avviene via POST /api/alunni/login (firma congelata) che emette il cookie firmato
+// e ridirige al passaporto. Niente reset password, niente logout (brief §9.4).
+//
+// SSR (prerender=false) così, se la sessione è già attiva, salta il login.
+export const prerender = false;
 
+import AlunnoLayout from "../../layouts/AlunnoLayout.astro";
+import { getStudentSession } from "../../lib/alunni/session";
+import { STUDENT_HELP_TEXT, STUDENT_NAME_HINT } from "../../config/alunni";
+
+if (getStudentSession(Astro.cookies)) return Astro.redirect("/avventura/passaporto");
 ---
 
-<BaseLayout
-  title="Codice Avventura | Verga's World"
-  fonts="adventure"
-  scripts={[{ src: "/scripts/adventure.js" }]}
-  page="entry"
->
-  <main id="main-content" class="entry-page">
-        <a class="back-link" href="/">Verga's World</a>
-        <section class="entry-card">
-          <div class="guide-sign" aria-hidden="true">
-            <img decoding="async" loading="lazy" src="/immagini/Logo di Progetto Borgo cunziria.jpg" alt="Logo Borgo della Cunziria" />
-          </div>
-          <p class="eyebrow">Passaporto dell'Avventura</p>
-          <h1>Hai il Codice Avventura?</h1>
-          <p class="subtitle">Inseriscilo qui e parti per la missione!</p>
-          <form class="entry-form" data-entry-form>
-            <label>
-              Codice
-              <input data-code-input maxlength="12" placeholder="ES: PASS-2026" autocomplete="off" />
-            </label>
-            <label>
-              Nome esploratore
-              <input data-name-input maxlength="20" placeholder="Come ti chiami?" autocomplete="off" />
-            </label>
-            <p class="form-error" data-form-error hidden>! Codice non valido o scaduto.</p>
-            <button type="submit">Entra nel Passaporto!</button>
-          </form>
-        </section>
-      </main>
+<AlunnoLayout title="Codice Avventura | Verga's World" topbar={false}>
+  <div class="a-auth">
+    <div class="a-auth-card">
+      <div class="text-center mb-4">
+        <span class="a-badge-logo mb-3">VW</span>
+        <p class="text-uppercase fw-semibold mb-1" style="letter-spacing:.12em;color:var(--a-blue)">
+          Passaporto dell'Avventura
+        </p>
+        <h1 class="font-heading a-title h3 mb-2">Hai il Codice Avventura?</h1>
+        <p class="mb-0" style="color:rgba(55,65,81,.75)">Inseriscilo qui e parti per la missione!</p>
+      </div>
 
+      <div id="login-alert" class="alert alert-danger d-none" role="alert"></div>
 
-</BaseLayout>
+      <form id="login-form" novalidate>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="accessCode">Codice classe</label>
+          <input
+            class="form-control form-control-lg"
+            type="text"
+            id="accessCode"
+            name="accessCode"
+            autocomplete="off"
+            placeholder="ES: 3B-GARIBALDI-2026"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="displayName">Il tuo nome</label>
+          <input
+            class="form-control form-control-lg"
+            type="text"
+            id="displayName"
+            name="displayName"
+            autocomplete="off"
+            placeholder="ES: Marco R."
+            required
+          />
+          <div class="form-text">{STUDENT_NAME_HINT}</div>
+        </div>
+        <button class="btn btn-a-gold btn-lg w-100 py-2" type="submit" id="login-submit">
+          Entra nel Passaporto!
+        </button>
+      </form>
+
+      <div class="a-help-box mt-4">{STUDENT_HELP_TEXT}</div>
+
+      <div class="text-center mt-3">
+        <a href="/" style="color:rgba(55,65,81,.6);font-size:.875rem">← Torna alla home</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("login-form") as HTMLFormElement;
+    const alertBox = document.getElementById("login-alert")!;
+    const submitBtn = document.getElementById("login-submit") as HTMLButtonElement;
+
+    function showError(msg: string) {
+      alertBox.textContent = msg;
+      alertBox.classList.remove("d-none");
+    }
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertBox.classList.add("d-none");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Controllo il codice…";
+
+      const fd = new FormData(form);
+      const accessCode = String(fd.get("accessCode") ?? "").trim();
+      const displayName = String(fd.get("displayName") ?? "").trim();
+
+      try {
+        const res = await fetch("/api/alunni/login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ accessCode, displayName }),
+        });
+        if (res.ok) {
+          window.location.href = "/avventura/passaporto";
+          return;
+        }
+        showError("Codice classe o nome non corretti. Controlla con il tuo docente.");
+      } catch {
+        showError("Errore di rete. Riprova.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Entra nel Passaporto!";
+      }
+    });
+  </script>
+</AlunnoLayout>

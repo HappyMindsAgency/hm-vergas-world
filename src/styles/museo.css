@@ -1,0 +1,211 @@
+/* Token e primitive di design dell'Area Museo/Admin (Figma 99-139 / 99-414).
+   Scoping su .museo per non collidere con Bootstrap né con altre aree (ADR-11).
+   Importato dai layout/pagine riservati che usano ReservedLayout. */
+
+.museo {
+  --museo-cream: #fcfcf8;
+  --museo-ink: #374151;
+  --museo-border: #e5e7eb;
+  --museo-blue: #3e85a9;
+  --museo-blue-dark: #275b78;
+  --museo-red: #e1492f;
+  --museo-gold: #fdd985;
+  background: var(--museo-cream);
+  color: var(--museo-ink);
+  font-family: "Outfit", system-ui, sans-serif;
+}
+.museo .font-heading {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+}
+.museo .text-cream {
+  color: var(--museo-cream);
+}
+
+/* ---- Shell con sidebar ---- */
+.museo .museo-shell {
+  min-height: 100vh;
+}
+.museo .museo-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background-image: linear-gradient(256.9deg, var(--museo-blue) 25%, var(--museo-blue-dark) 75%);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.museo .museo-logo-badge {
+  background: var(--museo-gold);
+  color: var(--museo-blue-dark);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+.museo .museo-nav-item {
+  color: var(--museo-cream);
+  padding: 14px 24px;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 0 100px 100px 0;
+  transition: background-color 0.15s;
+}
+.museo .museo-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.museo .museo-nav-item.active {
+  background: var(--museo-red);
+}
+.museo .museo-nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.museo .museo-main {
+  background: var(--museo-cream);
+}
+
+/* ---- Primitive riusabili ---- */
+.museo .museo-card {
+  background: #fff;
+  border: 1px solid var(--museo-border);
+  border-radius: 22px;
+  box-shadow: 0 12px 12px rgba(31, 41, 55, 0.06);
+}
+.museo .museo-title {
+  color: var(--museo-red);
+}
+.museo .stat-value {
+  color: var(--museo-blue);
+  font-weight: 700;
+  font-size: 2rem;
+}
+.museo .stat-label {
+  color: rgba(55, 65, 81, 0.6);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.museo .btn-museo-red {
+  background: var(--museo-red);
+  color: var(--museo-cream);
+  border: 1px solid var(--museo-red);
+  border-radius: 10px;
+  font-weight: 600;
+}
+.museo .btn-museo-red:hover {
+  background: #c93e26;
+  color: #fff;
+}
+.museo .btn-museo-blue {
+  background: var(--museo-blue);
+  color: var(--museo-cream);
+  border: 1px solid var(--museo-blue);
+  border-radius: 999px;
+  font-weight: 700;
+}
+.museo .btn-museo-blue:hover {
+  background: var(--museo-blue-dark);
+  color: #fff;
+}
+.museo .btn-outline-museo-blue {
+  color: var(--museo-blue);
+  border: 1px solid var(--museo-blue);
+  border-radius: 8px;
+  font-weight: 600;
+  background: transparent;
+}
+.museo .btn-outline-museo-blue:hover {
+  background: rgba(62, 133, 169, 0.08);
+}
+.museo .btn-outline-museo-red {
+  color: var(--museo-red);
+  border: 1px solid rgba(225, 73, 47, 0.4);
+  border-radius: 8px;
+  font-weight: 600;
+  background: transparent;
+}
+.museo .btn-outline-museo-red:hover {
+  background: rgba(225, 73, 47, 0.08);
+}
+.museo .avatar-initials {
+  background: rgba(62, 133, 169, 0.15);
+  color: var(--museo-blue);
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.museo .pill-blue {
+  background: rgba(62, 133, 169, 0.1);
+  color: var(--museo-blue);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+.museo .form-control:focus,
+.museo .form-select:focus {
+  border-color: var(--museo-blue);
+  box-shadow: 0 0 0 0.2rem rgba(62, 133, 169, 0.15);
+}
+.museo .breadcrumb-museo a {
+  color: var(--museo-blue);
+  text-decoration: none;
+}
+.museo .breadcrumb-museo {
+  color: rgba(55, 65, 81, 0.6);
+  font-size: 0.8125rem;
+}
+
+/* ---- Login (card centrata, senza sidebar) ---- */
+.museo .museo-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.museo .museo-auth-card {
+  background: var(--museo-cream);
+  border: 1px solid var(--museo-border);
+  border-radius: 24px;
+  box-shadow:
+    0 6px 9px rgba(31, 41, 55, 0.06),
+    0 18px 24px rgba(31, 41, 55, 0.1);
+  width: 100%;
+  max-width: 520px;
+  padding: 48px;
+}
+.museo .museo-help-box {
+  background: var(--museo-gold);
+  border: 1px solid var(--museo-border);
+  border-radius: 16px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .museo .museo-sidebar {
+    width: 84px;
+    position: static;
+    height: auto;
+  }
+  .museo .museo-sidebar .nav-label,
+  .museo .museo-nav-item span {
+    display: none !important;
+  }
+  .museo .museo-nav-item {
+    justify-content: center;
+    padding: 14px;
+  }
+}

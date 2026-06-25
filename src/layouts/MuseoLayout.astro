@@ -1,0 +1,75 @@
+---
+// Shell dell'Area Museo/Admin: sidebar a gradiente + area contenuti (Bootstrap).
+// Wrappa ReservedLayout (unico importatore di Bootstrap, ADR-11). I token di
+// design vivono in src/styles/museo.css, scoping su .museo per non collidere.
+import ReservedLayout from "./ReservedLayout.astro";
+import { ADMIN_NAV } from "../config/admin";
+import AdminIcon from "../components/admin/AdminIcon.astro";
+import "../styles/museo.css";
+
+interface Props {
+  title: string;
+  /** pathname corrente per evidenziare la voce di menu attiva */
+  active: string;
+  adminName?: string;
+  adminSubtitle?: string;
+}
+const { title, active, adminName = "Coordinatore Admin", adminSubtitle = "Area Museo" } = Astro.props;
+
+function isActive(match: string): boolean {
+  if (match === "/museo") return active === "/museo" || active === "/museo/";
+  return active === match || active.startsWith(match + "/");
+}
+---
+
+<ReservedLayout title={title} bodyClass="museo">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="museo-shell d-flex">
+    <aside class="museo-sidebar d-flex flex-column justify-content-between py-4">
+      <div>
+        <div class="d-flex align-items-center gap-2 px-4 mb-5">
+          <span class="museo-logo-badge">VW</span>
+          <span class="nav-label d-flex flex-column lh-1 text-cream">
+            <strong class="font-heading fs-5">Verga's World</strong>
+            <small class="text-uppercase opacity-75" style="font-size:.625rem">Coordinatori</small>
+          </span>
+        </div>
+        <div class="nav-label px-4 mb-5 text-cream">
+          <div class="fw-medium">{adminName}</div>
+          <div class="opacity-75 small">{adminSubtitle}</div>
+        </div>
+        <nav class="d-flex flex-column gap-1">
+          {
+            ADMIN_NAV.map((item) => (
+              <a
+                href={item.href}
+                class:list={["museo-nav-item d-flex align-items-center gap-3", { active: isActive(item.match) }]}
+              >
+                <AdminIcon name={item.icon} />
+                <span>{item.label}</span>
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+      <form method="post" action="/api/museo/logout" class="pe-4">
+        <button type="submit" class="museo-nav-item d-flex align-items-center gap-3 border-0 bg-transparent w-100 text-start">
+          <AdminIcon name="logout" />
+          <span>Esci</span>
+        </button>
+      </form>
+    </aside>
+
+    <main class="museo-main flex-grow-1 p-4 p-lg-5">
+      <slot />
+    </main>
+  </div>
+</ReservedLayout>

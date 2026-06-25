@@ -1,0 +1,339 @@
+---
+// Dettaglio classe (Figma 64-159): "nome – anno – Istituto"; riepilogo testuale;
+// tabella alunni (nome formattato, Missioni fatte/totali, Badge come stelle, ultima
+// attività). Azioni: modifica codice · modifica dati · modifica composizione · elimina.
+// SSR protetto; la classe deve essere del docente loggato.
+export const prerender = false;
+
+import DocenteLayout from "../../../layouts/DocenteLayout.astro";
+import { getTeacherProfile } from "../../../lib/docenti/session";
+import { getClassDetail, getInstitutes } from "../../../lib/docenti/data";
+import { STUDENT_IMPORT_ACCEPT } from "../../../config/docenti";
+
+const teacher = await getTeacherProfile(Astro.cookies);
+if (!teacher) return Astro.redirect("/insegnante/login");
+
+const { id } = Astro.params;
+const detail = id ? await getClassDetail(teacher.id, id) : null;
+if (!detail) return Astro.redirect("/insegnante/classi");
+
+const institutes = await getInstitutes();
+const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
+const { classe, istitutoNome, alunni, alunniAttivi, missioniTotaliPerAlunno } = detail;
+
+function fmtDate(iso: string | null): string {
+  return iso ? new Date(iso).toLocaleDateString("it-IT") : "—";
+}
+---
+
+<DocenteLayout
+  title={`Classe ${classe.nome} | Area Docenti`}
+  active="/insegnante/classi"
+  teacherName={teacherName}
+  teacherSubtitle="Docente"
+>
+  <nav class="breadcrumb-d mb-3">
+    <a href="/insegnante">Dashboard</a> / <a href="/insegnante/classi">Le mie classi</a> / Classe {classe.nome}
+  </nav>
+
+  <header
+    class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4"
+    data-class-id={classe.id}
+    data-class-nome={classe.nome}
+    data-class-anno={classe.anno}
+    data-class-istituto={classe.institute_id}
+    data-class-code={classe.access_code}
+  >
+    <div>
+      <h1 class="font-heading d-title display-6 mb-1">Classe {classe.nome} – {classe.anno}</h1>
+      <p class="mb-1" style="color:var(--d-ink)">{istitutoNome ?? "—"}</p>
+      <p class="mb-0" style="color:rgba(55,65,81,.8)">
+        {alunniAttivi} {alunniAttivi === 1 ? "alunno attivo" : "alunni attivi"} su {alunni.length} hanno usato il codice almeno una volta.
+      </p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-outline-d-blue px-3" data-bs-toggle="modal" data-bs-target="#codeModal">Modifica codice</button>
+      <button class="btn btn-outline-d-blue px-3" data-bs-toggle="modal" data-bs-target="#dataModal">Modifica dati</button>
+      <button class="btn btn-outline-d-blue px-3" data-bs-toggle="modal" data-bs-target="#composeModal">Modifica composizione</button>
+      <button class="btn btn-outline-d-red px-3" data-bs-toggle="modal" data-bs-target="#deleteModal">Elimina</button>
+      <a class="btn btn-light px-3" href="/insegnante/classi">← Torna all'elenco</a>
+    </div>
+  </header>
+
+  <div id="page-alert" class="alert d-none" role="alert"></div>
+
+  <section class="d-card p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
+    <span style="color:rgba(55,65,81,.8)">Codice classe per il login degli alunni:</span>
+    <span class="pill-red"><code style="color:inherit">{classe.access_code}</code></span>
+  </section>
+
+  <!-- Tabella alunni -->
+  <section class="d-card p-0 overflow-hidden">
+    {
+      alunni.length === 0 ? (
+        <p class="mb-0 text-center py-5" style="color:rgba(55,65,81,.6)">
+          Nessun alunno in questa classe. Usa "Modifica composizione" per aggiungerli o importare un Excel.
+        </p>
+      ) : (
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr class="stat-label">
+                <th class="ps-4">Nome esploratore</th>
+                <th>Missioni</th>
+                <th>Badge</th>
+                <th class="text-end pe-4">Ultima attività</th>
+              </tr>
+            </thead>
+            <tbody>
+              {alunni.map((s) => (
+                <tr>
+                  <td class="ps-4 fw-semibold">{s.displayName}</td>
+                  <td>
+                    {s.missioniFatte > 0 ? (
+                      <span>
+                        <strong style="color:var(--d-blue)">{s.missioniFatte}</strong>
+                        <span style="color:rgba(55,65,81,.7)">/{missioniTotaliPerAlunno}</span>
+                      </span>
+                    ) : (
+                      <span class="small" style="color:rgba(55,65,81,.5)">Non ancora iniziate</span>
+                    )}
+                  </td>
+                  <td>
+                    {s.badge > 0 ? (
+                      <span class="stars" aria-label={`${s.badge} badge`}>
+                        {Array.from({ length: s.badge }).map(() => (
+                          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                        ))}
+                      </span>
+                    ) : (
+                      <span style="color:rgba(55,65,81,.5)">—</span>
+                    )}
+                  </td>
+                  <td class="text-end pe-4 small" style="color:rgba(55,65,81,.8)">{fmtDate(s.lastActivityAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </section>
+  <p class="text-end small mt-2 mb-0" style="color:rgba(55,65,81,.8)">{alunni.length} esploratori in classe</p>
+
+  <!-- Modale: modifica codice -->
+  <div class="modal fade" id="codeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0"><h2 class="h5 font-heading d-title mb-0">Modifica codice classe</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <form id="code-form">
+          <div class="modal-body">
+            <p class="small" style="color:rgba(55,65,81,.7)">Il codice deve restare univoco. Lettere maiuscole, numeri e trattini.</p>
+            <div id="code-alert" class="alert alert-danger d-none" role="alert"></div>
+            <input class="form-control" id="code-input" value={classe.access_code} required />
+          </div>
+          <div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button><button type="submit" class="btn btn-d-blue px-4">Salva</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale: modifica dati -->
+  <div class="modal fade" id="dataModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0"><h2 class="h5 font-heading d-title mb-0">Modifica dati classe</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <form id="data-form">
+          <div class="modal-body">
+            <div id="data-alert" class="alert alert-danger d-none" role="alert"></div>
+            <div class="mb-3">
+              <label class="form-label stat-label" for="data-nome">Nome classe</label>
+              <input class="form-control" id="data-nome" value={classe.nome} required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label stat-label" for="data-istituto">Istituto</label>
+              <select class="form-select" id="data-istituto">
+                {institutes.map((i) => <option value={i.id} selected={i.id === classe.institute_id}>{i.nome}</option>)}
+              </select>
+            </div>
+            <div class="mb-1">
+              <label class="form-label stat-label" for="data-anno">Anno</label>
+              <input class="form-control" id="data-anno" type="number" min="2000" max="2100" value={classe.anno} required />
+            </div>
+          </div>
+          <div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button><button type="submit" class="btn btn-d-blue px-4">Salva</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale: modifica composizione -->
+  <div class="modal fade" id="composeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0"><h2 class="h5 font-heading d-title mb-0">Modifica composizione</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div id="compose-alert" class="alert d-none" role="alert"></div>
+
+          <h3 class="h6 mb-2">Aggiungi un alunno</h3>
+          <form id="add-student-form" class="d-flex gap-2 mb-3">
+            <input class="form-control" id="add-student-name" placeholder="Nome Cognome" required />
+            <button class="btn btn-d-blue px-3" type="submit">Aggiungi</button>
+          </form>
+
+          <h3 class="h6 mb-2">Importa da Excel/CSV</h3>
+          <form id="import-form" class="d-flex gap-2 mb-3">
+            <input class="form-control" id="import-file" type="file" accept={STUDENT_IMPORT_ACCEPT} required />
+            <button class="btn btn-outline-d-blue px-3" type="submit">Importa</button>
+          </form>
+
+          <h3 class="h6 mb-2">Alunni in classe</h3>
+          {alunni.length === 0 ? (
+            <p class="small mb-0" style="color:rgba(55,65,81,.6)">Nessun alunno.</p>
+          ) : (
+            <ul class="list-group">
+              {alunni.map((s) => (
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>{s.displayName}</span>
+                  <button class="btn btn-sm btn-outline-d-red btn-remove-student" data-id={s.id} data-name={s.displayName}>Rimuovi</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale: elimina classe -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0"><h2 class="h5 font-heading mb-0" style="color:var(--d-red)">Elimina classe</h2><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <p class="mb-2">Eliminerai la classe <strong>{classe.nome}</strong> e tutti i suoi alunni e progressi. Irreversibile.</p>
+          <p class="small mb-2" style="color:rgba(55,65,81,.7)">Digita il codice classe <code>{classe.access_code}</code> per confermare.</p>
+          <input class="form-control" id="del-confirm" autocomplete="off" placeholder="Codice classe" />
+        </div>
+        <div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button><button class="btn btn-d-red" id="del-submit" disabled>Elimina definitivamente</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const header = document.querySelector("header[data-class-id]") as HTMLElement;
+    const classId = header.dataset.classId!;
+    const classCode = header.dataset.classCode!;
+
+    const pageAlert = document.getElementById("page-alert")!;
+    function notify(msg: string, ok = true) {
+      pageAlert.classList.remove("d-none", "alert-success", "alert-danger");
+      pageAlert.classList.add(ok ? "alert-success" : "alert-danger");
+      pageAlert.textContent = msg;
+    }
+    async function patch(payload: Record<string, unknown>) {
+      const res = await fetch(`/api/classi/${classId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => ({}));
+      return { ok: res.ok, body };
+    }
+
+    // modifica codice
+    document.getElementById("code-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const codeAlert = document.getElementById("code-alert")!;
+      codeAlert.classList.add("d-none");
+      const accessCode = (document.getElementById("code-input") as HTMLInputElement).value;
+      const { ok, body } = await patch({ action: "codice", accessCode });
+      if (ok) window.location.reload();
+      else {
+        codeAlert.classList.remove("d-none");
+        codeAlert.textContent = body.error ?? "Aggiornamento non riuscito.";
+      }
+    });
+
+    // modifica dati
+    document.getElementById("data-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const dataAlert = document.getElementById("data-alert")!;
+      dataAlert.classList.add("d-none");
+      const { ok, body } = await patch({
+        action: "dati",
+        nome: (document.getElementById("data-nome") as HTMLInputElement).value,
+        anno: Number((document.getElementById("data-anno") as HTMLInputElement).value),
+        instituteId: (document.getElementById("data-istituto") as HTMLSelectElement).value,
+      });
+      if (ok) window.location.reload();
+      else {
+        dataAlert.classList.remove("d-none");
+        dataAlert.textContent = body.error ?? "Aggiornamento non riuscito.";
+      }
+    });
+
+    // composizione: aggiungi alunno
+    document.getElementById("add-student-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("add-student-name") as HTMLInputElement;
+      const { ok, body } = await patch({ action: "aggiungi-alunno", nome: input.value });
+      const composeAlert = document.getElementById("compose-alert")!;
+      composeAlert.classList.remove("d-none", "alert-danger", "alert-success");
+      if (ok) {
+        composeAlert.classList.add("alert-success");
+        composeAlert.textContent = `Aggiunto: ${body.displayName}.`;
+        setTimeout(() => window.location.reload(), 800);
+      } else {
+        composeAlert.classList.add("alert-danger");
+        composeAlert.textContent = body.error ?? "Aggiunta non riuscita.";
+      }
+    });
+
+    // composizione: rimuovi alunno
+    document.querySelectorAll<HTMLButtonElement>(".btn-remove-student").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm(`Rimuovere ${btn.dataset.name}? I suoi progressi verranno eliminati.`)) return;
+        const { ok } = await patch({ action: "rimuovi-alunno", studentId: btn.dataset.id });
+        if (ok) window.location.reload();
+        else notify("Rimozione non riuscita.", false);
+      });
+    });
+
+    // composizione: import Excel/CSV
+    document.getElementById("import-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = document.getElementById("import-file") as HTMLInputElement;
+      if (!fileInput.files?.length) return;
+      const fd = new FormData();
+      fd.append("classId", classId);
+      fd.append("file", fileInput.files[0]);
+      const res = await fetch("/api/classi/import", { method: "POST", body: fd });
+      const body = await res.json().catch(() => ({}));
+      const composeAlert = document.getElementById("compose-alert")!;
+      composeAlert.classList.remove("d-none", "alert-danger", "alert-success");
+      if (res.ok) {
+        composeAlert.classList.add("alert-success");
+        composeAlert.textContent = `Importati: ${body.created}, saltati: ${body.skipped}.`;
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        composeAlert.classList.add("alert-danger");
+        composeAlert.textContent = body.error ?? "Import non riuscito.";
+      }
+    });
+
+    // elimina classe
+    const delConfirm = document.getElementById("del-confirm") as HTMLInputElement;
+    const delSubmit = document.getElementById("del-submit") as HTMLButtonElement;
+    delConfirm?.addEventListener("input", () => {
+      delSubmit.disabled = delConfirm.value.trim().toUpperCase() !== classCode.toUpperCase();
+    });
+    delSubmit?.addEventListener("click", async () => {
+      const res = await fetch(`/api/classi/${classId}`, { method: "DELETE" });
+      if (res.ok) window.location.href = "/insegnante/classi";
+      else notify("Eliminazione non riuscita.", false);
+    });
+  </script>
+</DocenteLayout>

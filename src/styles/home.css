@@ -1,0 +1,540 @@
+/*
+ * Home pubblica — aderente a Figma node 75-766.
+ * Tutto è scoped sotto .vw-home per non interferire con styles.css condiviso
+ * (Header/Footer e le altre pagine pubbliche restano invariati). CSS scritto a
+ * mano, niente Tailwind/Bootstrap (ADR-11).
+ *
+ * Token di design estratti dal Figma (vedi data-node-id nel sorgente):
+ *   teal #3e85a9 · teal scuro #275b78 · oro #f3b94c · oro tenue #f9d46b
+ *   crema-verde #f4f8f2 · crema indizio #fefbf3 · testo #374151 · bordo #e5e7eb
+ */
+.vw-home {
+  --vw-teal: #3e85a9;
+  --vw-teal-dark: #275b78;
+  --vw-gold: #f3b94c;
+  --vw-gold-soft: #f9d46b;
+  --vw-cream: #f4f8f2;
+  --vw-cream-indizio: #fefbf3;
+  --vw-paper: #fcfcf8;
+  --vw-ink: #374151;
+  --vw-border: #e5e7eb;
+  --vw-shadow-card: 0 24px 60px -24px rgba(31, 41, 55, 0.18);
+
+  font-family: "Outfit", system-ui, sans-serif;
+  color: var(--vw-ink);
+  background: #fff;
+  line-height: 1.5;
+}
+
+.vw-home h1,
+.vw-home h2,
+.vw-home h3,
+.vw-home h4 {
+  font-family: "Fraunces", Georgia, serif;
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  color: var(--vw-ink);
+  margin: 0;
+  line-height: 1;
+}
+
+.vw-home p {
+  margin: 0;
+}
+
+.vw-home a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vw-home img {
+  display: block;
+  max-width: 100%;
+}
+
+.vw-wrap {
+  width: min(1280px, 100% - 32px);
+  margin-inline: auto;
+}
+
+/* --- Pill / kicker label --- */
+.vw-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.92px;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+.vw-pill--teal {
+  background: rgba(62, 133, 169, 0.1);
+  color: var(--vw-teal);
+}
+.vw-pill--gold {
+  background: var(--vw-gold);
+  color: var(--vw-teal-dark);
+}
+
+/* --- Buttons --- */
+.vw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 22px;
+  border-radius: 9999px;
+  border: 0;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.08px;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+.vw-btn:hover { transform: translateY(-1px); filter: brightness(1.03); }
+/* Compound (.vw-btn.vw-btn--x) per battere `.vw-home a { color: inherit }`. */
+.vw-btn.vw-btn--primary { background: var(--vw-teal); color: var(--vw-paper); box-shadow: 0 6px 16px -6px rgba(45, 143, 88, 0.55); }
+.vw-btn.vw-btn--gold { background: var(--vw-gold); color: var(--vw-ink); }
+.vw-btn.vw-btn--ghost { background: transparent; color: var(--vw-teal); }
+.vw-btn.vw-btn--ghost-light { background: transparent; color: #fff; }
+
+/* ============ HERO ============ */
+.vw-hero {
+  position: relative;
+  padding: 64px 16px 40px;
+  text-align: center;
+  background: linear-gradient(180deg, var(--vw-cream) 0%, #fff 70%);
+  border-bottom: 1px solid var(--vw-border);
+}
+.vw-hero__intro {
+  max-width: 660px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.vw-hero__logo {
+  width: min(560px, 90%);
+  height: auto;
+}
+.vw-hero__lead {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.vw-hero__lead strong { font-weight: 700; }
+.vw-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+/* ============ MAPPA (75:769) ============ */
+/* Illustrazione panoramica grande, a tutta larghezza (frame 1920×1149).
+   Le tappe in una riga in cima; il box indizio le galleggia sopra (desktop). */
+.vw-map-section {
+  padding: 16px 0 64px;
+  background: #fff;
+}
+
+/* Tab tappe in una riga in cima alla mappa */
+.vw-tappe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+}
+.vw-tappa {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 13px 5px 5px;
+  border-radius: 9999px;
+  border: 1px solid var(--vw-border);
+  background: var(--vw-paper);
+  color: var(--vw-ink);
+  font-weight: 500;
+  font-size: 15px;
+  cursor: default;
+}
+.vw-tappa__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--vw-gold);
+  font-weight: 700;
+  font-size: 10px;
+}
+
+/* Stage della mappa illustrata — full-bleed panoramico */
+.vw-map-overlay {
+  position: relative;
+  width: 100%;
+}
+.vw-map-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1920 / 1149;
+  overflow: hidden;
+}
+.vw-map-stage__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Gradient overlay in basso (Figma 75:840) */
+.vw-map-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(31, 41, 55, 0) 55%, rgba(31, 41, 55, 0.18) 100%);
+}
+
+/* Pointer "Nome del luogo" sulla mappa */
+.vw-map-pointer {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 36px;
+  border-radius: 9999px;
+  background: var(--vw-cream);
+  border: 1px solid var(--vw-border);
+  color: var(--vw-ink);
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+  font-size: clamp(11px, 1.4vw, 18px);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(31, 41, 55, 0.04), 0 8px 24px -12px rgba(31, 41, 55, 0.12);
+  cursor: pointer;
+  z-index: 2;
+}
+.vw-map-pointer::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--vw-gold);
+  border: 2px solid #fff;
+}
+
+/* Disclaimer in fondo alla mappa (Figma 174:2403) */
+.vw-map-note {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: min(878px, 92%);
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 14px 24px 8px;
+  text-align: center;
+  font-size: 14px;
+  z-index: 3;
+}
+
+/* Lenti "indizio" iniettate da indizio.js — invariate nella logica */
+.vw-map-stage .clue-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  background: rgba(62, 133, 169, 0.92);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 16px -6px rgba(31, 41, 55, 0.5);
+  z-index: 4;
+  animation: vw-clue-pulse 1.8s ease-in-out infinite;
+}
+.vw-map-stage .clue-marker:hover,
+.vw-map-stage .clue-marker:focus-visible { outline: 3px solid var(--vw-gold); }
+.vw-map-stage .clue-marker.is-correct { background: var(--vw-teal); animation: none; }
+.vw-map-stage .clue-marker.is-wrong { background: #c0392b; animation: none; }
+@keyframes vw-clue-pulse {
+  0%, 100% { box-shadow: 0 6px 16px -6px rgba(31, 41, 55, 0.5), 0 0 0 0 rgba(62, 133, 169, 0.5); }
+  50% { box-shadow: 0 6px 16px -6px rgba(31, 41, 55, 0.5), 0 0 0 10px rgba(62, 133, 169, 0); }
+}
+
+/* ============ BOX INDIZIO DI VERGA (75:1016) ============ */
+/* Card verticale STRETTA (~502px su mappa 1920 → ~26%). Desktop: galleggia
+   sopra l'angolo top-right della mappa. Mobile: sotto la mappa, full-width. */
+.vw-indizio {
+  width: 100%;
+  background: var(--vw-cream-indizio);
+  border-radius: 20px;
+  padding: 16px 43px;
+  box-shadow: 0 30px 70px -28px rgba(31, 41, 55, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+}
+.vw-indizio__media {
+  position: relative;
+  width: 248px;
+  max-width: 100%;
+}
+.vw-indizio__frame {
+  transform: rotate(-7deg);
+  background: #fcfaf5;
+  border: 1px solid rgba(45, 27, 10, 0.1);
+  border-radius: 16px;
+  padding: 12px;
+}
+.vw-indizio__frame img {
+  width: 100%;
+  aspect-ratio: 226 / 193;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.vw-indizio__objlabel {
+  margin-top: 8px;
+  background: var(--vw-teal);
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 16px;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.vw-indizio__objlabel .obj-prefix { font-family: "Fraunces", Georgia, serif; font-weight: 400; }
+.vw-indizio__objlabel .obj-name { font-weight: 700; }
+.vw-indizio__title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 34px;
+}
+.vw-indizio__title img { width: 44px; height: 44px; }
+.vw-indizio__desc { font-size: 17px; line-height: 1.4; }
+.vw-indizio__countdown-label { color: var(--vw-teal); font-weight: 600; font-size: 22px; letter-spacing: -0.72px; margin-top: 4px; }
+.vw-indizio__countdown {
+  font-family: "Outfit", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  letter-spacing: 4px;
+  color: var(--vw-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============ SECTION GENERICHE ============ */
+.vw-section { padding: 80px 16px; }
+.vw-section__head {
+  max-width: 760px;
+  margin-inline: auto 16px;
+  margin-inline: auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.vw-section__head h2 { font-size: clamp(32px, 5vw, 50px); letter-spacing: -0.72px; line-height: 1; }
+.vw-section__head p { font-size: 18px; font-weight: 500; line-height: 1.4; }
+
+/* ---- Personaggi ---- */
+.vw-characters { background: #fff; }
+.vw-characters__rail {
+  margin-top: 40px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(280px, 1fr);
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+}
+.vw-char-card {
+  scroll-snap-align: start;
+  background: rgba(243, 185, 76, 0.1);
+  border: 1px solid var(--vw-border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.vw-char-card__media { aspect-ratio: 4 / 3; background: #fefefe; overflow: hidden; }
+.vw-char-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.vw-char-card__body { padding: 20px 16px; display: flex; flex-direction: column; gap: 4px; }
+.vw-char-card__body h3 { font-size: 24px; letter-spacing: -0.3px; }
+.vw-char-card__role { font-size: 14px; }
+.vw-char-card__desc { font-size: 17px; line-height: 1.45; font-weight: 500; }
+
+/* ---- Codice avventura (banda teal, 75:1005) ---- */
+.vw-cta-code {
+  position: relative;
+  overflow: hidden;
+  padding: 64px 16px;
+  text-align: center;
+  color: var(--vw-paper);
+  background: linear-gradient(158deg, #3e85a9 0%, #275b78 100%);
+  box-shadow: var(--vw-shadow-card);
+}
+.vw-cta-code__inner { max-width: 822px; margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+.vw-cta-code__icon { width: 80px; height: auto; }
+.vw-cta-code h2 { color: var(--vw-paper); font-size: clamp(36px, 6vw, 60px); line-height: 1; letter-spacing: -0.72px; }
+.vw-cta-code__lead { font-size: 22px; line-height: 1.25; color: rgba(252, 252, 248, 0.85); }
+.vw-cta-code__sub { font-size: 18px; color: rgba(252, 252, 248, 0.8); }
+.vw-cta-code__actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+/* ---- Slider storie (75:937) ---- */
+.vw-stories {
+  position: relative;
+  padding: 80px 16px;
+  background: rgba(62, 133, 169, 0.12);
+}
+.vw-stories__inner { width: min(1460px, 100%); margin-inline: auto; display: flex; flex-direction: column; gap: 40px; }
+.vw-stories__head { display: flex; flex-direction: column; gap: 20px; }
+.vw-stories__head h2 { font-size: clamp(34px, 5vw, 50px); letter-spacing: -0.72px; line-height: 1; }
+.vw-stories__head p { font-size: 18px; font-weight: 500; line-height: 1.4; }
+
+.vw-story-card {
+  background: #fff;
+  border: 1px solid var(--vw-border);
+  border-radius: 18px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+}
+.vw-story-card__media {
+  width: 100%;
+  border: 1px solid var(--vw-border);
+  border-radius: 18px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: var(--vw-cream);
+}
+.vw-story-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.vw-story-card__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--vw-gold);
+  border: 1px solid var(--vw-border);
+  font-weight: 700;
+  font-size: 14px;
+}
+.vw-story-card h4 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.72px; line-height: 1; }
+.vw-story-card__desc { font-size: 16px; line-height: 1.6; font-weight: 500; }
+
+/* Slider: una storia per slide con scroll-snap (ponytail: niente libreria carousel) */
+.vw-stories__track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 24px;
+  scrollbar-width: none;
+}
+.vw-stories__track::-webkit-scrollbar { display: none; }
+.vw-stories__slide { flex: 0 0 100%; scroll-snap-align: center; }
+
+/* Paginazione (puntini tappa 1..7) */
+.vw-stories__dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.vw-stories__dot {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--vw-border);
+  background: var(--vw-cream);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--vw-ink);
+  cursor: pointer;
+}
+.vw-stories__dot[aria-current="true"] { background: var(--vw-gold); }
+.vw-stories__nav { display: flex; gap: 12px; justify-content: center; align-items: center; }
+.vw-stories__arrow {
+  width: 48px;
+  height: 44px;
+  border-radius: 9999px;
+  border: 1px solid var(--vw-border);
+  background: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--vw-teal);
+}
+
+/* ---- Pianifica visita (75:896) ---- */
+.vw-visit { background: #fff; }
+.vw-visit__cards {
+  margin-top: 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  max-width: 1024px;
+  margin-inline: auto;
+}
+.vw-visit-card {
+  border: 1px solid var(--vw-border);
+  border-radius: 22px;
+  padding: 34px 33px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.vw-visit-card--famiglie { background: rgba(249, 212, 107, 0.6); }
+.vw-visit-card--scuole { background: var(--vw-cream); }
+.vw-visit-card h3 { font-size: 30px; letter-spacing: -0.48px; line-height: 1.05; }
+.vw-visit-card p { font-size: 16px; line-height: 1.6; font-weight: 500; }
+
+/* ============ Layout desktop: indizio stretto, sovrapposto top-right ============ */
+@media (min-width: 1100px) {
+  .vw-indizio {
+    position: absolute;
+    top: 28px;
+    right: clamp(24px, 4vw, 96px);
+    width: min(470px, 28vw);
+    z-index: 5;
+  }
+  /* La nota mappa resta centrata nella parte SINISTRA libera dal box */
+  .vw-map-note { left: 38%; width: min(720px, 60%); }
+}
+
+/* Sotto desktop: box sotto la mappa, a piena larghezza (brief §9.1) */
+@media (max-width: 1099px) {
+  .vw-map-overlay { display: flex; flex-direction: column; gap: 28px; }
+  .vw-indizio { max-width: 502px; margin-inline: auto; }
+}

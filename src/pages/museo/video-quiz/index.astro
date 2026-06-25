@@ -1,0 +1,58 @@
+---
+// Video & Quiz (§9.2): elenco delle 7 storie con stato video/quiz. I video sono
+// visibili anche ai docenti (RLS: lettura authenticated — vedi INTEGRATION).
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+import { getStoriesWithContent } from "../../../lib/admin/data";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const stories = await getStoriesWithContent();
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+---
+
+<MuseoLayout title="Video & Quiz | Area Museo" active="/museo/video-quiz" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3"><a href="/museo">Dashboard</a> / Video & Quiz</nav>
+
+  <header class="mb-4">
+    <h1 class="font-heading museo-title display-6 mb-1">Video & Quiz</h1>
+    <p class="mb-0" style="color:var(--museo-ink)">
+      Gestisci i video e il quiz di ciascuna storia. I video sono visibili anche ai docenti.
+    </p>
+  </header>
+
+  {stories.length === 0 ? (
+    <div class="museo-card p-4">
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">
+        Nessuna storia configurata. Le 7 storie vanno create nel database (seed iniziale).
+      </p>
+    </div>
+  ) : (
+    <div class="row g-3">
+      {stories.map((s) => (
+        <div class="col-md-6 col-xl-4">
+          <a class="text-decoration-none" href={`/museo/video-quiz/${s.id}`}>
+            <div class="museo-card p-4 h-100">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="pill-blue">Storia {s.numero}</span>
+                <div class="d-flex gap-1">
+                  <span class={`badge ${s.hasVideo ? "text-bg-success" : "text-bg-secondary"}`}>
+                    {s.videoCount} video
+                  </span>
+                  <span class={`badge ${s.hasQuiz ? "text-bg-success" : "text-bg-secondary"}`}>
+                    {s.hasQuiz ? `quiz · ${s.questionCount} dom.` : "no quiz"}
+                  </span>
+                </div>
+              </div>
+              <h2 class="h5 mb-1" style="color:var(--museo-ink)">{s.titolo}</h2>
+              {s.sinossi && <p class="small mb-0" style="color:rgba(55,65,81,.6)">{s.sinossi}</p>}
+            </div>
+          </a>
+        </div>
+      ))}
+    </div>
+  )}
+</MuseoLayout>

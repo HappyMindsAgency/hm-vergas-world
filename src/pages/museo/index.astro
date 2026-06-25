@@ -1,0 +1,134 @@
+---
+// Dashboard Area Museo (Figma 99-139): KPI, box aggiunta rapida docente,
+// gestione rapida ultimi docenti. SSR protetto (solo admin).
+export const prerender = false;
+
+import MuseoLayout from "../../layouts/MuseoLayout.astro";
+import StatCards from "../../components/admin/StatCards.astro";
+import { getAdminProfile } from "../../lib/admin/session";
+import { getDashboardStats, getTeachers, getInstitutes } from "../../lib/admin/data";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const [stats, teachers, institutes] = await Promise.all([
+  getDashboardStats(),
+  getTeachers(),
+  getInstitutes(),
+]);
+
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+const latest = teachers.slice(0, 4);
+
+function initials(t: { nome: string; cognome: string }): string {
+  return `${t.nome[0] ?? ""}${t.cognome[0] ?? ""}`.toUpperCase();
+}
+---
+
+<MuseoLayout title="Dashboard | Area Museo" active="/museo" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3">Dashboard</nav>
+
+  <header class="mb-4">
+    <h1 class="font-heading museo-title display-6 mb-1">Ciao, {admin.nome}!</h1>
+    <p class="mb-0 fs-5" style="color:var(--museo-ink)">Gestisci i docenti e le classi.</p>
+  </header>
+
+  <StatCards stats={stats} />
+
+  <!-- Box aggiunta rapida docente -->
+  <section class="museo-card p-4 p-lg-4 mb-4">
+    <h2 class="font-heading museo-title h4 mb-3">Aggiungi nuovo docente</h2>
+    <hr style="border-color:var(--museo-border)" />
+    <div id="quick-add-alert" class="alert d-none" role="alert"></div>
+    <form id="quick-add-form" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label stat-label" for="qa-nome">Nome</label>
+        <input class="form-control" id="qa-nome" name="nome" placeholder="Es. Mario" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label stat-label" for="qa-cognome">Cognome</label>
+        <input class="form-control" id="qa-cognome" name="cognome" placeholder="Es. Rossi" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label stat-label" for="qa-email">Email</label>
+        <input class="form-control" id="qa-email" name="email" type="email" placeholder="nome@istituto.edu" required />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label stat-label" for="qa-istituto">Istituto</label>
+        <select class="form-select" id="qa-istituto" name="instituteId" required>
+          <option value="" selected disabled>Seleziona…</option>
+          {institutes.map((i) => <option value={i.id}>{i.nome}</option>)}
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button class="btn btn-museo-red w-100" type="submit">Invita</button>
+      </div>
+    </form>
+    {institutes.length === 0 && (
+      <p class="small mt-2 mb-0" style="color:rgba(55,65,81,.6)">
+        Nessun istituto disponibile: configura prima gli istituti.
+      </p>
+    )}
+  </section>
+
+  <!-- Gestione rapida ultimi docenti -->
+  <section class="museo-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading museo-title h4 mb-0">Gestione Docenti</h2>
+      <span class="pill-blue">{teachers.length} docenti</span>
+    </div>
+    <hr style="border-color:var(--museo-border)" />
+    {latest.length === 0 ? (
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">Nessun docente ancora registrato.</p>
+    ) : (
+      <ul class="list-unstyled mb-0">
+        {latest.map((t) => (
+          <li class="d-flex align-items-center gap-3 py-3 border-bottom" style="border-color:var(--museo-border)!important">
+            <span class="avatar-initials">{initials(t)}</span>
+            <span class="flex-grow-1">
+              <span class="fw-semibold d-block">{t.nome} {t.cognome}</span>
+              <span class="small" style="color:rgba(55,65,81,.6)">
+                {t.istitutoNome ?? "—"} · {t.classiCount} {t.classiCount === 1 ? "classe" : "classi"}
+              </span>
+            </span>
+            <span class="pill-blue">{t.studentiCount} studenti</span>
+            <a class="btn btn-sm btn-outline-museo-blue" href={`/museo/docenti/${t.id}`}>Gestisci</a>
+          </li>
+        ))}
+      </ul>
+    )}
+    <div class="text-end mt-3">
+      <a class="btn btn-sm btn-outline-museo-blue" href="/museo/docenti">Vedi tutti →</a>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById("quick-add-form") as HTMLFormElement;
+    const alertBox = document.getElementById("quick-add-alert")!;
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertBox.classList.add("d-none");
+      const fd = new FormData(form);
+      const res = await fetch("/api/docenti/invito", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nome: fd.get("nome"),
+          cognome: fd.get("cognome"),
+          email: fd.get("email"),
+          instituteId: fd.get("instituteId"),
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      alertBox.classList.remove("d-none", "alert-danger", "alert-success");
+      if (res.ok) {
+        alertBox.classList.add("alert-success");
+        alertBox.textContent = body.emailSent ? "Invito inviato!" : "Docente creato (email non inviata).";
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        alertBox.classList.add("alert-danger");
+        alertBox.textContent = body.error ?? "Errore durante l'invito.";
+      }
+    });
+  </script>
+</MuseoLayout>

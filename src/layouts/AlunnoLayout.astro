@@ -1,0 +1,50 @@
+---
+// Shell dell'Area Alunni: topbar a gradiente + contenuto (Bootstrap). Wrappa
+// ReservedLayout (unico importatore di Bootstrap, ADR-11). Niente "logout" (ADR-2:
+// sessione effimera), solo "Cambia codice" che riporta al login. I token vivono in
+// src/styles/alunni.css, scope .alunni.
+import ReservedLayout from "./ReservedLayout.astro";
+import "../styles/alunni.css";
+
+interface Props {
+  title: string;
+  /** mostra la topbar (pagine interne); il login la nasconde */
+  topbar?: boolean;
+  studentName?: string;
+}
+const { title, topbar = true, studentName } = Astro.props;
+---
+
+<ReservedLayout title={title} bodyClass="alunni">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  {
+    topbar && (
+      <header class="a-topbar py-3 px-3 px-lg-4 d-flex align-items-center justify-content-between">
+        <a href="/avventura/passaporto" class="d-flex align-items-center gap-2">
+          <span class="a-logo-badge">VW</span>
+          <span class="d-flex flex-column lh-1">
+            <strong class="font-heading">Verga's World</strong>
+            <small class="opacity-75" style="font-size:.7rem">Passaporto dell'Avventura</small>
+          </span>
+        </a>
+        <div class="d-flex align-items-center gap-3">
+          {studentName && <span class="d-none d-sm-inline fw-semibold">{studentName}</span>}
+          {/* Niente logout (ADR-2): "Cambia codice" torna al login. */}
+          <a href="/avventura" class="btn btn-a-outline btn-sm" style="color:#fff;border-color:#fff">
+            Cambia codice
+          </a>
+        </div>
+      </header>
+    )
+  }
+
+  <slot />
+</ReservedLayout>

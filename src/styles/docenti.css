@@ -1,0 +1,242 @@
+/* Token e primitive dell'Area Docenti (Figma 61-3 / 63-31 / 64-159).
+   La grafica condivide la palette/struttura dell'Area Museo: per non duplicare
+   regole, replichiamo gli stessi token sotto lo scope .docenti (ADR-11: ogni
+   area riservata ha il suo scope, Bootstrap importato solo da ReservedLayout).
+   Aggiunge solo ciò che è specifico dei Docenti (stelle badge, progress bar). */
+
+.docenti {
+  --d-cream: #fcfcf8;
+  --d-ink: #374151;
+  --d-border: #e5e7eb;
+  --d-blue: #3e85a9;
+  --d-blue-dark: #275b78;
+  --d-red: #e1492f;
+  --d-gold: #fdd985;
+  --d-green: #34c759;
+  background: var(--d-cream);
+  color: var(--d-ink);
+  font-family: "Outfit", system-ui, sans-serif;
+}
+.docenti .font-heading {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+}
+.docenti .text-cream {
+  color: var(--d-cream);
+}
+
+/* ---- Shell con sidebar ---- */
+.docenti .d-shell {
+  min-height: 100vh;
+}
+.docenti .d-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background-image: linear-gradient(256.9deg, var(--d-blue) 25%, var(--d-blue-dark) 75%);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.docenti .d-logo-badge {
+  background: var(--d-gold);
+  color: var(--d-blue-dark);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+.docenti .d-nav-item {
+  color: var(--d-cream);
+  padding: 14px 24px;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 0 100px 100px 0;
+  transition: background-color 0.15s;
+}
+.docenti .d-nav-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.docenti .d-nav-item.active {
+  background: var(--d-red);
+}
+.docenti .d-nav-item svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.docenti .d-main {
+  background: var(--d-cream);
+}
+
+/* ---- Primitive riusabili ---- */
+.docenti .d-card {
+  background: #fff;
+  border: 1px solid var(--d-border);
+  border-radius: 22px;
+  box-shadow: 0 12px 12px rgba(31, 41, 55, 0.06);
+}
+.docenti .d-title {
+  color: var(--d-blue-dark);
+}
+.docenti .d-accent {
+  color: var(--d-red);
+}
+.docenti .stat-value {
+  color: var(--d-blue);
+  font-weight: 700;
+  font-size: 2rem;
+}
+.docenti .stat-label {
+  color: rgba(55, 65, 81, 0.7);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.docenti .btn-d-red {
+  background: var(--d-red);
+  color: var(--d-cream);
+  border: 1px solid var(--d-red);
+  border-radius: 10px;
+  font-weight: 600;
+}
+.docenti .btn-d-red:hover {
+  background: #c93e26;
+  color: #fff;
+}
+.docenti .btn-d-blue {
+  background: var(--d-blue);
+  color: var(--d-cream);
+  border: 1px solid var(--d-blue);
+  border-radius: 999px;
+  font-weight: 700;
+}
+.docenti .btn-d-blue:hover {
+  background: var(--d-blue-dark);
+  color: #fff;
+}
+.docenti .btn-outline-d-blue {
+  color: var(--d-blue);
+  border: 1px solid var(--d-blue);
+  border-radius: 8px;
+  font-weight: 600;
+  background: transparent;
+}
+.docenti .btn-outline-d-blue:hover {
+  background: rgba(62, 133, 169, 0.08);
+}
+.docenti .btn-outline-d-red {
+  color: var(--d-red);
+  border: 1px solid rgba(225, 73, 47, 0.4);
+  border-radius: 8px;
+  font-weight: 600;
+  background: transparent;
+}
+.docenti .btn-outline-d-red:hover {
+  background: rgba(225, 73, 47, 0.08);
+}
+.docenti .pill-blue {
+  background: rgba(62, 133, 169, 0.1);
+  color: var(--d-blue);
+  border-radius: 100px;
+  padding: 4px 12px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+.docenti .pill-red {
+  background: var(--d-red);
+  color: #fff;
+  border-radius: 100px;
+  padding: 4px 14px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.docenti .form-control:focus,
+.docenti .form-select:focus {
+  border-color: var(--d-blue);
+  box-shadow: 0 0 0 0.2rem rgba(62, 133, 169, 0.15);
+}
+.docenti .breadcrumb-d a {
+  color: var(--d-blue);
+  text-decoration: none;
+}
+.docenti .breadcrumb-d {
+  color: rgba(55, 65, 81, 0.6);
+  font-size: 0.8125rem;
+}
+
+/* ---- Stelle badge (dettaglio classe) ---- */
+.docenti .stars {
+  display: inline-flex;
+  gap: 2px;
+}
+.docenti .stars svg {
+  width: 14px;
+  height: 14px;
+  color: var(--d-gold);
+}
+
+/* ---- Progress bar completamento storie (dashboard) ---- */
+.docenti .bar-track {
+  background: #f1f3f5;
+  height: 12px;
+  border-radius: 100px;
+  overflow: hidden;
+}
+.docenti .bar-fill {
+  height: 100%;
+  border-radius: 100px;
+}
+.docenti .bar-fill.high {
+  background: var(--d-green);
+}
+.docenti .bar-fill.low {
+  background: var(--d-gold);
+}
+
+/* ---- Login / invito (card centrata) ---- */
+.docenti .d-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.docenti .d-auth-card {
+  background: var(--d-cream);
+  border: 1px solid var(--d-border);
+  border-radius: 24px;
+  box-shadow:
+    0 6px 9px rgba(31, 41, 55, 0.06),
+    0 18px 24px rgba(31, 41, 55, 0.1);
+  width: 100%;
+  max-width: 520px;
+  padding: 48px;
+}
+.docenti .d-help-box {
+  background: var(--d-gold);
+  border: 1px solid var(--d-border);
+  border-radius: 16px;
+  padding: 16px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .docenti .d-sidebar {
+    width: 84px;
+    position: static;
+    height: auto;
+  }
+  .docenti .d-sidebar .nav-label,
+  .docenti .d-nav-item span {
+    display: none !important;
+  }
+  .docenti .d-nav-item {
+    justify-content: center;
+    padding: 14px;
+  }
+}

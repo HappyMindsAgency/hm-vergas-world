@@ -1,0 +1,240 @@
+---
+// Missione/quiz di una storia (brief §9.4). SSR auth-gated. Carica il quiz SENZA
+// is_correct (vincolo 4: le risposte corrette non raggiungono mai il browser prima
+// del blocco). Flusso: una domanda alla volta → dopo la scelta, POST
+// /api/alunni/verifica restituisce SOLO la correttezza di QUELLA domanda (verde la
+// giusta, rossa la sbagliata). Alla fine POST /api/alunni/quiz calcola l'esito
+// definitivo server-side e, se superato (≤ QUIZ_MAX_ERRORS), assegna il badge.
+// Quiz già superato → non ripetibile: mostra schermata "già completato".
+export const prerender = false;
+
+import AlunnoLayout from "../../../layouts/AlunnoLayout.astro";
+import { getStudentSession } from "../../../lib/alunni/session";
+import { getQuizForStudent } from "../../../lib/alunni/data";
+import { QUIZ_MAX_ERRORS } from "../../../config/game";
+
+const session = getStudentSession(Astro.cookies);
+if (!session) return Astro.redirect("/avventura");
+
+const numero = Number(Astro.params.numero);
+if (!Number.isInteger(numero) || numero < 1 || numero > 7) return Astro.redirect("/avventura/passaporto");
+
+const quiz = await getQuizForStudent(numero, session.id);
+// Quiz non ancora pubblicato dall'Admin → torna al passaporto con messaggio soft.
+const quizMissing = !quiz;
+const alreadyPassed = quiz?.alreadyPassed ?? false;
+
+// Dati per il client: SOLO testo opzioni e id, MAI is_correct.
+const clientQuiz = quiz
+  ? {
+      quizId: quiz.quizId,
+      numero: quiz.numero,
+      titolo: quiz.titolo,
+      questions: quiz.questions.map((q) => ({
+        id: q.id,
+        testo: q.testo,
+        options: q.options,
+      })),
+    }
+  : null;
+---
+
+<AlunnoLayout title={`Missione ${numero} | Verga's World`} studentName={session.displayName}>
+  <main id="main-content" class="container py-4 py-lg-5" style="max-width:720px">
+    {
+      quizMissing ? (
+        <div class="a-card p-4 p-lg-5 text-center">
+          <h1 class="font-heading a-title h3 mb-3">Missione in preparazione</h1>
+          <p style="color:rgba(55,65,81,.75)">Il quiz di questa storia non è ancora disponibile. Torna più tardi!</p>
+          <a href="/avventura/passaporto" class="btn btn-a-blue mt-2">← Torna al Passaporto</a>
+        </div>
+      ) : alreadyPassed ? (
+        <div class="a-card p-4 p-lg-5 text-center">
+          <div style="font-size:3rem">🏅</div>
+          <h1 class="font-heading a-title h3 mb-2">Missione già completata!</h1>
+          <p style="color:rgba(55,65,81,.75)">
+            Hai già conquistato il badge di "{quiz!.titolo}". Questa missione non si può rifare.
+          </p>
+          <a href="/avventura/passaporto" class="btn btn-a-blue mt-2">← Torna al Passaporto</a>
+        </div>
+      ) : (
+        <>
+          <header class="mb-4">
+            <a href="/avventura/passaporto" class="small a-title text-decoration-none">← Passaporto</a>
+            <div class="d-flex align-items-baseline justify-content-between mt-2 mb-2">
+              <h1 class="font-heading a-title h4 mb-0">{quiz!.titolo}</h1>
+              <strong class="a-title">
+                <span data-q-index>1</span> / {quiz!.questions.length}
+              </strong>
+            </div>
+            <div class="a-quiz-track" style="background:#e7e3d8">
+              <div class="a-quiz-fill" data-quiz-fill style="width:0%" />
+            </div>
+            <p class="small text-muted mt-2 mb-0">Puoi sbagliare al massimo {QUIZ_MAX_ERRORS} domanda per ottenere il badge.</p>
+          </header>
+
+          <section class="a-card p-4 p-lg-5" data-quiz-stage>
+            <h2 class="h5 fw-bold mb-4" data-question-text />
+            <div class="d-flex flex-column gap-2" data-options />
+            <p class="mt-3 mb-0 a-feedback" data-feedback hidden />
+            <button type="button" class="btn btn-a-blue mt-4 d-none" data-next>
+              Prossima domanda →
+            </button>
+          </section>
+
+          <section class="a-card p-4 p-lg-5 text-center d-none" data-result>
+            <div data-result-icon style="font-size:3rem" />
+            <h2 class="font-heading a-title h3 mb-2" data-result-title />
+            <p style="color:rgba(55,65,81,.75)" data-result-text />
+            <div class="d-flex gap-2 justify-content-center flex-wrap" data-result-actions />
+          </section>
+        </>
+      )
+    }
+  </main>
+
+  {
+    clientQuiz && !alreadyPassed && (
+      <script type="application/json" id="quiz-data" is:inline set:html={JSON.stringify(clientQuiz)} />
+    )
+  }
+
+  {
+    clientQuiz && !alreadyPassed && (
+      <script>
+        type Opt = { id: string; testo: string };
+        type Q = { id: string; testo: string; options: Opt[] };
+        type QuizData = { quizId: string; numero: number; titolo: string; questions: Q[] };
+
+        const data: QuizData = JSON.parse(document.getElementById("quiz-data")!.textContent!);
+
+        const stage = document.querySelector("[data-quiz-stage]")!;
+        const qText = stage.querySelector("[data-question-text]")!;
+        const optionsBox = stage.querySelector("[data-options]")!;
+        const feedback = stage.querySelector("[data-feedback]") as HTMLElement;
+        const nextBtn = stage.querySelector("[data-next]") as HTMLButtonElement;
+        const qIndexEl = document.querySelector("[data-q-index]")!;
+        const fill = document.querySelector("[data-quiz-fill]") as HTMLElement;
+
+        const resultBox = document.querySelector("[data-result]")!;
+
+        // answers: questionId -> optionId scelto. È ciò che inviamo a /api/alunni/quiz
+        // per il calcolo definitivo server-side.
+        const answers: Record<string, string> = {};
+        let current = 0;
+
+        function renderQuestion() {
+          const q = data.questions[current];
+          qIndexEl.textContent = String(current + 1);
+          fill.style.width = `${Math.round((current / data.questions.length) * 100)}%`;
+          qText.textContent = q.testo;
+          optionsBox.innerHTML = "";
+          feedback.hidden = true;
+          feedback.className = "mt-3 mb-0 a-feedback";
+          nextBtn.classList.add("d-none");
+
+          for (const opt of q.options) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "a-option";
+            btn.textContent = opt.testo;
+            btn.dataset.optionId = opt.id;
+            btn.addEventListener("click", () => choose(q, opt, btn));
+            optionsBox.appendChild(btn);
+          }
+        }
+
+        async function choose(q: Q, opt: Opt, btn: HTMLButtonElement) {
+          // blocca tutte le opzioni: la scelta è definitiva per la domanda.
+          const buttons = optionsBox.querySelectorAll<HTMLButtonElement>(".a-option");
+          buttons.forEach((b) => (b.disabled = true));
+          answers[q.id] = opt.id;
+
+          // Feedback per-domanda: il server dice SOLO se questa risposta è giusta e
+          // qual è l'opzione corretta (per evidenziarla in verde). Nessun leak delle altre.
+          try {
+            const res = await fetch("/api/alunni/verifica", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ numero: data.numero, questionId: q.id, optionId: opt.id }),
+            });
+            if (res.ok) {
+              const { correctOptionId, chosenCorrect } = await res.json();
+              buttons.forEach((b) => {
+                if (b.dataset.optionId === correctOptionId) b.classList.add("correct");
+              });
+              if (!chosenCorrect) btn.classList.add("wrong");
+              feedback.hidden = false;
+              feedback.classList.add(chosenCorrect ? "ok" : "ko");
+              feedback.textContent = chosenCorrect ? "Esatto! 🎉" : "Ops, non è questa. La risposta giusta è in verde.";
+            }
+          } catch {
+            feedback.hidden = false;
+            feedback.textContent = "Risposta registrata.";
+          }
+
+          nextBtn.textContent = current < data.questions.length - 1 ? "Prossima domanda →" : "Vedi il risultato →";
+          nextBtn.classList.remove("d-none");
+        }
+
+        nextBtn.addEventListener("click", () => {
+          if (current < data.questions.length - 1) {
+            current++;
+            renderQuestion();
+          } else {
+            finish();
+          }
+        });
+
+        async function finish() {
+          fill.style.width = "100%";
+          let body: { passed: boolean; score: number; total: number; badgeEarned: boolean; allBadges: boolean };
+          try {
+            const res = await fetch("/api/alunni/quiz", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ quizId: data.quizId, answers }),
+            });
+            body = await res.json();
+          } catch {
+            showResult(false, 0, data.questions.length, false, false);
+            return;
+          }
+          showResult(body.passed, body.score, body.total, body.badgeEarned, body.allBadges);
+        }
+
+        function showResult(passed: boolean, score: number, total: number, badge: boolean, allBadges: boolean) {
+          stage.classList.add("d-none");
+          resultBox.classList.remove("d-none");
+          const icon = resultBox.querySelector("[data-result-icon]")!;
+          const title = resultBox.querySelector("[data-result-title]")!;
+          const text = resultBox.querySelector("[data-result-text]")!;
+          const actions = resultBox.querySelector("[data-result-actions]")!;
+
+          if (passed) {
+            icon.textContent = "🏅";
+            title.textContent = badge ? "Badge conquistato!" : "Missione superata!";
+            text.textContent = `Hai risposto bene a ${score} domande su ${total}. ${
+              badge ? "Un nuovo badge è nel tuo passaporto." : ""
+            }`;
+          } else {
+            icon.textContent = "💪";
+            title.textContent = "Quasi!";
+            text.textContent = `Hai ${score} risposte giuste su ${total}. Riguarda il video e riprova la missione!`;
+          }
+
+          let html = `<a href="/avventura/passaporto" class="btn btn-a-blue">Torna al Passaporto</a>`;
+          if (!passed) {
+            html += `<a href="/avventura/missione/${data.numero}" class="btn btn-a-outline">Riprova</a>`;
+          }
+          if (allBadges) {
+            html += `<a href="/avventura/attestato" class="btn btn-a-gold">🏆 Scarica l'attestato</a>`;
+          }
+          actions.innerHTML = html;
+        }
+
+        renderQuestion();
+      </script>
+    )
+  }
+</AlunnoLayout>

@@ -1,43 +1,69 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
-import "../../../styles/teacher.css";
+// Materiali (§9.3): materiali assegnati al docente dall'Admin (RLS materials_assigned),
+// raggruppati nelle 3 categorie, scaricabili/stampabili. Sola lettura. Gli URL di
+// download sono firmati e temporanei (generati server-side, service_role). SSR protetto.
+export const prerender = false;
 
+import DocenteLayout from "../../../layouts/DocenteLayout.astro";
+import { getTeacherProfile } from "../../../lib/docenti/session";
+import { getAssignedMaterials } from "../../../lib/docenti/data";
+import { MATERIAL_CATEGORY_LABELS } from "../../../config/admin";
+import { MATERIAL_CATEGORIES } from "../../../config/game";
+import type { MaterialCategory } from "../../../types/db";
+
+const teacher = await getTeacherProfile(Astro.cookies);
+if (!teacher) return Astro.redirect("/insegnante/login");
+
+const materials = await getAssignedMaterials(teacher.id);
+const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
+
+const byCategory = new Map<MaterialCategory, typeof materials>();
+for (const cat of MATERIAL_CATEGORIES) byCategory.set(cat, []);
+for (const m of materials) byCategory.get(m.category)?.push(m);
 ---
 
-<BaseLayout
-  title="Materiali | Verga's World"
-  fonts="main"
-  scripts={[]}
->
-  <div class="teacher-layout">
-        <aside class="teacher-sidebar">
-          <a class="sidebar-logo" href="/"><span class="brand-mark">VW</span><span><strong>Verga's World</strong><small>Docenti</small></span></a>
-          <div class="teacher-meta"><strong>Prof.ssa Rossi</strong><span>Classe 2B · I.C. Vizzini</span></div>
-          <nav class="sidebar-nav"><a href="/insegnante/dashboard">Dashboard</a><a href="/insegnante/classe">La mia classe</a><a class="is-active" href="/insegnante/materiali">Materiali</a><a href="/insegnante/impostazioni">Impostazioni</a></nav>
-          <a class="sidebar-exit" href="/insegnante/login">Esci</a>
-        </aside>
-        <main id="main-content" class="teacher-main">
-          <header class="page-header"><h1>Materiali</h1><p>PDF statici pronti per la classe, organizzati per momento didattico.</p></header>
-          <section class="dashboard-panel"><div class="panel-heading"><h2>Prima della visita</h2></div><div class="materials-grid">
-            <article class="file-card"><span>📄</span><strong>Guida per l'insegnante</strong><small>PDF · 8 pagine · /public/materiali/guida-insegnante.pdf</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>📄</span><strong>Scheda introduttiva su Giovanni Verga</strong><small>PDF · 2 pagine</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>📄</span><strong>Le parole di Verga</strong><small>PDF stampabile · attività pre-visita</small><button type="button">Scarica →</button></article>
-          </div></section>
-          <section class="dashboard-panel"><div class="panel-heading"><h2>Percorsi tematici</h2></div><div class="materials-grid">
-            <article class="file-card"><span>🌿</span><strong>La libertà</strong><small>La Lupa + Cavalleria Rusticana</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>💪</span><strong>Il coraggio</strong><small>Rosso Malpelo</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>👨‍👩‍👧</span><strong>La famiglia</strong><small>I Malavoglia</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>🌾</span><strong>La natura</strong><small>Percorso ambientale trasversale</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>⚖️</span><strong>Le scelte difficili</strong><small>Mastro-don Gesualdo</small><button type="button">Scarica →</button></article>
-          </div></section>
-          <section class="dashboard-panel"><div class="panel-heading"><h2>Dopo la visita</h2></div><div class="materials-grid">
-            <article class="file-card"><span>📄</span><strong>Lezione di restituzione</strong><small>PDF · suggerimenti</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>📄</span><strong>Schede discussione storie</strong><small>7 PDF · una scheda per storia</small><button type="button">Scarica →</button></article>
-            <article class="file-card"><span>🖨️</span><strong>Diploma da stampare</strong><small>Versione insegnante</small><button type="button">Scarica →</button></article>
-          </div></section>
-        </main>
-      </div>
-      <nav class="bottom-nav"><a href="/insegnante/dashboard"><span>⌂</span>Dashboard</a><a href="/insegnante/classe"><span>●</span>Classe</a><a href="/insegnante/materiali"><span>□</span>Materiali</a><a href="/insegnante/login"><span>↗</span>Esci</a></nav>
+<DocenteLayout title="Materiali | Area Docenti" active="/insegnante/materiali" teacherName={teacherName} teacherSubtitle="Docente">
+  <header class="mb-4">
+    <h1 class="font-heading d-title display-6 mb-1">Materiali</h1>
+    <p class="mb-0" style="color:var(--d-ink)">I materiali che il museo ha condiviso con te, pronti da scaricare e stampare.</p>
+  </header>
 
-
-</BaseLayout>
+  {
+    materials.length === 0 ? (
+      <section class="d-card p-5 text-center" style="color:rgba(55,65,81,.6)">
+        Nessun materiale assegnato al momento. Il museo te ne assegnerà a breve.
+      </section>
+    ) : (
+      MATERIAL_CATEGORIES.map((cat) => {
+        const items = byCategory.get(cat) ?? [];
+        if (items.length === 0) return null;
+        return (
+          <section class="mb-4">
+            <h2 class="font-heading d-accent h4 mb-3">{MATERIAL_CATEGORY_LABELS[cat]}</h2>
+            <div class="row g-3">
+              {items.map((m) => (
+                <div class="col-md-6 col-lg-4">
+                  <div class="d-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div class="mb-3">
+                      <span class="pill-blue mb-2 d-inline-block">{MATERIAL_CATEGORY_LABELS[m.category]}</span>
+                      <h3 class="h6 mb-0 mt-2">{m.nome}</h3>
+                    </div>
+                    {m.downloadUrl ? (
+                      <a class="btn btn-d-blue w-100" href={m.downloadUrl} target="_blank" rel="noopener" download>
+                        Scarica / Stampa
+                      </a>
+                    ) : (
+                      <button class="btn btn-outline-d-blue w-100" disabled>
+                        Non disponibile
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })
+    )
+  }
+</DocenteLayout>

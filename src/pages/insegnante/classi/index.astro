@@ -1,0 +1,231 @@
+---
+// Le mie classi (§9.3): "Aggiungi nuova classe" → accordion con form (nome,
+// istituto pre-compilato modificabile, anno = anno corrente, upload Excel alunni).
+// Elenco classi; per classe: apri dettaglio (click sul nome) o elimina (modale con
+// codice classe; cascata FK). SSR protetto.
+export const prerender = false;
+
+import DocenteLayout from "../../../layouts/DocenteLayout.astro";
+import { getTeacherProfile } from "../../../lib/docenti/session";
+import { getTeacherClasses, getInstitutes } from "../../../lib/docenti/data";
+import { STUDENT_IMPORT_ACCEPT } from "../../../config/docenti";
+
+const teacher = await getTeacherProfile(Astro.cookies);
+if (!teacher) return Astro.redirect("/insegnante/login");
+
+const [classes, institutes] = await Promise.all([getTeacherClasses(teacher.id), getInstitutes()]);
+const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
+const currentYear = new Date().getFullYear();
+const defaultInstituteId = teacher.institute_id ?? "";
+---
+
+<DocenteLayout title="Le mie classi | Area Docenti" active="/insegnante/classi" teacherName={teacherName} teacherSubtitle="Docente">
+  <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="font-heading d-title display-6 mb-1">Le mie classi</h1>
+      <p class="mb-0" style="color:var(--d-ink)">Crea una classe, importa gli alunni e segui i loro progressi.</p>
+    </div>
+    <button class="btn btn-d-red px-3 py-2" type="button" data-bs-toggle="collapse" data-bs-target="#addClassAccordion" aria-expanded="false">
+      + Aggiungi nuova classe
+    </button>
+  </header>
+
+  <div id="page-alert" class="alert d-none" role="alert"></div>
+
+  <!-- Accordion: form nuova classe -->
+  <div class="collapse mb-4" id="addClassAccordion">
+    <section class="d-card p-4">
+      <h2 class="font-heading d-accent h5 mb-2">Nuova classe</h2>
+      <p class="small mb-3" style="color:rgba(55,65,81,.7)">
+        Il codice classe viene generato automaticamente come <code>NOME-ISTITUTO-ANNO</code>.
+        L'upload Excel/CSV è opzionale: una colonna "Nome Cognome", una riga per alunno.
+      </p>
+      <div id="add-alert" class="alert alert-danger d-none" role="alert"></div>
+      <form id="add-class-form" class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label stat-label" for="ac-nome">Nome classe</label>
+          <input class="form-control" id="ac-nome" name="nome" placeholder="Es. 3B" required />
+        </div>
+        <div class="col-md-4">
+          <label class="form-label stat-label" for="ac-istituto">Istituto</label>
+          <select class="form-select" id="ac-istituto" name="instituteId" required>
+            <option value="" disabled selected={!defaultInstituteId}>Seleziona…</option>
+            {institutes.map((i) => <option value={i.id} selected={i.id === defaultInstituteId}>{i.nome}</option>)}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label stat-label" for="ac-anno">Anno</label>
+          <input class="form-control" id="ac-anno" name="anno" type="number" min="2000" max="2100" value={currentYear} required />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label stat-label" for="ac-file">Alunni (Excel/CSV)</label>
+          <input class="form-control" id="ac-file" name="file" type="file" accept={STUDENT_IMPORT_ACCEPT} />
+        </div>
+        <div class="col-12">
+          <button class="btn btn-d-blue px-4" type="submit" id="ac-submit">Crea classe</button>
+        </div>
+      </form>
+      {institutes.length === 0 && (
+        <p class="small mt-2 mb-0" style="color:rgba(55,65,81,.6)">Nessun istituto disponibile: contatta il museo.</p>
+      )}
+    </section>
+  </div>
+
+  <!-- Elenco classi -->
+  <section class="d-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading d-title h4 mb-0">Elenco classi</h2>
+      <span class="pill-blue">{classes.length} {classes.length === 1 ? "classe" : "classi"}</span>
+    </div>
+    <hr style="border-color:var(--d-border)" />
+    {
+      classes.length === 0 ? (
+        <p class="mb-0 text-center py-4" style="color:rgba(55,65,81,.6)">
+          Nessuna classe ancora. Usa "Aggiungi nuova classe".
+        </p>
+      ) : (
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr class="stat-label">
+                <th>Classe</th>
+                <th>Istituto</th>
+                <th>Anno</th>
+                <th>Codice</th>
+                <th>Alunni</th>
+                <th class="text-end">Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
+              {classes.map((c) => (
+                <tr>
+                  <td>
+                    <a class="fw-semibold" style="color:var(--d-blue);text-decoration:none" href={`/insegnante/classe/${c.id}`}>
+                      {c.nome}
+                    </a>
+                  </td>
+                  <td>{c.istitutoNome ?? "—"}</td>
+                  <td>{c.anno}</td>
+                  <td><code>{c.access_code}</code></td>
+                  <td><span class="pill-blue">{c.alunniCount}</span></td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-d-blue" href={`/insegnante/classe/${c.id}`}>Apri</a>
+                    <button
+                      class="btn btn-sm btn-outline-d-red btn-delete-class"
+                      data-id={c.id}
+                      data-nome={c.nome}
+                      data-codice={c.access_code}
+                    >
+                      Elimina
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+  </section>
+
+  <!-- Modale elimina classe (richiede il codice classe) -->
+  <div class="modal fade" id="deleteClassModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading mb-0" style="color:var(--d-red)">Elimina classe</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-2">
+            Stai per eliminare <strong id="del-class-name"></strong> e tutti i suoi alunni e progressi.
+            L'azione è irreversibile.
+          </p>
+          <p class="small mb-2" style="color:rgba(55,65,81,.7)">Digita il codice classe <code id="del-class-code"></code> per confermare.</p>
+          <input class="form-control" id="del-class-confirm" autocomplete="off" placeholder="Codice classe" />
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+          <button class="btn btn-d-red" id="del-class-submit" disabled>Elimina definitivamente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { Modal } from "bootstrap";
+
+    const pageAlert = document.getElementById("page-alert")!;
+    function notify(msg: string, ok = true) {
+      pageAlert.classList.remove("d-none", "alert-success", "alert-danger");
+      pageAlert.classList.add(ok ? "alert-success" : "alert-danger");
+      pageAlert.textContent = msg;
+    }
+
+    // Crea classe (multipart, con Excel opzionale).
+    const addForm = document.getElementById("add-class-form") as HTMLFormElement;
+    const addAlert = document.getElementById("add-alert")!;
+    const addSubmit = document.getElementById("ac-submit") as HTMLButtonElement;
+    addForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      addAlert.classList.add("d-none");
+      addSubmit.disabled = true;
+      addSubmit.textContent = "Creazione…";
+      try {
+        const res = await fetch("/api/classi", { method: "POST", body: new FormData(addForm) });
+        const body = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          addAlert.classList.remove("d-none");
+          addAlert.textContent = body.error ?? "Creazione non riuscita.";
+          return;
+        }
+        if (body.import && typeof body.import.created === "number") {
+          notify(`Classe creata (codice ${body.accessCode}). Alunni importati: ${body.import.created}, saltati: ${body.import.skipped}.`);
+        } else {
+          notify(`Classe creata. Codice: ${body.accessCode}.`);
+        }
+        setTimeout(() => window.location.reload(), 1200);
+      } catch {
+        addAlert.classList.remove("d-none");
+        addAlert.textContent = "Errore di rete. Riprova.";
+      } finally {
+        addSubmit.disabled = false;
+        addSubmit.textContent = "Crea classe";
+      }
+    });
+
+    // Elimina classe (conferma con codice).
+    const delModalEl = document.getElementById("deleteClassModal")!;
+    const delModal = new Modal(delModalEl);
+    const delName = document.getElementById("del-class-name")!;
+    const delCode = document.getElementById("del-class-code")!;
+    const delConfirm = document.getElementById("del-class-confirm") as HTMLInputElement;
+    const delSubmit = document.getElementById("del-class-submit") as HTMLButtonElement;
+    let pendingId: string | null = null;
+    let pendingCode = "";
+
+    document.querySelectorAll<HTMLButtonElement>(".btn-delete-class").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        pendingId = btn.dataset.id!;
+        pendingCode = btn.dataset.codice!;
+        delName.textContent = `la classe ${btn.dataset.nome}`;
+        delCode.textContent = pendingCode;
+        delConfirm.value = "";
+        delSubmit.disabled = true;
+        delModal.show();
+      });
+    });
+    delConfirm?.addEventListener("input", () => {
+      delSubmit.disabled = delConfirm.value.trim().toUpperCase() !== pendingCode.toUpperCase();
+    });
+    delSubmit?.addEventListener("click", async () => {
+      if (!pendingId) return;
+      const res = await fetch(`/api/classi/${pendingId}`, { method: "DELETE" });
+      if (res.ok) window.location.reload();
+      else {
+        delModal.hide();
+        notify("Eliminazione non riuscita.", false);
+      }
+    });
+  </script>
+</DocenteLayout>

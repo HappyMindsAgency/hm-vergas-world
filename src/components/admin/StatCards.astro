@@ -1,0 +1,28 @@
+---
+// 4 card KPI della dashboard (Figma 99-139).
+import type { DashboardStats } from "../../lib/admin/data";
+interface Props {
+  stats: DashboardStats;
+}
+const { stats } = Astro.props;
+
+const cards = [
+  { label: "Docenti totali", value: stats.docentiTotali },
+  { label: "Istituti totali", value: stats.istitutiTotali },
+  { label: "Classi totali", value: stats.classiTotali },
+  { label: "Docenti attivi", value: stats.docentiAttivi },
+];
+---
+
+<div class="row g-3 mb-4">
+  {
+    cards.map((c) => (
+      <div class="col-6 col-lg-3">
+        <div class="museo-card p-3 p-lg-4 h-100">
+          <div class="stat-label mb-2">{c.label}</div>
+          <div class="stat-value">{c.value}</div>
+        </div>
+      </div>
+    ))
+  }
+</div>

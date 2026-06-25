@@ -1,0 +1,65 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/styles.css";
+---
+
+<BaseLayout
+  title="Cookie policy | Verga's World"
+  description="Informativa sull'uso dei cookie del progetto Verga's World — Casa Museo Giovanni Verga, Vizzini."
+  fonts="main"
+>
+  <Header />
+
+  <main id="main-content">
+    <article class="legal-page">
+      <p class="kicker">Note legali</p>
+      <h1>Cookie policy</h1>
+      <p class="legal-updated">Ultimo aggiornamento: giugno 2026</p>
+
+      <section>
+        <h2>Che cosa sono i cookie</h2>
+        <p>
+          I cookie sono piccoli file di testo che i siti visitati salvano sul dispositivo
+          dell'utente. Servono a far funzionare correttamente alcune parti del sito e a
+          ricordare informazioni di sessione.
+        </p>
+      </section>
+
+      <section>
+        <h2>Cookie utilizzati</h2>
+        <p>
+          Il frontend pubblico di Verga's World utilizza esclusivamente cookie tecnici,
+          necessari al funzionamento del sito. Le aree riservate impiegano un cookie di
+          sessione per mantenere l'accesso finché la pagina resta aperta. Non vengono usati
+          cookie di profilazione o di marketing.
+        </p>
+      </section>
+
+      <section>
+        <h2>Cookie di terze parti</h2>
+        <p>
+          Alcuni contenuti incorporati (ad esempio video ospitati su piattaforme esterne)
+          possono impostare cookie propri quando vengono riprodotti. Per maggiori informazioni
+          consulta le rispettive informative dei fornitori.
+        </p>
+      </section>
+
+      <section>
+        <h2>Gestione dei cookie</h2>
+        <p>
+          Puoi gestire o disattivare i cookie tramite le impostazioni del tuo browser. La
+          disattivazione dei cookie tecnici può compromettere alcune funzionalità del sito,
+          in particolare l'accesso alle aree riservate.
+        </p>
+      </section>
+
+      <div class="legal-back">
+        <a class="button secondary" href="/">Torna alla home</a>
+      </div>
+    </article>
+  </main>
+
+  <Footer />
+</BaseLayout>

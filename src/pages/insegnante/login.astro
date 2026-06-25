@@ -1,0 +1,149 @@
+---
+// Login Area Docenti (Figma 61-3). Auth Supabase (email+password) lato client con
+// la sola anon key; l'access_token viene scambiato con un cookie HttpOnly via
+// /api/insegnante/session. Recupero password via /api/docenti/reset-password (firma
+// congelata, condivisa con l'Admin).
+import ReservedLayout from "../../layouts/ReservedLayout.astro";
+import "../../styles/docenti.css";
+---
+
+<ReservedLayout title="Area Docenti | Verga's World" bodyClass="docenti">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="d-auth">
+    <div class="d-auth-card">
+      <div class="text-center mb-4">
+        <h1 class="font-heading d-title h2 mb-2">Bentornato/a, professore!</h1>
+        <p class="mb-0" style="color:rgba(55,65,81,.75)">Accedi per vedere come sta andando la tua classe.</p>
+      </div>
+
+      <div id="login-alert" class="alert alert-danger d-none" role="alert"></div>
+
+      <form id="login-form" novalidate>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="email">Email</label>
+          <input class="form-control form-control-lg" type="email" id="email" name="email" autocomplete="email" placeholder="nome@istituto.edu" required />
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold" for="password">Password</label>
+          <input class="form-control form-control-lg" type="password" id="password" name="password" autocomplete="current-password" required />
+        </div>
+        <button class="btn btn-d-blue btn-lg w-100 py-2" type="submit" id="login-submit">Entra nel cruscotto</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <button class="btn btn-link p-0" style="color:var(--d-blue);text-decoration:none" type="button" data-bs-toggle="modal" data-bs-target="#resetModal">
+          Hai problemi ad accedere?
+        </button>
+      </div>
+
+      <div class="d-help-box mt-4">
+        Primo accesso? Usa il link di invito ricevuto dal museo.
+      </div>
+
+      <div class="text-center mt-3">
+        <a href="/" style="color:rgba(55,65,81,.6);font-size:.875rem">← Torna alla home pubblica</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recupero password -->
+  <div class="modal fade" id="resetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading d-title mb-0">Recupera password</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <form id="reset-form">
+          <div class="modal-body">
+            <p class="small" style="color:rgba(55,65,81,.7)">
+              Inserisci la tua email: ti invieremo un link per reimpostare la password.
+            </p>
+            <div id="reset-alert" class="alert d-none" role="alert"></div>
+            <input class="form-control" type="email" name="email" placeholder="nome@istituto.edu" required />
+          </div>
+          <div class="modal-footer border-0">
+            <button type="submit" class="btn btn-d-blue px-4">Invia link</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { supabaseBrowser } from "../../lib/supabase/browser";
+
+    const form = document.getElementById("login-form") as HTMLFormElement;
+    const alertBox = document.getElementById("login-alert")!;
+    const submitBtn = document.getElementById("login-submit") as HTMLButtonElement;
+
+    function showError(msg: string) {
+      alertBox.textContent = msg;
+      alertBox.classList.remove("d-none");
+    }
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertBox.classList.add("d-none");
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Accesso in corso…";
+
+      const fd = new FormData(form);
+      const email = String(fd.get("email"));
+      const password = String(fd.get("password"));
+
+      try {
+        const { data, error } = await supabaseBrowser.auth.signInWithPassword({ email, password });
+        if (error || !data.session) {
+          showError("Email o password non corretti.");
+          return;
+        }
+        const res = await fetch("/api/insegnante/session", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ accessToken: data.session.access_token }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          showError(body.error ?? "Accesso non consentito per questo account.");
+          await supabaseBrowser.auth.signOut();
+          return;
+        }
+        window.location.href = "/insegnante";
+      } catch {
+        showError("Errore di rete. Riprova.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Entra nel cruscotto";
+      }
+    });
+
+    const resetForm = document.getElementById("reset-form") as HTMLFormElement;
+    const resetAlert = document.getElementById("reset-alert")!;
+    resetForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = String(new FormData(resetForm).get("email"));
+      const res = await fetch("/api/docenti/reset-password", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      resetAlert.classList.remove("d-none", "alert-danger", "alert-success");
+      if (res.ok) {
+        resetAlert.classList.add("alert-success");
+        resetAlert.textContent = "Se l'email è registrata, riceverai il link a breve.";
+      } else {
+        resetAlert.classList.add("alert-danger");
+        resetAlert.textContent = "Impossibile inviare l'email ora. Riprova più tardi.";
+      }
+    });
+  </script>
+</ReservedLayout>

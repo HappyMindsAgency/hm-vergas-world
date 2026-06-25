@@ -1,84 +1,99 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/styles.css";
-
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/styles.css"; // token + Header/Footer condivisi
+import "../styles/pagina-interna.css"; // layout pagine interne (scoped .vw-page)
 ---
 
 <BaseLayout
   title="Borgo della Cunziria | Verga's World"
+  description="Un borgo scavato nella pietra: storia, museo R.I.VI.VI. e la rinascita PNRR della Cunziria di Vizzini."
   fonts="none"
-  scripts={[{ src: "/scripts/app.js" }]}
 >
-  <header class="topbar">
-        <a class="brand" href="/" aria-label="Verga's World home">
-          <span class="brand-mark">VW</span>
-          <span>
-            <strong>Verga's World</strong>
-            <small>Casa Verga, Vizzini</small>
-          </span>
-        </a>
-        <img decoding="async" loading="lazy" class="header-project-logo" src="/immagini/Logo di Progetto Borgo cunziria.jpg" alt="Logo progetto Borgo della Cunziria" />
-        <nav aria-label="Navigazione principale">
-          <a href="/">Home</a>
-          <a href="/famiglie">Famiglie</a>
-          <a href="/scuole">Scuole</a>
-        </nav>
-        <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="kid-menu" aria-label="Apri menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <div id="kid-menu" class="kid-menu" data-kid-menu hidden>
-          <a href="/">Home</a>
-          <a href="/famiglie">Vengo con la famiglia</a>
-          <a href="/scuole">Porto la mia classe</a>
-          <a href="/borgo-cunziria">Borgo Cunziria</a>
-          <a class="nav-cta" href="/avventura">Ho il Codice Avventura!</a>
+  <Header />
+
+  <main id="main-content" class="vw-page">
+    <!-- HERO (46:474) -->
+    <section
+      class="vw-page__hero"
+      style="--p-hero-img: url('/immagini/figma-piazza-cunziria.png');"
+      aria-labelledby="borgo-title"
+    >
+      <div class="vw-page__wrap vw-page__hero-inner">
+        <span class="vw-page__pill">Il Borgo</span>
+        <h1 id="borgo-title">Borgo della Cunziria</h1>
+      </div>
+    </section>
+
+    <div class="vw-page__wrap vw-page__main">
+      <!-- LUOGO (2/3) + STORIA (1/3) -->
+      <div class="vw-page__grid vw-page__grid--split">
+        <article class="vw-card vw-card--shadow">
+          <div class="vw-card__media">
+            <img src="/immagini/figma-piazza-cunziria.png" alt="Piazza del Borgo della Cunziria" loading="lazy" decoding="async" />
+          </div>
+          <div class="vw-card__body">
+            <span class="vw-page__pill">Luogo</span>
+            <h2>Un borgo scavato nella pietra</h2>
+            <p>Il Borgo della Cunziria è uno dei luoghi più riconoscibili di Vizzini: un nucleo di edifici in pietra, vicoli, cortili e ipogei legati alla memoria del lavoro artigianale e alla vita quotidiana della comunità.</p>
+            <p>Qui, per generazioni, si sono intrecciati mestieri, relazioni, fatiche e racconti. Oggi la Cunziria torna a essere uno spazio da attraversare e da ascoltare: non solo un luogo da vedere, ma un pezzo vivo dell'immaginario di Vizzini.</p>
+          </div>
+        </article>
+
+        <article class="vw-card vw-card--soft vw-card--center">
+          <div class="vw-card__body">
+            <span class="vw-page__pill">Storia</span>
+            <h2>Dove il lavoro è diventato memoria</h2>
+            <p>La Cunziria nasce come borgo produttivo legato alla lavorazione del cuoio. I suoi edifici, gli spazi scavati nella roccia e le strade raccolte raccontano una parte concreta della storia di Vizzini: quella fatta di mani, botteghe, materiali, acqua, pietra e lavoro.</p>
+            <p>Nel tempo, questo luogo ha assunto anche un valore narrativo. La sua atmosfera, ruvida e teatrale, lo rende vicino al mondo di Giovanni Verga: un mondo di comunità, contrasti, sguardi, parole non dette e destini che passano attraverso i luoghi.</p>
+            <p>Nella webapp, la Cunziria è il paesaggio in cui Carletto comincia a capire che Vizzini non è un posto fermo, ma un luogo pieno di storie.</p>
+          </div>
+        </article>
+      </div>
+
+      <!-- CITAZIONE (46:508) -->
+      <figure class="vw-quote">
+        <p>
+          <span class="vw-quote__mark">“</span>Alla Cunziria le pietre non fanno da sfondo:<br />custodiscono lavoro, memoria e racconti.<span class="vw-quote__mark">”</span>
+        </p>
+      </figure>
+
+      <!-- CULTURA (5/12) + MUSEO immagine (7/12) -->
+      <div class="vw-page__grid vw-page__grid--info">
+        <article class="vw-card vw-card--center">
+          <div class="vw-card__body">
+            <span class="vw-page__pill">Cultura</span>
+            <h2>Museo R.I.VI.VI.</h2>
+            <p>Il Museo R.I.VI.VI. è il punto di partenza del viaggio dentro Verga, Vizzini e la Cunziria. La webapp accompagna questa esperienza con storie animate, personaggi, indizi e schede pensate per scuole e famiglie.</p>
+            <p>Il percorso non vuole spiegare tutto in modo scolastico. Invita a guardare meglio: un sasso, una finestra, un vicolo, una grotta o una barca sull'erba diventano segni da interpretare. Ogni storia apre una domanda semplice: che cosa vediamo davvero quando impariamo a osservare?</p>
+            <p>Così il museo non resta chiuso nelle sue stanze. Continua nella mappa, negli oggetti, nei giochi e nelle attività didattiche: prima, durante e dopo la visita.</p>
+          </div>
+        </article>
+
+        <article class="vw-card vw-card--shadow">
+          <div class="vw-card__media" style="aspect-ratio: auto; height: 100%;">
+            <img src="/immagini/figma-museo-facciata.png" alt="Facciata del Museo Verga a Vizzini" loading="lazy" decoding="async" />
+          </div>
+        </article>
+      </div>
+
+      <!-- PROGETTO PNRR (174:2488), a piena larghezza -->
+      <article class="vw-card vw-card--center">
+        <div class="vw-card__body">
+          <span class="vw-page__pill">Progetto</span>
+          <h2>Cunziria 4.0 e la rinascita del borgo</h2>
+          <p>Il recupero della Cunziria fa parte di un progetto più ampio di rigenerazione culturale e sociale finanziato dal PNRR. L'obiettivo è restituire vita a un luogo simbolico della tradizione verghiana, valorizzandone gli edifici, la memoria e il paesaggio.</p>
+          <p>La rinascita del borgo non riguarda solo il restauro degli spazi. Significa costruire nuove occasioni di visita, studio, racconto e partecipazione: un luogo aperto alla comunità, alle scuole, ai visitatori e a chi vuole scoprire Vizzini attraverso il suo patrimonio culturale.</p>
+          <p>In questo contesto, il Museo R.I.VI.VI. e la webapp lavorano insieme: il museo accoglie il percorso fisico, la piattaforma digitale lo rende più accessibile, giocabile e adatto anche alle classi.</p>
         </div>
-      </header>
+      </article>
 
-      <main id="main-content">
-        <section class="section-heading" style="padding:36px clamp(18px,5vw,64px); text-align:center;">
-          <p class="kicker">Il Borgo</p>
-          <h1>Borgo della Cunziria</h1>
-          <p>Scopri la storia, il patrimonio e il ruolo del Borgo della Cunziria nella vita culturale di Vizzini.</p>
-        </section>
+      <div class="vw-page__home">
+        <a class="vw-page__home-btn" href="/">Torna alla Home</a>
+      </div>
+    </div>
+  </main>
 
-        <section class="card" style="max-width:980px; margin:0 auto 28px; overflow:hidden;">
-          <img decoding="async" loading="lazy" src="/immagini/vizzini.jpg" alt="Veduta del Borgo di Cunziria" style="width:100%; height:360px; object-fit:cover; display:block;" />
-          <div class="card-body">
-            <h2>Una piazza, molte vite</h2>
-            <p>La Cunziria è un luogo storico legato alle attività tessili, alle fiere e alle tradizioni popolari. Le sue architetture e i vicoli custodiscono memorie di lavoro e comunità.</p>
-          </div>
-        </section>
-
-        <section class="card" style="max-width:980px; margin:0 auto 28px; overflow:hidden;">
-          <div class="card-body">
-            <h2>La storia del Borgo</h2>
-            <p>Nel corso dei secoli il Borgo della Cunziria si è sviluppato attorno alle botteghe e alle attività artigiane. Oggi è al centro di iniziative di conservazione e valorizzazione del patrimonio locale.</p>
-          </div>
-        </section>
-
-        <section class="card" style="max-width:980px; margin:0 auto 28px; overflow:hidden;">
-          <img decoding="async" loading="lazy" src="/immagini/palazzo di verga.jpg" alt="Casa Verga" style="width:100%; height:300px; object-fit:cover; display:block;" />
-          <div class="card-body">
-            <h2>Museo Verga</h2>
-            <p>Il Museo Verga ospita collezioni e percorsi che raccontano le storie e i luoghi di Giovanni Verga e della comunità di Vizzini. Il progetto educativo "Verga's World" integra letture, video e attività per i visitatori di tutte le età.</p>
-          </div>
-        </section>
-
-        <section class="card" style="max-width:980px; margin:0 auto 48px; overflow:hidden;">
-          <div class="card-body">
-            <h2>Progetto PNRR per Vizzini</h2>
-            <p>Il progetto PNRR sostiene interventi di rigenerazione culturale e infrastrutturale nel territorio, con iniziative volte a valorizzare luoghi come la Cunziria e a promuovere il patrimonio storico e turistico. Il Museo Verga è parte di queste attività, con azioni dedicate all'accessibilità e alle attività didattiche.</p>
-            <p>Per informazioni dettagliate sui bandi e sulle azioni del PNRR rivolte a Vizzini, contatta l'ufficio culturale del Comune o visita il sito istituzionale.</p>
-          </div>
-        </section>
-
-        <div style="text-align:center; margin-bottom:40px;">
-          <a class="button secondary" href="/">Torna alla home</a>
-        </div>
-      </main>
-
-
+  <Footer />
 </BaseLayout>

@@ -143,3 +143,11 @@ legacy-html/
 .pnp.*
 
 .claude
+
+dist
+
+# Astro Vercel adapter build output
+.vercel
+
+# Windows root CA bundle (local npm TLS fix, not a secret but local-only)
+.system-ca.pem

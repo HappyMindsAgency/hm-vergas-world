@@ -1,0 +1,105 @@
+---
+// Dashboard Area Docenti (Figma 63-31): KPI dei soli alunni del docente loggato,
+// ultime attività, completamento per storia. SSR protetto (solo teacher attivo).
+export const prerender = false;
+
+import DocenteLayout from "../../layouts/DocenteLayout.astro";
+import { getTeacherProfile } from "../../lib/docenti/session";
+import { getTeacherDashboard } from "../../lib/docenti/data";
+
+const teacher = await getTeacherProfile(Astro.cookies);
+if (!teacher) return Astro.redirect("/insegnante/login");
+
+const dash = await getTeacherDashboard(teacher.id);
+const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
+
+const cards = [
+  { label: "Alunni attivi", value: dash.alunniAttivi, total: dash.alunniTotali },
+  { label: "Alunni inseriti", value: dash.alunniTotali, total: null },
+  { label: "Badge conquistati", value: dash.badgeTotali, total: null },
+  { label: "Passaporti completati", value: dash.passaportiCompletati, total: dash.alunniTotali },
+];
+
+function pct(c: number, t: number): number {
+  return t > 0 ? Math.round((c / t) * 100) : 0;
+}
+function fmtWhen(iso: string): string {
+  return new Date(iso).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+}
+---
+
+<DocenteLayout title="Dashboard | Area Docenti" active="/insegnante" teacherName={teacherName} teacherSubtitle="Docente">
+  <header class="mb-4">
+    <h1 class="font-heading d-title display-6 mb-1">Ciao, {teacher.nome}!</h1>
+    <p class="mb-0 fs-5" style="color:var(--d-ink)">Ecco come stanno esplorando i tuoi alunni.</p>
+  </header>
+
+  <!-- KPI -->
+  <div class="row g-3 mb-4">
+    {
+      cards.map((c) => (
+        <div class="col-6 col-lg-3">
+          <div class="d-card p-3 p-lg-4 h-100">
+            <div class="stat-label mb-2">{c.label}</div>
+            <div class="d-flex align-items-baseline gap-1">
+              <span class="stat-value">{c.value}</span>
+              {c.total !== null && <span class="fs-5" style="color:rgba(55,65,81,.75)">/ {c.total}</span>}
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <!-- Ultime attività -->
+  <section class="d-card p-4 mb-4">
+    <h2 class="font-heading d-accent h4 mb-3">Ultime attività</h2>
+    <hr style="border-color:var(--d-border)" />
+    {
+      dash.ultimeAttivita.length === 0 ? (
+        <p class="mb-0" style="color:rgba(55,65,81,.6)">Nessuna attività registrata finora.</p>
+      ) : (
+        <ul class="list-unstyled mb-0">
+          {dash.ultimeAttivita.map((a) => (
+            <li class="d-flex align-items-center justify-content-between py-2 border-bottom" style="border-color:var(--d-border)!important">
+              <span>
+                <strong>{a.studentName}</strong> ha conquistato il badge "{a.badgeStory}"
+              </span>
+              <span class="small" style="color:rgba(55,65,81,.75)">{fmtWhen(a.earnedAt)}</span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  <!-- Completamento per storia -->
+  <section class="d-card p-4">
+    <h2 class="font-heading d-accent h4 mb-3">Quanti alunni hanno completato ogni storia?</h2>
+    <hr style="border-color:var(--d-border)" />
+    {
+      dash.storie.length === 0 ? (
+        <p class="mb-0" style="color:rgba(55,65,81,.6)">Nessuna storia disponibile.</p>
+      ) : (
+        <div class="d-flex flex-column gap-3">
+          {dash.storie.map((s) => {
+            const p = pct(s.completati, s.totale);
+            return (
+              <div class="d-flex align-items-center gap-3">
+                <span class="fw-medium" style="color:var(--d-blue);width:240px;flex-shrink:0">
+                  {s.numero}. {s.titolo}
+                </span>
+                <div class="bar-track flex-grow-1">
+                  <div class:list={["bar-fill", p >= 50 ? "high" : "low"]} style={`width:${p}%`} />
+                </div>
+                <span class="small text-end" style="color:rgba(55,65,81,.8);width:96px;flex-shrink:0">
+                  {s.completati}/{s.totale} · <strong>{p}%</strong>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )
+    }
+  </section>
+</DocenteLayout>

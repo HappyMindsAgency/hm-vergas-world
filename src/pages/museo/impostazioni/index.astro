@@ -1,0 +1,151 @@
+---
+// Impostazioni (§9.2): nuovo amministratore, cambia propria password/email,
+// elimina il proprio account.
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+---
+
+<MuseoLayout title="Impostazioni | Area Museo" active="/museo/impostazioni" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3"><a href="/museo">Dashboard</a> / Impostazioni</nav>
+
+  <header class="mb-4">
+    <h1 class="font-heading museo-title display-6 mb-1">Impostazioni</h1>
+    <p class="mb-0" style="color:var(--museo-ink)">Gestisci il tuo account e gli altri amministratori.</p>
+  </header>
+
+  <div id="page-alert" class="alert d-none" role="alert"></div>
+
+  <!-- Nuovo amministratore -->
+  <section class="museo-card p-4 mb-4">
+    <h2 class="font-heading museo-title h4 mb-3">Nuovo amministratore</h2>
+    <hr style="border-color:var(--museo-border)" />
+    <form id="new-admin-form" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label stat-label" for="na-nome">Nome</label>
+        <input class="form-control" id="na-nome" name="nome" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label stat-label" for="na-cognome">Cognome</label>
+        <input class="form-control" id="na-cognome" name="cognome" required />
+      </div>
+      <div class="col-md-3">
+        <label class="form-label stat-label" for="na-email">Email</label>
+        <input class="form-control" id="na-email" name="email" type="email" required />
+      </div>
+      <div class="col-md-2">
+        <label class="form-label stat-label" for="na-pw">Password</label>
+        <input class="form-control" id="na-pw" name="password" type="password" minlength="8" required />
+      </div>
+      <div class="col-md-1">
+        <button class="btn btn-museo-red w-100" type="submit">Crea</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Il mio account -->
+  <section class="museo-card p-4 mb-4">
+    <h2 class="font-heading museo-title h4 mb-3">Il mio account</h2>
+    <hr style="border-color:var(--museo-border)" />
+    <form id="self-form" class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label stat-label" for="se-email">Email</label>
+        <input class="form-control" id="se-email" name="email" type="email" value={admin.email} />
+      </div>
+      <div class="col-md-6">
+        <label class="form-label stat-label" for="se-pw">Nuova password (lascia vuoto per non cambiarla)</label>
+        <input class="form-control" id="se-pw" name="password" type="password" minlength="8" autocomplete="new-password" />
+      </div>
+      <div class="col-12">
+        <button class="btn btn-museo-blue px-4" type="submit">Salva modifiche</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Zona pericolosa -->
+  <section class="museo-card p-4" style="border-color:rgba(225,73,47,.4)">
+    <h2 class="font-heading h4 mb-3" style="color:var(--museo-red)">Elimina account</h2>
+    <p class="small" style="color:rgba(55,65,81,.7)">
+      Eliminerai definitivamente il tuo account amministratore. L'azione è irreversibile.
+    </p>
+    <button class="btn btn-outline-museo-red" data-bs-toggle="modal" data-bs-target="#deleteSelfModal">Elimina il mio account</button>
+  </section>
+
+  <div class="modal fade" id="deleteSelfModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading mb-0" style="color:var(--museo-red)">Conferma eliminazione</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-2">Digita <strong>ELIMINA</strong> per confermare.</p>
+          <input class="form-control" id="del-self-confirm" autocomplete="off" />
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+          <button class="btn btn-museo-red" id="del-self-submit" disabled>Elimina definitivamente</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const pageAlert = document.getElementById("page-alert")!;
+    function notify(msg: string, ok = true) {
+      pageAlert.classList.remove("d-none", "alert-success", "alert-danger");
+      pageAlert.classList.add(ok ? "alert-success" : "alert-danger");
+      pageAlert.textContent = msg;
+    }
+    async function post(action: string, payload: Record<string, unknown>) {
+      const res = await fetch("/api/museo/impostazioni", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action, ...payload }),
+      });
+      const body = await res.json().catch(() => ({}));
+      return { ok: res.ok, body };
+    }
+
+    document.getElementById("new-admin-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const { ok, body } = await post("new-admin", {
+        nome: fd.get("nome"),
+        cognome: fd.get("cognome"),
+        email: fd.get("email"),
+        password: fd.get("password"),
+      });
+      if (ok) {
+        notify("Amministratore creato.");
+        (e.target as HTMLFormElement).reset();
+      } else notify(body.error ?? "Creazione non riuscita.", false);
+    });
+
+    document.getElementById("self-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target as HTMLFormElement);
+      const payload: Record<string, unknown> = { email: fd.get("email") };
+      const pw = String(fd.get("password") ?? "");
+      if (pw) payload.password = pw;
+      const { ok, body } = await post("update-self", payload);
+      notify(ok ? "Account aggiornato." : (body.error ?? "Aggiornamento non riuscito."), ok);
+    });
+
+    const confirmInput = document.getElementById("del-self-confirm") as HTMLInputElement;
+    const confirmBtn = document.getElementById("del-self-submit") as HTMLButtonElement;
+    confirmInput?.addEventListener("input", () => {
+      confirmBtn.disabled = confirmInput.value.trim() !== "ELIMINA";
+    });
+    confirmBtn?.addEventListener("click", async () => {
+      const { ok, body } = await post("delete-self", {});
+      if (ok) window.location.href = "/museo/login";
+      else notify(body.error ?? "Eliminazione non riuscita.", false);
+    });
+  </script>
+</MuseoLayout>

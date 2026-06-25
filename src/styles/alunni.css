@@ -1,0 +1,359 @@
+/* Token e primitive dell'Area Alunni (brief §9.4). Nessun node-id Figma (ADR-6):
+   costruita dal funzionale, coerente con la palette delle altre aree riservate
+   (vedi docenti.css) ma con un tono più giocoso adatto ai bambini.
+   Scope su .alunni: Bootstrap importato solo da ReservedLayout (ADR-11). */
+
+.alunni {
+  --a-cream: #fcfcf8;
+  --a-ink: #374151;
+  --a-border: #e7e3d8;
+  --a-blue: #3e85a9;
+  --a-blue-dark: #275b78;
+  --a-red: #e1492f;
+  --a-gold: #fdd985;
+  --a-gold-deep: #f0b429;
+  --a-green: #34c759;
+  background: var(--a-cream);
+  color: var(--a-ink);
+  font-family: "Outfit", system-ui, sans-serif;
+  min-height: 100vh;
+}
+.alunni .font-heading {
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+}
+.alunni .a-title {
+  color: var(--a-blue-dark);
+}
+.alunni .a-accent {
+  color: var(--a-red);
+}
+
+/* ---- Bottoni ---- */
+.alunni .btn-a-blue {
+  background: var(--a-blue);
+  color: var(--a-cream);
+  border: 1px solid var(--a-blue);
+  border-radius: 999px;
+  font-weight: 700;
+}
+.alunni .btn-a-blue:hover {
+  background: var(--a-blue-dark);
+  color: #fff;
+}
+.alunni .btn-a-gold {
+  background: var(--a-gold);
+  color: var(--a-blue-dark);
+  border: 1px solid var(--a-gold-deep);
+  border-radius: 999px;
+  font-weight: 700;
+}
+.alunni .btn-a-gold:hover {
+  background: var(--a-gold-deep);
+  color: var(--a-blue-dark);
+}
+.alunni .btn-a-outline {
+  color: var(--a-blue);
+  border: 1px solid var(--a-blue);
+  border-radius: 999px;
+  font-weight: 600;
+  background: transparent;
+}
+.alunni .btn-a-outline:hover {
+  background: rgba(62, 133, 169, 0.08);
+}
+
+/* ---- Card generiche ---- */
+.alunni .a-card {
+  background: #fff;
+  border: 1px solid var(--a-border);
+  border-radius: 22px;
+  box-shadow: 0 12px 12px rgba(31, 41, 55, 0.06);
+}
+
+/* ---- Login (card centrata, tono avventura) ---- */
+.alunni .a-auth {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-image: linear-gradient(180deg, #fff6e2 0%, var(--a-cream) 60%);
+}
+.alunni .a-auth-card {
+  background: #fff;
+  border: 1px solid var(--a-border);
+  border-radius: 28px;
+  box-shadow:
+    0 6px 9px rgba(31, 41, 55, 0.06),
+    0 18px 28px rgba(31, 41, 55, 0.12);
+  width: 100%;
+  max-width: 480px;
+  padding: 40px;
+}
+.alunni .a-badge-logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 20px;
+  background: var(--a-gold);
+  color: var(--a-blue-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+.alunni .a-help-box {
+  background: #fff6e2;
+  border: 1px solid var(--a-gold);
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 0.875rem;
+}
+.alunni .form-control:focus,
+.alunni .form-select:focus {
+  border-color: var(--a-blue);
+  box-shadow: 0 0 0 0.2rem rgba(62, 133, 169, 0.15);
+}
+
+/* ---- Topbar (passaporto / missione) ---- */
+.alunni .a-topbar {
+  background: linear-gradient(256.9deg, var(--a-blue) 25%, var(--a-blue-dark) 75%);
+  color: var(--a-cream);
+}
+.alunni .a-topbar a {
+  color: var(--a-cream);
+  text-decoration: none;
+}
+.alunni .a-logo-badge {
+  background: var(--a-gold);
+  color: var(--a-blue-dark);
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* ---- Video card ---- */
+.alunni .a-video-card {
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.12s ease;
+}
+.alunni .a-video-card:hover {
+  transform: translateY(-3px);
+}
+.alunni .a-video-thumb {
+  aspect-ratio: 16 / 9;
+  background: #e9eef1 center/cover no-repeat;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.alunni .a-video-thumb .a-play {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--a-blue-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.alunni .a-story-num {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--a-red);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 10px;
+}
+
+/* ---- Passaporto: progress + badge ---- */
+.alunni .a-progress-track {
+  background: #f1f3f5;
+  height: 14px;
+  border-radius: 100px;
+  overflow: hidden;
+}
+.alunni .a-progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--a-gold-deep), var(--a-green));
+  transition: width 0.3s ease;
+}
+.alunni .a-rank-pill {
+  display: inline-block;
+  background: rgba(62, 133, 169, 0.12);
+  color: var(--a-blue-dark);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.alunni .a-badge {
+  border: 1px solid var(--a-border);
+  border-radius: 18px;
+  padding: 18px 12px;
+  text-align: center;
+  background: #fff;
+}
+.alunni .a-badge.earned {
+  background: #fff6e2;
+  border-color: var(--a-gold);
+}
+.alunni .a-badge .a-star {
+  width: 44px;
+  height: 44px;
+  color: #d7d2c4;
+}
+.alunni .a-badge.earned .a-star {
+  color: var(--a-gold-deep);
+}
+.alunni .a-badge .a-cta {
+  font-size: 0.8125rem;
+}
+
+/* ---- Quiz (missione) ---- */
+.alunni .a-quiz-track {
+  background: rgba(255, 255, 255, 0.3);
+  height: 8px;
+  border-radius: 100px;
+  overflow: hidden;
+}
+.alunni .a-quiz-fill {
+  height: 100%;
+  background: var(--a-gold);
+  transition: width 0.3s ease;
+}
+.alunni .a-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 2px solid var(--a-border);
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px 18px;
+  font-weight: 500;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+.alunni .a-option:hover:not(:disabled) {
+  border-color: var(--a-blue);
+}
+.alunni .a-option:disabled {
+  cursor: default;
+}
+.alunni .a-option.correct {
+  border-color: var(--a-green);
+  background: rgba(52, 199, 89, 0.12);
+}
+.alunni .a-option.wrong {
+  border-color: var(--a-red);
+  background: rgba(225, 73, 47, 0.1);
+}
+.alunni .a-feedback.ok {
+  color: var(--a-green);
+  font-weight: 700;
+}
+.alunni .a-feedback.ko {
+  color: var(--a-red);
+  font-weight: 700;
+}
+
+/* ---- Attestato (PDF via window.print) ---- */
+.attestato-page {
+  background: #e9eef1;
+  min-height: 100vh;
+  padding: 32px 16px;
+}
+.attestato-sheet {
+  background: #fff;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  border: 10px solid var(--a-gold, #fdd985);
+  border-radius: 8px;
+  padding: 56px 64px;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(31, 41, 55, 0.18);
+  font-family: "Fraunces", Georgia, serif;
+  color: #374151;
+}
+.attestato-sheet .att-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #275b78;
+  font-family: "Outfit", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.attestato-sheet h1 {
+  font-size: 2.6rem;
+  color: #275b78;
+  margin: 8px 0 24px;
+}
+.attestato-sheet .att-name {
+  font-size: 2rem;
+  color: #e1492f;
+  border-bottom: 2px solid #e7e3d8;
+  display: inline-block;
+  padding: 0 24px 6px;
+  margin: 8px 0 24px;
+}
+.attestato-sheet .att-body {
+  font-family: "Outfit", system-ui, sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.attestato-sheet .att-seal {
+  margin-top: 32px;
+  font-size: 3rem;
+}
+.attestato-actions {
+  max-width: 900px;
+  margin: 24px auto 0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+@media print {
+  /* Solo l'attestato in stampa: nasconde sfondo e azioni. */
+  .attestato-page {
+    background: #fff;
+    padding: 0;
+  }
+  .attestato-actions {
+    display: none !important;
+  }
+  .attestato-sheet {
+    box-shadow: none;
+    border-color: #f0b429;
+    max-width: none;
+    margin: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .alunni .a-auth-card {
+    padding: 28px;
+  }
+  .attestato-sheet {
+    padding: 32px 24px;
+  }
+  .attestato-sheet h1 {
+    font-size: 1.8rem;
+  }
+}

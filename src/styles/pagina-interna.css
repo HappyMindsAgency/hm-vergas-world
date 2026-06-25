@@ -1,0 +1,207 @@
+/*
+ * Pagine interne pubbliche — Borgo della Cunziria (37:51), Visite in famiglia
+ * (71:566), Visite scolastiche (72:666). Layout condiviso, scoped sotto .vw-page
+ * per non interferire con styles.css / home.css. CSS scritto a mano (ADR-11).
+ *
+ * Token Figma:
+ *   oro pill #f9d46b · testo pill #513308 · titolo #162330 · corpo #576574
+ *   teal #3e85a9 · oro CTA #f3b94c · bordo card rgba(227,222,207,.6)
+ *   quote #f3b94c · sfondo card oro tenue rgba(243,185,76,.15)
+ */
+.vw-page {
+  --p-gold: #f9d46b;
+  --p-gold-ink: #513308;
+  --p-cta: #f3b94c;
+  --p-teal: #3e85a9;
+  --p-title: #162330;
+  --p-body: #576574;
+  --p-card-border: rgba(227, 222, 207, 0.6);
+  --p-card-shadow: 0 10px 30px -12px rgba(51, 74, 98, 0.18);
+
+  font-family: "Outfit", system-ui, sans-serif;
+  color: var(--p-body);
+  background: #fff;
+  line-height: 1.5;
+}
+.vw-page h1,
+.vw-page h2 {
+  font-family: "Fraunces", Georgia, serif;
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  color: var(--p-title);
+  margin: 0;
+}
+.vw-page p { margin: 0; }
+.vw-page img { display: block; max-width: 100%; }
+
+.vw-page__wrap {
+  width: min(1200px, 100% - 32px);
+  margin-inline: auto;
+}
+
+/* --- Pill kicker / label --- */
+.vw-page__pill {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: var(--p-gold);
+  color: var(--p-gold-ink);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+  line-height: 1.33;
+}
+
+/* --- Hero (header con immagine sfumata + titolo) --- */
+.vw-page__hero {
+  position: relative;
+  padding: clamp(40px, 8vw, 96px) 0 clamp(32px, 5vw, 64px);
+  overflow: hidden;
+  isolation: isolate;
+}
+.vw-page__hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background-image: var(--p-hero-img, none);
+  background-size: cover;
+  background-position: center 30%;
+  opacity: 0.5;
+}
+.vw-page__hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  backdrop-filter: blur(4px);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.47) 51%, #fff 100%);
+}
+.vw-page__hero-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  align-items: flex-start;
+}
+.vw-page__hero h1 {
+  font-weight: 700;
+  font-size: clamp(38px, 6vw, 72px);
+  line-height: 1.02;
+  letter-spacing: -1.8px;
+  max-width: 18ch;
+}
+.vw-page__lead {
+  font-family: "Fraunces", Georgia, serif;
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  color: var(--p-title);
+  font-size: clamp(20px, 2.4vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  max-width: 60ch;
+}
+
+/* --- Main / griglia card --- */
+.vw-page__main {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-bottom: clamp(40px, 6vw, 80px);
+}
+.vw-page__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+/* Borgo: layout 2/3 – 1/3 */
+.vw-page__grid--split {
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+}
+/* Famiglie/Scuole: info 5/12 + immagine 7/12 */
+.vw-page__grid--info {
+  grid-template-columns: 5fr 7fr;
+  align-items: stretch;
+}
+
+/* --- Card / Article --- */
+.vw-card {
+  background: #fff;
+  border: 1px solid var(--p-card-border);
+  border-radius: 32px;
+  overflow: hidden;
+}
+.vw-card--shadow { box-shadow: var(--p-card-shadow); }
+.vw-card--soft { background: rgba(249, 212, 107, 0.4); }
+.vw-card__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+.vw-card__media img { width: 100%; height: 100%; object-fit: cover; }
+.vw-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: clamp(24px, 3vw, 41px);
+}
+.vw-card__body h2 {
+  font-size: 30px;
+  line-height: 1.2;
+  letter-spacing: -0.3px;
+  font-weight: 400;
+}
+.vw-card__body p {
+  font-size: 16px;
+  line-height: 1.625;
+}
+.vw-card--center { display: flex; flex-direction: column; justify-content: center; }
+
+/* --- Citazione (37:51, solo borgo) --- */
+.vw-quote {
+  border: 1px solid var(--p-card-border);
+  border-radius: 32px;
+  background: rgba(243, 185, 76, 0.15);
+  padding: clamp(36px, 5vw, 57px) clamp(24px, 8vw, 141px);
+  text-align: center;
+}
+.vw-quote p {
+  font-family: "Fraunces", Georgia, serif;
+  font-variation-settings: "SOFT" 0, "WONK" 1;
+  color: var(--p-title);
+  font-size: clamp(24px, 3.4vw, 36px);
+  line-height: 1.375;
+}
+.vw-quote .vw-quote__mark { color: var(--p-cta); }
+
+/* --- CTA "Torna alla Home" --- */
+.vw-page__home {
+  display: flex;
+  justify-content: center;
+  padding-top: 24px;
+}
+.vw-page__home-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 192px;
+  padding: 11px 22px;
+  border-radius: 9999px;
+  background: var(--p-cta);
+  color: #374151;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.076px;
+  text-decoration: none;
+}
+.vw-page__home-btn:hover { filter: brightness(1.04); }
+
+/* --- Responsive --- */
+@media (max-width: 860px) {
+  .vw-page__grid--split,
+  .vw-page__grid--info {
+    grid-template-columns: 1fr;
+  }
+}

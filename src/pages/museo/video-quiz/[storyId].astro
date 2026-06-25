@@ -1,0 +1,219 @@
+---
+// Editor Video & Quiz di una singola storia. Gestisce i video (aggiungi/rimuovi)
+// e il quiz 1:1 (domande con opzioni, una sola is_correct). Le scritture passano
+// per /api/video-quiz (service_role, solo admin).
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+import { getStoryContent } from "../../../lib/admin/content";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const { storyId } = Astro.params;
+const content = storyId ? await getStoryContent(storyId) : null;
+if (!content) return Astro.redirect("/museo/video-quiz");
+
+const { story, videos, quiz, questions } = content;
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+---
+
+<MuseoLayout title={`${story.titolo} | Video & Quiz`} active="/museo/video-quiz" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3">
+    <a href="/museo">Dashboard</a> / <a href="/museo/video-quiz">Video & Quiz</a> / Storia {story.numero}
+  </nav>
+
+  <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="font-heading museo-title display-6 mb-1">{story.titolo}</h1>
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">Storia {story.numero}</p>
+    </div>
+    <a class="btn btn-light px-3" href="/museo/video-quiz">← Torna all'elenco</a>
+  </header>
+
+  <div id="page-alert" class="alert d-none" role="alert"></div>
+
+  <!-- VIDEO -->
+  <section class="museo-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading museo-title h4 mb-0">Video</h2>
+      <button class="btn btn-sm btn-museo-red" data-bs-toggle="modal" data-bs-target="#videoModal">+ Aggiungi video</button>
+    </div>
+    {videos.length === 0 ? (
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">Nessun video. Aggiungine uno (YouTube o asset caricato).</p>
+    ) : (
+      <ul class="list-unstyled mb-0">
+        {videos.map((v) => (
+          <li class="d-flex align-items-center gap-3 py-2 border-bottom" style="border-color:var(--museo-border)!important">
+            <span class="flex-grow-1">
+              <span class="fw-semibold d-block">{v.titolo}</span>
+              <span class="small" style="color:rgba(55,65,81,.6)">{v.source_type} · {v.url_or_path}</span>
+            </span>
+            <button class="btn btn-sm btn-outline-museo-red btn-del-video" data-id={v.id}>Rimuovi</button>
+          </li>
+        ))}
+      </ul>
+    )}
+  </section>
+
+  <!-- QUIZ -->
+  <section class="museo-card p-4" data-quiz-id={quiz?.id ?? ""} data-story-id={story.id}>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading museo-title h4 mb-0">Quiz</h2>
+      {quiz ? (
+        <button class="btn btn-sm btn-museo-red" id="btn-add-question">+ Aggiungi domanda</button>
+      ) : (
+        <button class="btn btn-sm btn-museo-red" id="btn-create-quiz">Crea quiz per questa storia</button>
+      )}
+    </div>
+
+    {!quiz ? (
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">
+        Nessun quiz per questa storia. Creane uno per aggiungere domande e opzioni.
+      </p>
+    ) : questions.length === 0 ? (
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">Quiz creato. Aggiungi la prima domanda.</p>
+    ) : (
+      <ol class="ps-3 mb-0">
+        {questions.map((q) => (
+          <li class="mb-4 question-block" data-question-id={q.id}>
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <strong>{q.testo}</strong>
+              <button class="btn btn-sm btn-outline-museo-red btn-del-question" data-id={q.id}>Elimina</button>
+            </div>
+            <ul class="list-unstyled mt-2 mb-2">
+              {q.options.map((o) => (
+                <li class="d-flex align-items-center gap-2 py-1">
+                  <span class={`badge ${o.is_correct ? "text-bg-success" : "text-bg-light text-dark"}`}>
+                    {o.is_correct ? "✓ corretta" : "errata"}
+                  </span>
+                  <span>{o.testo}</span>
+                  <button class="btn btn-sm btn-link text-danger p-0 ms-2 btn-del-option" data-id={o.id}>rimuovi</button>
+                </li>
+              ))}
+            </ul>
+            <form class="row g-2 add-option-form" data-question-id={q.id}>
+              <div class="col"><input class="form-control form-control-sm" name="testo" placeholder="Nuova opzione…" required /></div>
+              <div class="col-auto">
+                <div class="form-check mt-1">
+                  <input class="form-check-input" type="checkbox" name="isCorrect" id={`oc-${q.id}`} />
+                  <label class="form-check-label small" for={`oc-${q.id}`}>corretta</label>
+                </div>
+              </div>
+              <div class="col-auto"><button class="btn btn-sm btn-outline-museo-blue">+ Opzione</button></div>
+            </form>
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+
+  <!-- Modale aggiungi video -->
+  <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0">Aggiungi video</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="video-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label stat-label" for="v-titolo">Titolo</label>
+              <input class="form-control" id="v-titolo" name="titolo" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label stat-label" for="v-source">Tipo sorgente</label>
+              <select class="form-select" id="v-source" name="sourceType">
+                <option value="youtube">YouTube</option>
+                <option value="asset">Asset (URL/percorso)</option>
+              </select>
+            </div>
+            <div class="mb-1">
+              <label class="form-label stat-label" for="v-url">URL o percorso</label>
+              <input class="form-control" id="v-url" name="urlOrPath" placeholder="https://youtu.be/… oppure /media/…" required />
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4">Aggiungi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ storyId: story.id, quizId: quiz?.id ?? null }}>
+    const api = "/api/video-quiz";
+    const pageAlert = document.getElementById("page-alert");
+    function notify(msg, ok = true) {
+      pageAlert.classList.remove("d-none", "alert-success", "alert-danger");
+      pageAlert.classList.add(ok ? "alert-success" : "alert-danger");
+      pageAlert.textContent = msg;
+    }
+    async function call(action, payload) {
+      const res = await fetch(api, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action, ...payload }),
+      });
+      if (!res.ok) {
+        const b = await res.json().catch(() => ({}));
+        notify(b.error || "Operazione non riuscita.", false);
+        return false;
+      }
+      return true;
+    }
+
+    // Video
+    document.getElementById("video-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const ok = await call("add-video", {
+        storyId,
+        titolo: fd.get("titolo"),
+        sourceType: fd.get("sourceType"),
+        urlOrPath: fd.get("urlOrPath"),
+      });
+      if (ok) window.location.reload();
+    });
+    document.querySelectorAll(".btn-del-video").forEach((b) =>
+      b.addEventListener("click", async () => {
+        if (await call("delete-video", { videoId: b.dataset.id })) window.location.reload();
+      })
+    );
+
+    // Quiz
+    document.getElementById("btn-create-quiz")?.addEventListener("click", async () => {
+      if (await call("create-quiz", { storyId })) window.location.reload();
+    });
+    document.getElementById("btn-add-question")?.addEventListener("click", async () => {
+      const testo = prompt("Testo della domanda:");
+      if (!testo) return;
+      if (await call("add-question", { quizId, testo })) window.location.reload();
+    });
+    document.querySelectorAll(".btn-del-question").forEach((b) =>
+      b.addEventListener("click", async () => {
+        if (await call("delete-question", { questionId: b.dataset.id })) window.location.reload();
+      })
+    );
+    document.querySelectorAll(".add-option-form").forEach((f) =>
+      f.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const ok = await call("add-option", {
+          questionId: f.dataset.questionId,
+          testo: fd.get("testo"),
+          isCorrect: fd.get("isCorrect") === "on",
+        });
+        if (ok) window.location.reload();
+      })
+    );
+    document.querySelectorAll(".btn-del-option").forEach((b) =>
+      b.addEventListener("click", async () => {
+        if (await call("delete-option", { optionId: b.dataset.id })) window.location.reload();
+      })
+    );
+  </script>
+</MuseoLayout>

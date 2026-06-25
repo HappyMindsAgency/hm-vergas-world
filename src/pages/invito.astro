@@ -1,0 +1,146 @@
+---
+// Completamento registrazione da invito (§9.3, Figma 61-3 stile login).
+// Il link di invito/recovery porta i token nella URL (hash): supabaseBrowser li
+// rileva e crea la sessione. L'utente conferma l'email (sola lettura) e sceglie la
+// password (con "genera password forte"). Si chiude impostando profiles.status='active'
+// via /api/insegnante/completa-registrazione, che rilascia anche il cookie di sessione.
+// La route /invito è anche il redirect del reset password (/api/docenti/reset-password).
+import ReservedLayout from "../layouts/ReservedLayout.astro";
+import "../styles/docenti.css";
+---
+
+<ReservedLayout title="Completa la registrazione | Verga's World" bodyClass="docenti">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="d-auth">
+    <div class="d-auth-card">
+      <div class="text-center mb-4">
+        <h1 class="font-heading d-title h2 mb-2">Completa la registrazione</h1>
+        <p class="mb-0" style="color:rgba(55,65,81,.75)">Conferma la tua email e scegli una password sicura.</p>
+      </div>
+
+      <div id="invito-alert" class="alert d-none" role="alert"></div>
+
+      <!-- Stato: token mancante / non valido -->
+      <div id="no-token" class="d-none">
+        <div class="d-help-box mb-3">
+          Questo link non è valido o è scaduto. Chiedi al museo un nuovo invito, oppure usa
+          "Hai problemi ad accedere?" dalla pagina di login.
+        </div>
+        <a class="btn btn-outline-d-blue w-100" href="/insegnante/login">Vai al login</a>
+      </div>
+
+      <form id="invito-form" class="d-none" novalidate>
+        <div class="mb-3">
+          <label class="form-label fw-semibold" for="email">Email</label>
+          <input class="form-control form-control-lg" type="email" id="email" name="email" readonly />
+        </div>
+        <div class="mb-2">
+          <label class="form-label fw-semibold" for="password">Nuova password</label>
+          <div class="input-group input-group-lg">
+            <input class="form-control" type="text" id="password" name="password" minlength="8" autocomplete="new-password" required />
+            <button class="btn btn-outline-d-blue" type="button" id="gen-password">Genera password forte</button>
+          </div>
+          <div class="form-text">Almeno 8 caratteri. Il pulsante crea una password robusta di 12 caratteri.</div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label fw-semibold" for="password2">Conferma password</label>
+          <input class="form-control form-control-lg" type="password" id="password2" name="password2" autocomplete="new-password" required />
+        </div>
+        <button class="btn btn-d-blue btn-lg w-100 py-2" type="submit" id="invito-submit">Attiva il mio account</button>
+      </form>
+
+      <div id="invito-loading" class="text-center py-3" style="color:rgba(55,65,81,.7)">Verifica del link in corso…</div>
+
+      <div class="text-center mt-3">
+        <a href="/" style="color:rgba(55,65,81,.6);font-size:.875rem">← Torna alla home pubblica</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { supabaseBrowser } from "../lib/supabase/browser";
+    import { generateStrongPassword } from "../lib/password";
+
+    const loading = document.getElementById("invito-loading")!;
+    const noToken = document.getElementById("no-token")!;
+    const form = document.getElementById("invito-form") as HTMLFormElement;
+    const emailInput = document.getElementById("email") as HTMLInputElement;
+    const pwInput = document.getElementById("password") as HTMLInputElement;
+    const pw2Input = document.getElementById("password2") as HTMLInputElement;
+    const submitBtn = document.getElementById("invito-submit") as HTMLButtonElement;
+    const alertBox = document.getElementById("invito-alert")!;
+
+    function notify(msg: string, ok = false) {
+      alertBox.classList.remove("d-none", "alert-danger", "alert-success");
+      alertBox.classList.add(ok ? "alert-success" : "alert-danger");
+      alertBox.textContent = msg;
+    }
+
+    document.getElementById("gen-password")?.addEventListener("click", () => {
+      const pw = generateStrongPassword();
+      pwInput.value = pw;
+      pw2Input.value = pw;
+    });
+
+    // Rileva la sessione creata dal link (token nell'hash). detectSessionInUrl è
+    // attivo di default nel client browser.
+    async function init() {
+      const {
+        data: { session },
+      } = await supabaseBrowser.auth.getSession();
+      loading.classList.add("d-none");
+      if (!session) {
+        noToken.classList.remove("d-none");
+        return;
+      }
+      emailInput.value = session.user.email ?? "";
+      form.classList.remove("d-none");
+    }
+    init();
+
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      alertBox.classList.add("d-none");
+      const pw = pwInput.value;
+      if (pw.length < 8) return notify("La password deve avere almeno 8 caratteri.");
+      if (pw !== pw2Input.value) return notify("Le due password non coincidono.");
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Attivazione in corso…";
+      try {
+        const { error: updErr } = await supabaseBrowser.auth.updateUser({ password: pw });
+        if (updErr) {
+          notify(updErr.message ?? "Impossibile impostare la password.");
+          return;
+        }
+        const {
+          data: { session },
+        } = await supabaseBrowser.auth.getSession();
+        const res = await fetch("/api/insegnante/completa-registrazione", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ accessToken: session?.access_token }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          notify(body.error ?? "Attivazione non riuscita.");
+          return;
+        }
+        window.location.href = "/insegnante";
+      } catch {
+        notify("Errore di rete. Riprova.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Attiva il mio account";
+      }
+    });
+  </script>
+</ReservedLayout>

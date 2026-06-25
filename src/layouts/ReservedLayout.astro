@@ -1,0 +1,33 @@
+---
+// Layout per le AREE RISERVATE (Museo/Admin, Docenti, Alunni) — Bootstrap.
+// Isolamento CSS (§11): Bootstrap vive SOLO qui; il frontend pubblico (BaseLayout)
+// non importa mai Bootstrap, le aree riservate non importano mai gli stili pubblici.
+// Nessuna pagina condivide i due mondi → niente conflitti di reset/specificità.
+import "bootstrap/dist/css/bootstrap.min.css";
+
+interface Props {
+  title: string;
+  description?: string;
+  bodyClass?: string;
+}
+const { title, description = "Verga's World — area riservata", bodyClass } = Astro.props;
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="noindex" />
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+    <script>
+      // Bootstrap JS (modali, dropdown, collapse) caricato solo nelle aree riservate.
+      import "bootstrap/dist/js/bootstrap.bundle.min.js";
+    </script>
+  </body>
+</html>

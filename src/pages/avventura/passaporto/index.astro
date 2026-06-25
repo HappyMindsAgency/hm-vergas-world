@@ -1,45 +1,171 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
-import "../../../styles/adventure.css";
+// Area Alunni — schermata principale (brief §9.4): divisa in VIDEO e PASSAPORTO.
+// SSR auth-gated (cookie firmato ADR-2). Video: 7 card → modale player. Passaporto:
+// badge col nome + progress bar + 7 pulsanti (1/storia) → missione/quiz.
+export const prerender = false;
 
+import AlunnoLayout from "../../../layouts/AlunnoLayout.astro";
+import { getStudentSession } from "../../../lib/alunni/session";
+import { getStoryVideos, getPassaporto } from "../../../lib/alunni/data";
+
+const session = getStudentSession(Astro.cookies);
+if (!session) return Astro.redirect("/avventura");
+
+const [videos, passaporto] = await Promise.all([getStoryVideos(), getPassaporto(session.id)]);
+const progressPct = passaporto.total > 0 ? Math.round((passaporto.badgeCount / passaporto.total) * 100) : 0;
+
+// Embed URL YouTube: estrae l'id da watch?v=, youtu.be o id nudo.
+function youtubeEmbed(urlOrId: string): string {
+  const m = urlOrId.match(/(?:v=|youtu\.be\/|embed\/)([\w-]{11})/);
+  const id = m ? m[1] : urlOrId.trim();
+  return `https://www.youtube.com/embed/${id}`;
+}
 ---
 
-<BaseLayout
-  title="Passaporto | Verga's World"
-  fonts="adventure"
-  scripts={[{ src: "/scripts/adventure.js" }]}
-  page="passport"
->
-  <main id="main-content" class="passport-page">
-        <header class="passport-header">
-          <a href="/">Verga's World</a>
-          <a href="/avventura">Cambia codice</a>
-        </header>
-        <section class="passport-layout">
-          <aside class="explorer-card">
-            <div class="avatar-initial" data-avatar-initial>V</div>
-            <h1 data-explorer-name>Esploratore</h1>
-            <span class="rank-pill" data-rank>Esploratore Principiante</span>
-            <div class="progress-copy"><span data-completed-count>0</span> / 7 missioni completate</div>
-            <div class="progress-track"><span data-progress-bar></span></div>
-            <button type="button" data-change-name>Cambia nome</button>
-          </aside>
-          <section class="badges-area">
-            <div class="section-title">
-              <p>Il tuo passaporto</p>
-              <h2>I 7 badge</h2>
+<AlunnoLayout title="Il mio Passaporto | Verga's World" studentName={session.displayName}>
+  <main id="main-content" class="container py-4 py-lg-5">
+    <!-- ============ PASSAPORTO ============ -->
+    <section class="mb-5" aria-labelledby="passaporto-title">
+      <div class="a-card p-4 p-lg-5">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-5">
+            <p class="text-uppercase fw-semibold mb-1" style="letter-spacing:.12em;color:var(--a-blue)">
+              Il passaporto di
+            </p>
+            <h1 id="passaporto-title" class="font-heading a-title display-6 mb-2">{session.displayName}</h1>
+            <span class="a-rank-pill mb-3">{passaporto.rank}</span>
+            <p class="mb-2 fw-semibold">
+              <span data-badge-count>{passaporto.badgeCount}</span> / {passaporto.total} badge conquistati
+            </p>
+            <div class="a-progress-track" role="progressbar" aria-valuenow={passaporto.badgeCount} aria-valuemin="0" aria-valuemax={passaporto.total}>
+              <div class="a-progress-fill" data-progress-fill style={`width:${progressPct}%`}></div>
             </div>
-            <div class="badge-grid" data-badge-grid></div>
-            <div class="passport-footer" data-passport-footer></div>
-          </section>
-        </section>
-      </main>
-      <dialog class="badge-modal" data-badge-modal>
-        <button type="button" data-close-modal>Chiudi</button>
-        <img decoding="async" loading="lazy" data-modal-img alt="" />
-        <h2 data-modal-title></h2>
-        <p data-modal-text></p>
-      </dialog>
+            {
+              passaporto.completed && (
+                <a href="/avventura/attestato" class="btn btn-a-blue mt-4">
+                  🏆 Scarica il tuo attestato!
+                </a>
+              )
+            }
+          </div>
 
+          <div class="col-lg-7">
+            <h2 class="font-heading a-accent h5 mb-3">Le 7 missioni</h2>
+            <div class="row row-cols-2 row-cols-md-3 g-3">
+              {
+                passaporto.storyBadges.map((s) => (
+                  <div class="col">
+                    <div class:list={["a-badge h-100 d-flex flex-column align-items-center justify-content-between", { earned: s.earned }]}>
+                      <svg class="a-star mb-2" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2l2.9 6.3 6.9.7-5.1 4.6 1.4 6.8L12 17.8 5.9 20.4l1.4-6.8L2.2 9l6.9-.7L12 2z" />
+                      </svg>
+                      <div class="fw-semibold small mb-2">
+                        {s.numero}. {s.titolo}
+                      </div>
+                      {s.earned ? (
+                        <span class="badge text-bg-warning text-dark">Conquistato!</span>
+                      ) : (
+                        <a href={`/avventura/missione/${s.numero}`} class="btn btn-a-gold btn-sm a-cta">
+                          Inizia la missione
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-</BaseLayout>
+    <!-- ============ VIDEO ============ -->
+    <section aria-labelledby="video-title">
+      <h2 id="video-title" class="font-heading a-title h3 mb-3">Guarda le 7 storie</h2>
+      <p class="mb-4" style="color:rgba(55,65,81,.75)">Clicca su una storia per guardare il video animato.</p>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3 g-lg-4">
+        {
+          videos.map((v) => (
+            <div class="col">
+              <div
+                class="a-card a-video-card h-100"
+                role="button"
+                tabindex="0"
+                data-video-trigger
+                data-source-type={v.video?.sourceType ?? ""}
+                data-src={v.video ? (v.video.sourceType === "youtube" ? youtubeEmbed(v.video.urlOrPath) : v.video.urlOrPath) : ""}
+                data-title={v.video?.titolo ?? v.titolo}
+                aria-label={`Guarda: ${v.titolo}`}
+              >
+                <div class="a-video-thumb" style={v.images[0] ? `background-image:url('${v.images[0]}')` : ""}>
+                  <span class="a-story-num">Storia {v.numero}</span>
+                  <span class="a-play" aria-hidden="true">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </span>
+                </div>
+                <div class="p-3">
+                  <div class="fw-semibold a-title">{v.titolo}</div>
+                  {!v.video && <div class="small text-muted mt-1">Video in arrivo</div>}
+                </div>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+
+  <!-- Modale player video -->
+  <div class="modal fade" id="videoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px;overflow:hidden">
+        <div class="modal-header border-0">
+          <h3 class="h5 font-heading a-title mb-0" data-modal-title></h3>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="ratio ratio-16x9" data-player-slot></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { Modal } from "bootstrap";
+
+    const modalEl = document.getElementById("videoModal")!;
+    const modal = new Modal(modalEl);
+    const slot = modalEl.querySelector("[data-player-slot]")!;
+    const titleEl = modalEl.querySelector("[data-modal-title]")!;
+
+    function openVideo(el: HTMLElement) {
+      const type = el.getAttribute("data-source-type");
+      const src = el.getAttribute("data-src");
+      const title = el.getAttribute("data-title") ?? "";
+      if (!src) return; // nessun video caricato per questa storia
+      titleEl.textContent = title;
+      slot.innerHTML =
+        type === "youtube"
+          ? `<iframe src="${src}" title="${title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+          : `<video src="${src}" controls autoplay playsinline></video>`;
+      modal.show();
+    }
+
+    document.querySelectorAll<HTMLElement>("[data-video-trigger]").forEach((el) => {
+      el.addEventListener("click", () => openVideo(el));
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openVideo(el);
+        }
+      });
+    });
+
+    // Ferma la riproduzione alla chiusura (svuota lo slot).
+    modalEl.addEventListener("hidden.bs.modal", () => {
+      slot.innerHTML = "";
+    });
+  </script>
+</AlunnoLayout>

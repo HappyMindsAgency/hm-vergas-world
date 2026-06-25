@@ -1,0 +1,68 @@
+---
+// Header/Navbar condiviso del frontend pubblico (brief §3, §9.1).
+// Un solo componente riusato su tutte le pagine pubbliche.
+// Gli ancoraggi di home usano /#... così funzionano anche dalle pagine secondarie.
+---
+
+<header class="topbar">
+  <a class="brand" href="/" aria-label="Verga's World — Borgo della Cunziria">
+    <img class="brand-logo" src="/immagini/figma-nav-logo.png" alt="Borgo della Cunziria" width="123" height="35" />
+  </a>
+  <nav aria-label="Sezioni principali">
+    <a href="/#mappa">Mappa</a>
+    <a href="/#indizio">Indizio</a>
+    <a href="/#characters-title">Personaggi</a>
+    <a href="/#storie">Storie</a>
+    <a href="/#visita">Visita</a>
+    <a href="/borgo-cunziria">Il Borgo</a>
+    <a class="nav-cta" href="/insegnante/login">Area docenti</a>
+  </nav>
+  <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="kid-menu" aria-label="Apri menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div id="kid-menu" class="kid-menu" data-kid-menu hidden>
+    <a href="/#mappa">Mappa</a>
+    <a href="/#indizio">Indizio</a>
+    <a href="/#characters-title">Personaggi</a>
+    <a href="/#storie">Storie</a>
+    <a href="/#visita">Visita</a>
+    <a href="/borgo-cunziria">Il Borgo</a>
+    <a class="nav-cta" href="/insegnante/login">Area docenti</a>
+  </div>
+</header>
+
+<script>
+  // Menu hamburger dell'Header condiviso (su ogni pagina pubblica).
+  // ponytail: vive qui col componente che controlla, non in uno script esterno.
+  const menuToggle = document.querySelector<HTMLButtonElement>("[data-menu-toggle]");
+  const kidMenu = document.querySelector<HTMLElement>("[data-kid-menu]");
+
+  function closeMenu() {
+    if (!menuToggle || !kidMenu) return;
+    menuToggle.setAttribute("aria-expanded", "false");
+    kidMenu.hidden = true;
+  }
+
+  menuToggle?.addEventListener("click", () => {
+    if (!kidMenu) return;
+    const isOpen = menuToggle.getAttribute("aria-expanded") === "true";
+    menuToggle.setAttribute("aria-expanded", String(!isOpen));
+    kidMenu.hidden = isOpen;
+  });
+
+  kidMenu?.querySelectorAll("a").forEach((link) => {
+    link.addEventListener("click", closeMenu);
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!kidMenu || !menuToggle || kidMenu.hidden) return;
+    if (kidMenu.contains(event.target as Node) || menuToggle.contains(event.target as Node)) return;
+    closeMenu();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || !kidMenu || !menuToggle || kidMenu.hidden) return;
+    closeMenu();
+    menuToggle.focus();
+  });
+</script>

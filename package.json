@@ -8,9 +8,21 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "test": "node --experimental-strip-types src/lib/helpers.check.ts && node --experimental-strip-types src/lib/indizioGiorno.check.ts"
   },
   "dependencies": {
-    "astro": "^6.4.6"
+    "@astrojs/vercel": "^10.0.8",
+    "@supabase/supabase-js": "^2.108.2",
+    "astro": "^6.4.6",
+    "bootstrap": "^5.3.8",
+    "fflate": "^0.8.3",
+    "nodemailer": "^9.0.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@types/nodemailer": "^8.0.1",
+    "typescript": "^6.0.3"
   }
 }

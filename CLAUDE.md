@@ -1,75 +1,151 @@
-# CLAUDE.md
+# CLAUDE.md — Verga's World
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guida operativa per Claude Code. Definisce stack, comandi, convenzioni, sicurezza e
+workflow multi-agentico. **Caricato automaticamente a ogni sessione.**
 
-## What this is
+## Gerarchia dei documenti
+1. **`BRIEF_VERGAS_WORLD.md`** → fonte **funzionale** autorevole (cosa costruire).
+2. **`CLAUDE.md`** (questo file) + **`AGENTS.md`** → fonte **tecnica/convenzioni** autorevole (come costruire).
+3. **`docs/INTEGRATION.md`** → registro dei contratti e delle interfacce tra agenti.
 
-**Verga's World** is a multi-page educational website for the Casa Verga museum in Vizzini (Sicily). It introduces children (ages 6–12) to Giovanni Verga's works through an illustrated interactive map, character cards, a daily clue game, and an unlockable "Adventure Code" quiz experience. All user-facing copy is in **Italian**.
+In caso di conflitto sulle convenzioni vince questo file. In caso di conflitto sui requisiti vince il brief.
 
-The site is an **Astro** static site (migrated from plain HTML on 2026-06-12). Pages live in `src/pages/*.astro` and share a single `src/layouts/BaseLayout.astro`. The original interactive logic is **unchanged vanilla JS** served from `public/scripts/` and loaded with `is:inline` `<script>` tags (so global ordering — e.g. `quiz-data.js` before `adventure.js` — and `window.*` globals are preserved). Styling is still the **hand-written CSS** in `src/styles/`, imported per-page (not Tailwind — see note below).
+---
 
-## Running locally
+## Stack
+- **Astro** (intero progetto) · **Supabase** (DB/Auth/Storage) · **Vercel** (deploy).
+- **Tailwind** → solo Sezione 1 (frontend pubblico).
+- **Bootstrap** → Sezioni 2/3/4 (aree riservate).
+- **MCP Figma** per le grafiche (node-id nel brief §10).
+- TypeScript ovunque.
+
+---
+
+## Comandi essenziali
+> Allinea questi script al `package.json` reale; se mancano, aggiungili.
 
 ```bash
-npm install
-npm run dev       # dev server (http://localhost:4321)
-npm run build     # static build -> dist/
-npm run preview   # serve the built dist/
+npm install            # dipendenze
+npm run dev            # dev server Astro
+npm run build          # build di produzione
+npm run preview        # anteprima build
+npx astro check        # typecheck Astro/TS — eseguire PRIMA di ogni commit
+npm run lint           # lint (se configurato)
 ```
 
-There are no unit tests or linters. `astro build` is the de-facto check — it fails on broken imports, bad `.astro` syntax, or missing assets.
+Supabase (CLI, se in uso):
+```bash
+supabase start                         # stack locale
+supabase migration new <nome>          # nuova migration
+supabase db push                       # applica migrations
+supabase gen types typescript --local  # genera i tipi condivisi
+```
 
-### Styling / Tailwind status
-Styling lives entirely in `src/styles/{styles,teacher,adventure}.css`, each imported by the pages that need it so Astro bundles/scopes it per-page. `src/styles/a11y.css` is global (imported by `BaseLayout`) and holds focus-visible, reduced-motion, and the `.visually-hidden` util. `tailwind.config.js` defines design tokens (brand `#1A3A5C` / accent `#E07B2A` / warm `#F2C94C`, Fraunces/Nunito, radii, shadows) but **Tailwind is not wired up** — markup uses no utility classes. A future migration to compiled Tailwind is planned; keep the legacy CSS authoritative until then.
+---
 
-## Routing / page structure
+## Struttura del progetto (convenzione)
+```
+src/
+  config/        # costanti, soglie, parametri di gioco, testi fissi (config VISIBILE)
+  data/          # dati hardcodati (es. indizi.ts per "L'indizio di Verga")
+  types/         # tipi TS condivisi — CONTRATTO, generati da Supabase
+  lib/           # client Supabase (browser vs server), helper condivisi
+  components/    # componenti riusabili (Header, Footer, UI primitives = CONTRATTO)
+  layouts/       # layout per route group (pubblico vs aree riservate)
+  pages/         # routing Astro
+    index.astro            # frontend pubblico (Tailwind)
+    museo/                 # Sezione 2 — admin (Bootstrap)
+    docenti/               # Sezione 3 (Bootstrap)
+    studenti/              # Sezione 4 — alunni (Bootstrap)
+    api/                   # API route server-side (service_role NON esce da qui)
+supabase/
+  migrations/    # schema versionato = CONTRATTO
+docs/
+  INTEGRATION.md
+```
 
-Astro file-based routing under `src/pages/`. Clean URLs (no `.html`); the flat marketing pages became routes:
+---
 
-- `index.astro` → `/` — homepage: interactive Vizzini map, character carousel, video vault, daily clue game. (Hand-authored, not machine-converted.)
-- `borgo-cunziria.astro`, `famiglie.astro`, `scuole.astro` → `/borgo-cunziria`, `/famiglie`, `/scuole` — marketing/info.
-- `avventura/` → `/avventura` (code entry), `/avventura/passaporto` (badge progress), `/avventura/missione/la-lupa` (quiz runner).
-- `insegnante/` → `/insegnante/{login,dashboard,classe,materiali,impostazioni}`. `/insegnante` redirects to `/insegnante/dashboard` (configured in `astro.config.mjs`, not a page).
-- `invito/` → `/invito` — teacher invite landing.
+## Convenzioni di codice
+- **Single responsibility**: una funzione fa una cosa sola; il nome la dichiara.
+- **Config visibile**: niente "magic number" o testi sparsi nel codice → in `src/config` o `src/data`.
+- **No logica duplicata**: estrai helper condivisi in `src/lib`. Esempi obbligati:
+  - formattazione nome alunno (`Marco Rossi` → `Marco R.`; `Marco Antonio Rossi` → `Marco A. R.`);
+  - generazione/validazione codice classe;
+  - validazione login alunno (codice + nome).
+- **Manutenibilità senza AI**: codice leggibile e modificabile da un umano senza assistenza. Niente astrazioni non documentate.
+- **Naming coerente** tra DB, `src/types` e componenti.
+- **Commenti** solo sul *perché*, mai sul *cosa*.
+- **Typecheck pulito** prima di ogni commit (`npx astro check`).
 
-All internal links and asset paths are **absolute** (`/avventura`, `/immagini/…`, `/scripts/…`). When adding pages/links, use absolute paths — there are no relative `../` links anymore.
+---
 
-### How the pages were generated
-`tools/convert.mjs` was a one-shot migration script: it lifted each old `<body>`, rewrote relative paths to absolute clean URLs, injected `loading="lazy"`/`decoding="async"`/`alt=""` on images, and wrapped the body in `BaseLayout` via `<Fragment set:html={...}>`. The generated `.astro` files are now the source of truth — **edit them directly; do not re-run the script** (re-running would overwrite hand edits). The machine-converted pages embed their body as a JSON-encoded `set:html` string; `index.astro` is the exception (fully hand-written, normal markup).
+## CSS: Tailwind + Bootstrap
+- Tailwind **solo** sotto le route pubbliche; Bootstrap **solo** sotto le aree riservate.
+- I due framework vanno **isolati** per route group per evitare conflitti di reset/specificità.
+- ⚠️ La strategia di isolamento definitiva è un **punto aperto** (brief §11): da concordare con l'orchestratore prima di scrivere CSS condiviso.
 
-### BaseLayout
-`BaseLayout.astro` owns `<head>` (meta, canonical, Open Graph, `lang="it"`), the skip link, and Google-Fonts loading. Props: `title`, `description`, `fonts` (`"main"` = Lexend+Fredericka / `"adventure"` = Abel+Source Serif 4 / `"none"`), `scripts` (array of `{src, defer}` served from `public/`), `page` (→ `<body data-page>` for `adventure.js` dispatch), `bodyClass`. The page body goes in the default slot; extra `<head>` content via the `head` named slot.
+---
 
-### Original assets
-- `public/immagini/` — all images and SVG badges (served at `/immagini/…`).
-- `public/scripts/` — the vanilla JS modules (served at `/scripts/…`).
+## Sicurezza (vincoli non negoziabili)
+- **Mai** chiavi/token/credenziali nel repo, nemmeno temporaneamente. Solo variabili d'ambiente
+  (`.env` locale + Environment Variables su Vercel).
+- Verifica che `.env`, `.env.*` e file di credenziali siano in **`.gitignore` prima del primo commit**.
+- Sul **client** gira solo la `anon` key. La **`service_role` key** vive **esclusivamente** nelle
+  API route server-side / Edge Functions e non deve mai raggiungere il browser.
+- **RLS attiva su tutte le tabelle.** Nessuna tabella senza policy. Policy minime:
+  - docente → solo le proprie classi/alunni/progressi;
+  - admin → docenti e materiali secondo le sue funzioni.
+- Prima di un commit, controlla con un diff che non siano finiti segreti nei file tracciati.
 
-## JavaScript modules (`public/scripts/`)
+---
 
-Scripts are plain classic `<script>` includes (no ES modules/bundler), emitted by `BaseLayout` as `is:inline`. Key shared conventions:
+## Auth
+- **Admin / Docenti** → Supabase Auth (email + password). Flussi: invito docente, reset password, completamento registrazione.
+- **Alunni** → **NO Supabase Auth**. Login con `codice classe + display_name`. Le operazioni alunno
+  (lettura video/quiz, salvataggio tentativi/badge) passano per **API route server-side** che validano
+  e usano la `service_role` key lato server. Sessione effimera, niente recupero password, niente logout.
+- Meccanismo esatto della sessione alunno = punto aperto (brief §11.2): confermare prima di implementare.
 
-- **DOM hooks use `data-*` attributes**, not classes/IDs, for behavior wiring (e.g. `[data-story]`, `[data-clue-panel]`, `[data-entry-form]`). When adding interactivity, follow this pattern.
-- `app.js` — homepage map + daily clue. The "clue of the day" is deterministic: `dailyClues[floor(Date.now()/86400000) % len]`, so it rotates every 24h with no backend.
-- `characters.js` — homepage character carousel scrolling.
-- `adventure.js` — the core quiz/passport engine (see below).
-- `teacher.js` — teacher-page UI (copy-code toast, help modal, invite-token handling, language toggle persisted to `localStorage["teacher-language"]`).
+---
 
-### Adventure quiz engine (`public/scripts/adventure.js`)
+## Workflow multi-agentico
+- **Orchestratore** (thread principale): possiede le **fondamenta condivise** (schema, RLS, auth, tipi,
+  componenti, isolamento CSS), le **congela** come contratti, integra gli output, fa da arbitro sui merge.
+- **Subagent** (`.claude/agents/`): uno per sezione — `frontend`, `admin`, `docenti`, `alunni`.
+- **Contratti condivisi** (schema DB, `src/types`, contratti API, componenti condivisi, `INTEGRATION.md`):
+  un subagent **non li modifica mai da solo**. Se gli serve una modifica → **si ferma e segnala all'orchestratore**.
+- Lo scambio di informazioni tra agenti avviene **solo** tramite `docs/INTEGRATION.md` e i contratti, non in tempo reale.
+- **Sequenza:** Fase 0 (orchestratore) → poi le sezioni. Per il primo giro: ordine
+  `Frontend → Admin → Docenti → Alunni` (rispetta le dipendenze: Admin produce materiali e quiz prima che Docenti/Alunni li consumino).
 
-This is the most stateful part of the codebase. Understand it before touching the adventure flow:
+---
 
-- The single script handles three pages, dispatched by `document.body.dataset.page` (`"entry"`, `"passport"`, or `"mission"`). Each page must set `<body data-page="…">`.
-- **Auth is client-side only.** `VALID_CODES` is a hard-coded array of demo codes (e.g. `VRG-2024`, `VIZZINI`). Entering a valid code + name writes a session to `localStorage["vergaAdventure"]`. There is no real authentication.
-- **Quiz content has two sources:** `public/scripts/quiz-data.js` sets `window.VERGA_QUIZ_DATA` (the authoritative Italian quiz set, keyed by `storyId`); `adventure.js` transforms it via `buildQuizzesFromData()`. If that global is absent, it falls back to the inline `FALLBACK_QUIZZES` constant. **The two sources duplicate question content — keep them in sync** when editing quizzes, and load `quiz-data.js` before `adventure.js`.
-- **Progress** is stored in `localStorage["vergaCompletions"]`, namespaced by completion scope (`session.classId || session.code || "default"`). `getAllCompletions()` migrates an older flat (un-namespaced) store on read — preserve that migration if you refactor.
-- The 7 stories/badges are defined by the `STORIES` array and `STORY_IMAGES` (SVG badges in `public/immagini/`). Story IDs (`carletto-arriva`, `la-lupa`, etc.) are the join key across `STORIES`, `quiz-data.js`, `STORY_IMAGES`, and the `?storyId=` query param used by the mission page.
+## Git
+- Operazioni Git via **GitHub Desktop** (no CLI).
+- Niente segreti nei commit (vedi Sicurezza).
+- Commit piccoli e tematici, un commit non mescola più sezioni.
+- Policy parallelo vs sequenziale (worktrees/branch) = punto aperto (brief §11.10).
 
-## Supabase (planned backend, not yet wired)
+---
 
-`supabase/teacher-dashboard.sql` defines the intended teacher backend: `teacher_profiles`, a `class_progress` view, and RLS policies over `adventure_codes` / `mission_completions`. **No page currently imports a Supabase client** — the teacher dashboard and adventure flow are still front-end mocks. This SQL is the schema to build against when the backend is connected; align any new code (e.g. replacing `VALID_CODES` or `vergaCompletions` with real persistence) with these table/column names.
+## MCP Figma
+- Accedi alle grafiche con i `node-id` della tabella nel brief §10.
+- Estrai prima HTML/CSS semantico, poi adatta al framework della sezione (Tailwind o Bootstrap).
 
-## Conventions
+---
 
-- Italian UI text frequently omits accents in source strings (e.g. "puo", "liberta", "citta") — match the surrounding style rather than "correcting" them unless asked.
-- Internal links and asset references are **absolute** (`/avventura`, `/immagini/…`). Image references inside JS (`app.js` `images:[…]`, `adventure.js` `STORY_IMAGES`) and the redirect targets in `adventure.js` are also absolute — keep them that way.
-- The old `immagini/`, `src/*.css`, `src/*.js` top-level layout and the flat `*.html` pages no longer exist; assets moved to `public/` and `src/` under the Astro layout.
+## Checklist pre-commit
+- [ ] `npx astro check` pulito
+- [ ] Nessun segreto nei file tracciati
+- [ ] RLS attiva sulle nuove tabelle
+- [ ] `service_role` non raggiunge il client
+- [ ] Interfacce trasversali aggiornate in `docs/INTEGRATION.md`
+- [ ] Nessuna modifica unilaterale ai contratti condivisi
+
+---
+
+## Prima di scrivere codice
+Risolvi i **Punti aperti** rilevanti del brief (§11): schema DB, auth alunni, servizio email,
+regola dell'indizio, formato codice classe, Figma alunni, formato Excel, PDF, contenuti quiz,
+policy multi-agente. In caso di dubbio architetturale: **proponi e attendi conferma**.

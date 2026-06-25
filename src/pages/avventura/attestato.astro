@@ -1,0 +1,46 @@
+---
+// Attestato finale (brief §9.4, ADR-8): pagina HTML + window.print, CSS @media print,
+// NESSUNA libreria. Disponibile solo quando l'alunno ha conquistato tutti e 7 i
+// badge. SSR auth-gated: la verifica del completamento è server-side (non ci si
+// fida del client).
+export const prerender = false;
+
+import AlunnoLayout from "../../layouts/AlunnoLayout.astro";
+import { getStudentSession } from "../../lib/alunni/session";
+import { getPassaporto } from "../../lib/alunni/data";
+
+const session = getStudentSession(Astro.cookies);
+if (!session) return Astro.redirect("/avventura");
+
+const passaporto = await getPassaporto(session.id);
+// Gate server-side: senza i 7 badge si torna al passaporto.
+if (!passaporto.completed) return Astro.redirect("/avventura/passaporto");
+
+const oggi = new Date().toLocaleDateString("it-IT", { day: "numeric", month: "long", year: "numeric" });
+---
+
+<AlunnoLayout title="Attestato | Verga's World" topbar={false}>
+  <div class="attestato-page">
+    <div class="attestato-sheet">
+      <p class="att-eyebrow">Casa Museo Giovanni Verga · Vizzini</p>
+      <h1>Attestato di Esplorazione</h1>
+      <p class="att-body mb-1">Si attesta che l'esploratrice / l'esploratore</p>
+      <div class="att-name">{session.displayName}</div>
+      <p class="att-body">
+        ha completato l'esplorazione del <strong>Verga's World</strong>, guardando tutte e sette le
+        storie animate e conquistando tutti e sette i badge del Passaporto dell'Avventura.
+      </p>
+      <div class="att-seal">🏆</div>
+      <p class="att-body mt-2" style="font-size:.9rem;color:#6b7280">Vizzini, {oggi}</p>
+    </div>
+
+    <div class="attestato-actions">
+      <button type="button" class="btn btn-a-blue" data-print>🖨️ Stampa / Salva in PDF</button>
+      <a href="/avventura/passaporto" class="btn btn-a-outline">← Torna al Passaporto</a>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector("[data-print]")?.addEventListener("click", () => window.print());
+  </script>
+</AlunnoLayout>

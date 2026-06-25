@@ -1,0 +1,294 @@
+---
+// Dettaglio docente (Figma 110-1514): riepilogo, reset password, assegnazione
+// materiali (checkbox → material_assignments), Modifica/Disattiva/Cancella.
+// La cancellazione richiede di digitare il nome del docente e propaga a cascata
+// (FK on delete cascade: profiles → classes → students → progressi).
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+import { getTeacherDetail, getMaterials, getAssignedMaterialIds } from "../../../lib/admin/data";
+import { MATERIAL_CATEGORY_LABELS, PROFILE_STATUS_LABELS, PROFILE_STATUS_BADGE } from "../../../config/admin";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const { id } = Astro.params;
+const teacher = id ? await getTeacherDetail(id) : null;
+if (!teacher) return Astro.redirect("/museo/docenti");
+
+const [materials, assignedIds] = await Promise.all([
+  getMaterials(),
+  getAssignedMaterialIds(teacher.id),
+]);
+
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+const fullName = `${teacher.nome} ${teacher.cognome}`;
+const initials = `${teacher.nome[0] ?? ""}${teacher.cognome[0] ?? ""}`.toUpperCase();
+function fmtDate(iso: string | null): string {
+  return iso ? new Date(iso).toLocaleDateString("it-IT") : "—";
+}
+---
+
+<MuseoLayout title={`${fullName} | Area Museo`} active="/museo/docenti" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3">
+    <a href="/museo">Dashboard</a> / <a href="/museo/docenti">Docenti</a> / {fullName}
+  </nav>
+
+  <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="font-heading museo-title display-6 mb-1">{fullName}</h1>
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">{teacher.istitutoNome ?? "—"}</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap" data-teacher-id={teacher.id} data-teacher-name={fullName} data-teacher-email={teacher.email}>
+      <button class="btn btn-museo-red px-3" data-bs-toggle="modal" data-bs-target="#modificaModal">Modifica docente</button>
+      <button id="btn-toggle-stato" class="btn btn-outline-museo-blue px-3" data-status={teacher.status}>
+        {teacher.status === "disabled" ? "Riattiva account" : "Disattiva account"}
+      </button>
+      <button class="btn btn-outline-museo-red px-3" data-bs-toggle="modal" data-bs-target="#cancellaModal">Cancella</button>
+      <a class="btn btn-light px-3" href="/museo/docenti">← Torna all'elenco</a>
+    </div>
+  </header>
+
+  <div id="page-alert" class="alert d-none" role="alert"></div>
+
+  <!-- Riepilogo -->
+  <section class="museo-card p-4 mb-4">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="d-flex flex-column align-items-center text-center">
+          <span class="avatar-initials" style="width:80px;height:80px;border-radius:40px;font-size:1.6rem">{initials}</span>
+          <h2 class="h5 mt-3 mb-1">{fullName}</h2>
+          <span class={`badge ${PROFILE_STATUS_BADGE[teacher.status]}`}>{PROFILE_STATUS_LABELS[teacher.status]}</span>
+        </div>
+      </div>
+      <div class="col-lg-8">
+        <h3 class="stat-label mb-3">Informazioni personali</h3>
+        <dl class="row mb-3">
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Nome e Cognome</dt>
+          <dd class="col-sm-8 fw-semibold">{fullName}</dd>
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Email</dt>
+          <dd class="col-sm-8"><a href={`mailto:${teacher.email}`} style="color:var(--museo-blue)">{teacher.email}</a></dd>
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Registrazione</dt>
+          <dd class="col-sm-8">{fmtDate(teacher.created_at)}</dd>
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Ultimo accesso</dt>
+          <dd class="col-sm-8">{fmtDate(teacher.last_login_at)}</dd>
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Istituto</dt>
+          <dd class="col-sm-8">{teacher.istitutoNome ?? "—"}</dd>
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Classi</dt>
+          <dd class="col-sm-8">{teacher.classiCount}</dd>
+          <dt class="col-sm-4 fw-normal" style="color:rgba(55,65,81,.6)">Studenti</dt>
+          <dd class="col-sm-8">{teacher.studentiCount}</dd>
+        </dl>
+        <button id="btn-reset-pw" class="btn btn-outline-museo-blue">Invia reset password via email</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assegnazione materiali -->
+  <section class="museo-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading museo-title h4 mb-0">Materiali assegnati</h2>
+      <a class="btn btn-sm btn-outline-museo-blue" href="/museo/materiali">Gestisci libreria →</a>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col-lg">
+        <input id="m-search" class="form-control" type="search" placeholder="Cerca materiale…" />
+      </div>
+      <div class="col-lg-auto">
+        <select id="m-cat" class="form-select">
+          <option value="">Categoria: Tutte</option>
+          {Object.entries(MATERIAL_CATEGORY_LABELS).map(([v, label]) => <option value={v}>{label}</option>)}
+        </select>
+      </div>
+    </div>
+    {materials.length === 0 ? (
+      <p class="mb-0" style="color:rgba(55,65,81,.6)">Nessun materiale in libreria. Caricali dalla sezione Materiali.</p>
+    ) : (
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <tbody id="materiali-assign">
+            {materials.map((m) => (
+              <tr class="materiale-row" data-nome={m.nome.toLowerCase()} data-cat={m.category}>
+                <td style="width:48px">
+                  <input
+                    class="form-check-input m-assign"
+                    type="checkbox"
+                    data-material-id={m.id}
+                    checked={assignedIds.has(m.id)}
+                  />
+                </td>
+                <td class="fw-semibold">{m.nome}</td>
+                <td><span class="pill-blue">{MATERIAL_CATEGORY_LABELS[m.category]}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+  <!-- Modale Modifica -->
+  <div class="modal fade" id="modificaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0">Modifica docente</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="modifica-form">
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label stat-label" for="ed-nome">Nome</label>
+                <input class="form-control" id="ed-nome" name="nome" value={teacher.nome} required />
+              </div>
+              <div class="col-6">
+                <label class="form-label stat-label" for="ed-cognome">Cognome</label>
+                <input class="form-control" id="ed-cognome" name="cognome" value={teacher.cognome} required />
+              </div>
+              <div class="col-12">
+                <label class="form-label stat-label" for="ed-email">Email</label>
+                <input class="form-control" id="ed-email" name="email" type="email" value={teacher.email} required />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4">Salva</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Cancellazione (richiede il nome) -->
+  <div class="modal fade" id="cancellaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading mb-0" style="color:var(--museo-red)">Cancella docente</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="cancella-form">
+          <div class="modal-body">
+            <p class="mb-2">
+              Questa azione è <strong>irreversibile</strong>: elimina il docente e <strong>a cascata</strong>
+              le sue classi, gli alunni e tutti i progressi.
+            </p>
+            <p class="small mb-3" style="color:rgba(55,65,81,.7)">
+              Per confermare, digita il nome completo del docente: <strong>{fullName}</strong>
+            </p>
+            <div id="del-alert" class="alert alert-danger d-none" role="alert"></div>
+            <input class="form-control" id="del-confirm" placeholder={fullName} autocomplete="off" />
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4" id="del-submit" disabled>Cancella definitivamente</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script is:inline define:vars={{ teacherId: teacher.id, fullName, email: teacher.email }}>
+    const pageAlert = document.getElementById("page-alert");
+    function notify(msg, ok = true) {
+      pageAlert.classList.remove("d-none", "alert-success", "alert-danger");
+      pageAlert.classList.add(ok ? "alert-success" : "alert-danger");
+      pageAlert.textContent = msg;
+    }
+
+    // Reset password
+    document.getElementById("btn-reset-pw")?.addEventListener("click", async () => {
+      const res = await fetch("/api/docenti/reset-password", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      notify(res.ok ? "Email di reset inviata." : "Invio non riuscito.", res.ok);
+    });
+
+    // Toggle stato (disattiva / riattiva)
+    const toggleBtn = document.getElementById("btn-toggle-stato");
+    toggleBtn?.addEventListener("click", async () => {
+      const current = toggleBtn.dataset.status;
+      const next = current === "disabled" ? "active" : "disabled";
+      const res = await fetch(`/api/docenti/${teacherId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ status: next }),
+      });
+      if (res.ok) window.location.reload();
+      else notify("Aggiornamento stato non riuscito.", false);
+    });
+
+    // Modifica
+    const modForm = document.getElementById("modifica-form");
+    modForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(modForm);
+      const res = await fetch(`/api/docenti/${teacherId}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ nome: fd.get("nome"), cognome: fd.get("cognome"), email: fd.get("email") }),
+      });
+      if (res.ok) window.location.reload();
+      else notify("Salvataggio non riuscito.", false);
+    });
+
+    // Assegnazione materiali (checkbox → POST/DELETE)
+    document.querySelectorAll(".m-assign").forEach((cb) => {
+      cb.addEventListener("change", async () => {
+        const materialId = cb.dataset.materialId;
+        const res = await fetch(`/api/docenti/${teacherId}/materiali`, {
+          method: cb.checked ? "POST" : "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ materialId }),
+        });
+        if (!res.ok) {
+          cb.checked = !cb.checked;
+          notify("Modifica assegnazione non riuscita.", false);
+        }
+      });
+    });
+
+    // Filtri materiali
+    const mSearch = document.getElementById("m-search");
+    const mCat = document.getElementById("m-cat");
+    function filterMaterials() {
+      const q = (mSearch?.value || "").toLowerCase();
+      const cat = mCat?.value || "";
+      document.querySelectorAll(".materiale-row").forEach((r) => {
+        const ok = (!q || r.dataset.nome.includes(q)) && (!cat || r.dataset.cat === cat);
+        r.style.display = ok ? "" : "none";
+      });
+    }
+    mSearch?.addEventListener("input", filterMaterials);
+    mCat?.addEventListener("change", filterMaterials);
+
+    // Cancellazione: abilita solo se il nome combacia
+    const delInput = document.getElementById("del-confirm");
+    const delSubmit = document.getElementById("del-submit");
+    const delAlert = document.getElementById("del-alert");
+    delInput?.addEventListener("input", () => {
+      delSubmit.disabled = delInput.value.trim() !== fullName;
+    });
+    document.getElementById("cancella-form")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      delAlert.classList.add("d-none");
+      const res = await fetch(`/api/docenti/${teacherId}`, {
+        method: "DELETE",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ confirmName: delInput.value.trim() }),
+      });
+      if (res.ok) {
+        window.location.href = "/museo/docenti";
+      } else {
+        const body = await res.json().catch(() => ({}));
+        delAlert.classList.remove("d-none");
+        delAlert.textContent = body.error || "Cancellazione non riuscita.";
+      }
+    });
+  </script>
+</MuseoLayout>

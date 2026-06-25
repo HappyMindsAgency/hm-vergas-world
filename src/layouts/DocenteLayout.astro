@@ -1,0 +1,75 @@
+---
+// Shell dell'Area Docenti: sidebar a gradiente + area contenuti (Bootstrap).
+// Wrappa ReservedLayout (unico importatore di Bootstrap, ADR-11). I token di
+// design vivono in src/styles/docenti.css, scoping su .docenti per non collidere.
+import ReservedLayout from "./ReservedLayout.astro";
+import { DOCENTE_NAV } from "../config/docenti";
+import DocenteIcon from "../components/docenti/DocenteIcon.astro";
+import "../styles/docenti.css";
+
+interface Props {
+  title: string;
+  /** pathname corrente per evidenziare la voce di menu attiva */
+  active: string;
+  teacherName?: string;
+  teacherSubtitle?: string;
+}
+const { title, active, teacherName = "Docente", teacherSubtitle = "Area Docenti" } = Astro.props;
+
+function isActive(match: string): boolean {
+  if (match === "/insegnante") return active === "/insegnante" || active === "/insegnante/";
+  return active === match || active.startsWith(match + "/");
+}
+---
+
+<ReservedLayout title={title} bodyClass="docenti">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="d-shell d-flex">
+    <aside class="d-sidebar d-flex flex-column justify-content-between py-4">
+      <div>
+        <div class="d-flex align-items-center gap-2 px-4 mb-5">
+          <span class="d-logo-badge">VW</span>
+          <span class="nav-label d-flex flex-column lh-1 text-cream">
+            <strong class="font-heading fs-5">Verga's World</strong>
+            <small class="text-uppercase opacity-75" style="font-size:.625rem">Docenti</small>
+          </span>
+        </div>
+        <div class="nav-label px-4 mb-5 text-cream">
+          <div class="fw-medium">{teacherName}</div>
+          <div class="opacity-75 small">{teacherSubtitle}</div>
+        </div>
+        <nav class="d-flex flex-column gap-1">
+          {
+            DOCENTE_NAV.map((item) => (
+              <a
+                href={item.href}
+                class:list={["d-nav-item d-flex align-items-center gap-3", { active: isActive(item.match) }]}
+              >
+                <DocenteIcon name={item.icon} />
+                <span>{item.label}</span>
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+      <form method="post" action="/api/insegnante/logout" class="pe-4">
+        <button type="submit" class="d-nav-item d-flex align-items-center gap-3 border-0 bg-transparent w-100 text-start">
+          <DocenteIcon name="logout" />
+          <span>Esci</span>
+        </button>
+      </form>
+    </aside>
+
+    <main class="d-main flex-grow-1 p-4 p-lg-5">
+      <slot />
+    </main>
+  </div>
+</ReservedLayout>

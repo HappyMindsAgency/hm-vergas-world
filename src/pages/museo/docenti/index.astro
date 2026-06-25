@@ -1,0 +1,267 @@
+---
+// Gestione Docenti (Figma 103-4): tabella con filtri (istituto, stato), ricerca
+// nome/cognome e ordinamento. Filtri/ordinamento client-side sui dati SSR.
+// "Nuovo docente" → modale → POST /api/docenti/invito.
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import StatCards from "../../../components/admin/StatCards.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+import { getDashboardStats, getTeachers, getInstitutes } from "../../../lib/admin/data";
+import { PROFILE_STATUS_LABELS, PROFILE_STATUS_BADGE, DOCENTI_SORT_OPTIONS } from "../../../config/admin";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const [stats, teachers, institutes] = await Promise.all([
+  getDashboardStats(),
+  getTeachers(),
+  getInstitutes(),
+]);
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+
+function initials(t: { nome: string; cognome: string }): string {
+  return `${t.nome[0] ?? ""}${t.cognome[0] ?? ""}`.toUpperCase();
+}
+function fmtDate(iso: string | null): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("it-IT");
+}
+---
+
+<MuseoLayout title="Gestione Docenti | Area Museo" active="/museo/docenti" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3"><a href="/museo">Dashboard</a> / Docenti</nav>
+
+  <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="font-heading museo-title display-6 mb-1">Gestione Docenti</h1>
+      <p class="mb-0" style="color:var(--museo-ink)">Visualizza e gestisci tutti i docenti registrati nella piattaforma.</p>
+    </div>
+    <button class="btn btn-museo-red px-3 py-2" data-bs-toggle="modal" data-bs-target="#nuovoDocenteModal">+ Nuovo docente</button>
+  </header>
+
+  <StatCards stats={stats} />
+
+  <!-- Filtri -->
+  <section class="museo-card p-3 mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg">
+        <input id="f-search" class="form-control" type="search" placeholder="Cerca docente per nome o cognome…" />
+      </div>
+      <div class="col-6 col-lg-auto">
+        <select id="f-istituto" class="form-select">
+          <option value="">Istituto: Tutti</option>
+          {institutes.map((i) => <option value={i.id}>{i.nome}</option>)}
+        </select>
+      </div>
+      <div class="col-6 col-lg-auto">
+        <select id="f-stato" class="form-select">
+          <option value="">Stato: Tutti</option>
+          {Object.entries(PROFILE_STATUS_LABELS).map(([v, label]) => <option value={v}>{label}</option>)}
+        </select>
+      </div>
+      <div class="col-6 col-lg-auto">
+        <select id="f-sort" class="form-select">
+          {DOCENTI_SORT_OPTIONS.map((o) => <option value={o.value}>Ordina: {o.label}</option>)}
+        </select>
+      </div>
+      <div class="col-6 col-lg-auto">
+        <button id="f-reset" class="btn btn-link" style="color:var(--museo-red);text-decoration:none">Azzera filtri</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabella -->
+  <section class="museo-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading museo-title h4 mb-0">Elenco Docenti</h2>
+      <span class="pill-blue"><span id="count-visibile">{teachers.length}</span> docenti</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle" id="docenti-table">
+        <thead>
+          <tr class="stat-label">
+            <th>Docente</th>
+            <th>Istituto</th>
+            <th>Classi</th>
+            <th>Studenti</th>
+            <th>Registrazione</th>
+            <th>Ultimo acc.</th>
+            <th>Stato</th>
+            <th class="text-end">Azioni</th>
+          </tr>
+        </thead>
+        <tbody>
+          {teachers.map((t) => (
+            <tr
+              class="docente-row"
+              data-nome={`${t.nome} ${t.cognome}`.toLowerCase()}
+              data-istituto={t.institute_id ?? ""}
+              data-stato={t.status}
+              data-sort-nome={`${t.cognome} ${t.nome}`.toLowerCase()}
+              data-sort-istituto={(t.istitutoNome ?? "").toLowerCase()}
+              data-sort-studenti={t.studentiCount}
+              data-sort-registrazione={t.created_at}
+              data-sort-ultimo_accesso={t.last_login_at ?? ""}
+            >
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="avatar-initials" style="width:36px;height:36px;font-size:.85rem">{initials(t)}</span>
+                  <span>
+                    <span class="fw-semibold d-block">{t.nome} {t.cognome}</span>
+                    <span class="small" style="color:rgba(55,65,81,.6)">{t.email}</span>
+                  </span>
+                </div>
+              </td>
+              <td>{t.istitutoNome ?? "—"}</td>
+              <td>{t.classiCount}</td>
+              <td><span class="fw-semibold" style="color:var(--museo-blue)">{t.studentiCount}</span></td>
+              <td>{fmtDate(t.created_at)}</td>
+              <td>{fmtDate(t.last_login_at)}</td>
+              <td><span class={`badge ${PROFILE_STATUS_BADGE[t.status]}`}>{PROFILE_STATUS_LABELS[t.status]}</span></td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-museo-blue" href={`/museo/docenti/${t.id}`} title="Dettaglio">Dettaglio</a>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p id="no-results" class="d-none text-center py-4 mb-0" style="color:rgba(55,65,81,.6)">Nessun docente corrisponde ai filtri.</p>
+  </section>
+
+  <!-- Modale Nuovo docente -->
+  <div class="modal fade" id="nuovoDocenteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0">Nuovo docente</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <form id="nuovo-docente-form">
+          <div class="modal-body">
+            <div id="nd-alert" class="alert d-none" role="alert"></div>
+            <div class="row g-3">
+              <div class="col-6">
+                <label class="form-label stat-label" for="nd-nome">Nome</label>
+                <input class="form-control" id="nd-nome" name="nome" required />
+              </div>
+              <div class="col-6">
+                <label class="form-label stat-label" for="nd-cognome">Cognome</label>
+                <input class="form-control" id="nd-cognome" name="cognome" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label stat-label" for="nd-email">Email</label>
+                <input class="form-control" id="nd-email" name="email" type="email" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label stat-label" for="nd-istituto">Istituto</label>
+                <select class="form-select" id="nd-istituto" name="instituteId" required>
+                  <option value="" selected disabled>Seleziona…</option>
+                  {institutes.map((i) => <option value={i.id}>{i.nome}</option>)}
+                </select>
+              </div>
+            </div>
+            <p class="small mt-3 mb-0" style="color:rgba(55,65,81,.6)">
+              Riceverà un'email di invito con il link di completamento registrazione.
+            </p>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4">Invia invito</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Filtri + ordinamento client-side (dataset piccolo: tutto SSR-renderizzato).
+    const tbody = document.querySelector("#docenti-table tbody") as HTMLTableSectionElement;
+    const rows = () => Array.from(tbody.querySelectorAll<HTMLTableRowElement>(".docente-row"));
+    const search = document.getElementById("f-search") as HTMLInputElement;
+    const fIst = document.getElementById("f-istituto") as HTMLSelectElement;
+    const fStato = document.getElementById("f-stato") as HTMLSelectElement;
+    const fSort = document.getElementById("f-sort") as HTMLSelectElement;
+    const reset = document.getElementById("f-reset")!;
+    const counter = document.getElementById("count-visibile")!;
+    const noResults = document.getElementById("no-results")!;
+
+    function apply() {
+      const q = search.value.trim().toLowerCase();
+      const ist = fIst.value;
+      const stato = fStato.value;
+      let visible = 0;
+      for (const r of rows()) {
+        const ok =
+          (!q || (r.dataset.nome ?? "").includes(q)) &&
+          (!ist || r.dataset.istituto === ist) &&
+          (!stato || r.dataset.stato === stato);
+        r.style.display = ok ? "" : "none";
+        if (ok) visible++;
+      }
+      counter.textContent = String(visible);
+      noResults.classList.toggle("d-none", visible !== 0);
+
+      // ordinamento
+      const key = fSort.value;
+      const sorted = rows()
+        .filter((r) => r.style.display !== "none")
+        .sort((a, b) => {
+          const av = a.dataset[`sort_${key}` as keyof DOMStringMap] ?? a.dataset[`sort${capitalize(key)}` as keyof DOMStringMap];
+          const bv = b.dataset[`sort_${key}` as keyof DOMStringMap] ?? b.dataset[`sort${capitalize(key)}` as keyof DOMStringMap];
+          return compare(key, av, bv);
+        });
+      for (const r of sorted) tbody.appendChild(r);
+    }
+    function capitalize(s: string) {
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+    function compare(key: string, a?: string, b?: string) {
+      const av = a ?? "";
+      const bv = b ?? "";
+      if (key === "studenti") return Number(bv) - Number(av);
+      if (key === "registrazione" || key === "ultimo_accesso") return bv.localeCompare(av); // recenti prima
+      return av.localeCompare(bv);
+    }
+
+    [search, fIst, fStato, fSort].forEach((el) => el.addEventListener("input", apply));
+    reset.addEventListener("click", () => {
+      search.value = "";
+      fIst.value = "";
+      fStato.value = "";
+      fSort.value = "nome";
+      apply();
+    });
+    apply();
+
+    // Nuovo docente
+    const ndForm = document.getElementById("nuovo-docente-form") as HTMLFormElement;
+    const ndAlert = document.getElementById("nd-alert")!;
+    ndForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      ndAlert.classList.add("d-none");
+      const fd = new FormData(ndForm);
+      const res = await fetch("/api/docenti/invito", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          nome: fd.get("nome"),
+          cognome: fd.get("cognome"),
+          email: fd.get("email"),
+          instituteId: fd.get("instituteId"),
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      ndAlert.classList.remove("d-none", "alert-danger", "alert-success");
+      if (res.ok) {
+        ndAlert.classList.add("alert-success");
+        ndAlert.textContent = body.emailSent ? "Invito inviato!" : "Docente creato (email non inviata).";
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        ndAlert.classList.add("alert-danger");
+        ndAlert.textContent = body.error ?? "Errore durante l'invito.";
+      }
+    });
+  </script>
+</MuseoLayout>

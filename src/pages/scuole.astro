@@ -1,70 +1,70 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/styles.css";
-
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/styles.css"; // token + Header/Footer condivisi
+import "../styles/pagina-interna.css"; // layout pagine interne (scoped .vw-page)
 ---
 
 <BaseLayout
-  title="Porto la mia classe | Verga's World"
+  title="Visite scolastiche | Verga's World"
+  description="Organizza la visita con la tua classe al Museo R.I.VI.VI.: materiali, percorsi guidati, codici avventura e attività collegate alle 7 storie."
   fonts="none"
-  scripts={[{ src: "/scripts/app.js" }]}
 >
-  <header class="topbar">
-        <a class="brand" href="/" aria-label="Verga's World home">
-          <span class="brand-mark">VW</span>
-          <span>
-            <strong>Verga's World</strong>
-            <small>Casa Verga, Vizzini</small>
-          </span>
-        </a>
-        <img decoding="async" loading="lazy" class="header-project-logo" src="/immagini/Logo di Progetto Borgo cunziria.jpg" alt="Logo progetto Borgo della Cunziria" />
-        <nav aria-label="Navigazione pagina">
-          <a href="/">Home</a>
-          <a href="/famiglie">Famiglie</a>
-        </nav>
-        <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="kid-menu" aria-label="Apri menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <div id="kid-menu" class="kid-menu" data-kid-menu hidden>
-          <a href="/">Home</a>
-          <a href="/famiglie">Vengo con la famiglia</a>
-          <a href="/scuole">Porto la mia classe</a>
-          <a href="/borgo-cunziria">Borgo Cunziria</a>
-          <a class="nav-cta" href="/avventura">Ho il Codice Avventura!</a>
+  <Header />
+
+  <main id="main-content" class="vw-page">
+    <!-- HERO (72:695) -->
+    <section
+      class="vw-page__hero"
+      style="--p-hero-img: url('/immagini/figma-museo-facciata.png');"
+      aria-labelledby="scuole-title"
+    >
+      <div class="vw-page__wrap vw-page__hero-inner">
+        <span class="vw-page__pill">Visite scolastiche</span>
+        <h1 id="scuole-title">Organizza la visita con la tua classe</h1>
+        <p class="vw-page__lead">Trova materiali, percorsi guidati e informazioni per rendere la tua esperienza didattica al museo coinvolgente e semplice da preparare.</p>
+      </div>
+    </section>
+
+    <div class="vw-page__wrap vw-page__main">
+      <!-- Percorso didattico (a piena larghezza) -->
+      <article class="vw-card vw-card--shadow">
+        <div class="vw-card__media">
+          <img src="/immagini/figma-piazza-cunziria.png" alt="Classe in visita al Museo R.I.VI.VI." loading="lazy" decoding="async" />
         </div>
-      </header>
+        <div class="vw-card__body">
+          <span class="vw-page__pill">Percorso didattico</span>
+          <h2>Dal museo all'area riservata</h2>
+          <p>La visita comincia nelle stanze del Museo R.I.VI.VI., dove le classi guardano le 7 microstorie di Verga's World. Ogni video racconta una tappa del viaggio di Carletto a Vizzini e apre un tema semplice da discutere insieme: il coraggio, la fiducia, il giudizio, il conflitto, le radici, la memoria.</p>
+          <p>Dopo la visita, il percorso continua nella webapp. Il museo consegna ai referenti scolastici le credenziali per entrare nell'area docenti. Da lì è possibile creare le classi, caricare i nomi e generare i codici avventura da consegnare a bambine e bambini.</p>
+        </div>
+      </article>
 
-      <main id="main-content">
-        <section class="section-heading" style="padding: 36px clamp(18px, 5vw, 64px); text-align: center;">
-          <p class="kicker">Visite scolastiche</p>
-          <h1>Organizza la visita con la tua classe</h1>
-          <p>Trova materiali, percorsi guidati e informazioni per rendere la tua esperienza didattica al museo coinvolgente e semplice da preparare.</p>
-        </section>
-
-        <section class="card" style="margin: 0 auto 32px auto; max-width: 980px; overflow: hidden;">
-          <img decoding="async" loading="lazy" src="/immagini/palazzo di verga.jpg" alt="Ingresso al museo Casa Verga" style="width:100%; height:360px; object-fit:cover; display:block;" />
-          <div class="card-body">
-            <h2>Percorso didattico per le classi</h2>
-            <p>Un itinerario pensato per le scuole con attività in museo suddivise per tema, supporti digitali e materiali da usare prima, durante e dopo la visita.</p>
-            <ul>
-              <li>Proposta di percorso in 7 tappe nelle storie del museo</li>
-              <li>Attività di gruppo su casa, lavoro e comunità</li>
-              <li>Guida per insegnanti e suggerimenti per la preparazione</li>
-            </ul>
-          </div>
-        </section>
-
-        <section class="card" style="margin: 0 auto 32px auto; max-width: 980px; overflow: hidden;">
-          <div class="card-body">
+      <!-- Come organizzare (5/12) + immagine museo (7/12) -->
+      <div class="vw-page__grid vw-page__grid--info">
+        <article class="vw-card vw-card--center">
+          <div class="vw-card__body">
+            <span class="vw-page__pill">Informazioni</span>
             <h2>Come organizzare la visita</h2>
-            <p>Scopri i dettagli pratici per la prenotazione, l'accoglienza in museo, i tempi consigliati e la proposta di percorso per le scuole primarie.</p>
-            <p>La proposta include materiali didattici, esercizi di osservazione e suggerimenti per prolungare l’esperienza in classe.</p>
-            <a class="button primary" href="/">Torna alla homepage</a>
+            <p>Per attivare il percorso, il museo fornisce l'accesso all'area docenti. Una volta entrati, si crea la classe e si carica l'elenco dei nomi. Il sistema genera un codice di accesso semplice da usare: ogni bambina e bambino entra con il codice della classe e il proprio nome.</p>
+            <p>Nell'area riservata la classe può rivedere i video già incontrati durante la visita al museo. Dopo ogni storia si risponde a una serie di quiz pensati per osservare meglio scene, personaggi e oggetti. Al completamento delle attività si sbloccano i badge nel passaporto digitale.</p>
+            <p>L'area docenti permette di seguire l'avanzamento della classe, vedere quali badge sono stati completati e recuperare i materiali utili per continuare il lavoro a scuola: schede, istruzioni e attività collegate alle 7 storie.</p>
           </div>
-        </section>
-      </main>
+        </article>
 
+        <article class="vw-card vw-card--shadow">
+          <div class="vw-card__media" style="aspect-ratio: auto; height: 100%;">
+            <img src="/immagini/figma-museo-facciata.png" alt="Facciata del Museo Verga a Vizzini" loading="lazy" decoding="async" />
+          </div>
+        </article>
+      </div>
 
+      <div class="vw-page__home">
+        <a class="vw-page__home-btn" href="/">Torna alla Home</a>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
 </BaseLayout>

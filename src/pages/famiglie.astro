@@ -1,69 +1,69 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import "../styles/styles.css";
-
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/styles.css"; // token + Header/Footer condivisi
+import "../styles/pagina-interna.css"; // layout pagine interne (scoped .vw-page)
 ---
 
 <BaseLayout
-  title="Vengo con la famiglia | Verga's World"
+  title="Visite in famiglia | Verga's World"
+  description="Pianifica la visita al Museo R.I.VI.VI. con i bambini: 7 storie animate, indizi, personaggi e attività da continuare anche dopo la visita."
   fonts="none"
-  scripts={[{ src: "/scripts/app.js" }]}
 >
-  <header class="topbar">
-        <a class="brand" href="/" aria-label="Verga's World home">
-          <span class="brand-mark">VW</span>
-          <span>
-            <strong>Verga's World</strong>
-            <small>Casa Verga, Vizzini</small>
-          </span>
-        </a>
-        <img decoding="async" loading="lazy" class="header-project-logo" src="/immagini/Logo di Progetto Borgo cunziria.jpg" alt="Logo progetto Borgo della Cunziria" />
-        <nav aria-label="Navigazione pagina">
-          <a href="/">Home</a>
-          <a href="/scuole">Scuole</a>
-        </nav>
-        <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-controls="kid-menu" aria-label="Apri menu">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-        <div id="kid-menu" class="kid-menu" data-kid-menu hidden>
-          <a href="/">Home</a>
-          <a href="/famiglie">Vengo con la famiglia</a>
-          <a href="/scuole">Porto la mia classe</a>
-          <a href="/borgo-cunziria">Borgo Cunziria</a>
-          <a class="nav-cta" href="/avventura">Ho il Codice Avventura!</a>
+  <Header />
+
+  <main id="main-content" class="vw-page">
+    <!-- HERO (71:595) -->
+    <section
+      class="vw-page__hero"
+      style="--p-hero-img: url('/immagini/figma-piazza-cunziria.png');"
+      aria-labelledby="famiglie-title"
+    >
+      <div class="vw-page__wrap vw-page__hero-inner">
+        <span class="vw-page__pill">Visite in famiglia</span>
+        <h1 id="famiglie-title">Pianifica la visita al Museo R.I.VI.VI. con i bambini</h1>
+        <p class="vw-page__lead">Un percorso per scoprire Vizzini, Verga e le sue storie attraverso video, indizi, personaggi e piccole attività da continuare anche dopo la visita.</p>
+      </div>
+    </section>
+
+    <div class="vw-page__wrap vw-page__main">
+      <!-- Esperienza per famiglie (a piena larghezza) -->
+      <article class="vw-card vw-card--shadow">
+        <div class="vw-card__media">
+          <img src="/immagini/figma-piazza-cunziria.png" alt="Bambine e bambini in visita al museo con la famiglia" loading="lazy" decoding="async" />
         </div>
-      </header>
+        <div class="vw-card__body">
+          <span class="vw-page__pill">Esperienza per famiglie</span>
+          <h2>Un viaggio tra storie, oggetti e scoperte</h2>
+          <p>Al Museo R.I.VI.VI. bambini e bambine incontrano le 7 storie di Verga's World: ogni stanza apre una tappa del viaggio di Carletto a Vizzini, tra vicoli, piazze, grotte, colline e oggetti da ricordare.</p>
+          <p>Durante la visita si guardano i video e si seguono i personaggi. Dopo, con il codice avventura, si può entrare nell'area riservata per rivedere le storie, rispondere ai quiz e raccogliere i badge del percorso.</p>
+        </div>
+      </article>
 
-      <main id="main-content">
-        <section class="section-heading" style="padding: 36px clamp(18px, 5vw, 64px); text-align: center;">
-          <p class="kicker">Visite in famiglia</p>
-          <h1>Pianifica la tua visita con i bambini</h1>
-          <p>Una proposta per le famiglie con bambini, con percorsi interattivi, attività scoperta e consigli pratici per una giornata al museo.</p>
-        </section>
-
-        <section class="card" style="margin: 0 auto 32px auto; max-width: 980px; overflow: hidden;">
-          <img decoding="async" loading="lazy" src="/immagini/carletto.jpg" alt="Bambino e famiglia al museo" style="width:100%; height:360px; object-fit:cover; display:block;" />
-          <div class="card-body">
-            <h2>Percorso famiglia</h2>
-            <p>Scopri come trasformare la visita in un’esperienza giocosa per i più piccoli, con momenti dedicati alla scoperta dei personaggi e dei luoghi di Verga.</p>
-            <ul>
-              <li>Attività pensate per bambini 6-12 anni</li>
-              <li>Suggerimenti per rendere la visita coinvolgente e divertente</li>
-              <li>Spunti per giochi, racconti e laboratori in museo</li>
-            </ul>
+      <!-- Come funziona (5/12) + immagine museo (7/12) -->
+      <div class="vw-page__grid vw-page__grid--info">
+        <article class="vw-card vw-card--center">
+          <div class="vw-card__body">
+            <span class="vw-page__pill">Informazioni</span>
+            <h2>Come funziona la visita</h2>
+            <p>La visita al Museo R.I.VI.VI. è pensata per essere vissuta anche con bambini e bambine, senza bisogno di preparazione. Ogni stanza presenta una delle 7 storie di Verga's World: si guarda il video, si incontrano i personaggi e si entra, passo dopo passo, nel viaggio di Carletto a Vizzini.</p>
+            <p>Dopo il video, le famiglie possono esplorare le schede di approfondimento interattive. Le domande, gli indizi e i dettagli da osservare aiutano a guardare meglio ciò che si è appena visto: il sasso di Pina, la bussola di Gesualdo, i disegni di Rosso, i cannoli di Turiddu e Alfio, il nespolo dei Malavoglia.</p>
           </div>
-        </section>
+        </article>
 
-        <section class="card" style="margin: 0 auto 32px auto; max-width: 980px; overflow: hidden;">
-          <div class="card-body">
-            <h2>Come arrivare e cosa portare</h2>
-            <p>Informazioni utili per l’organizzazione pratica della giornata: orari consigliati, indicazioni su accesso e fruizione, e la proposta del percorso narrativo per la famiglia.</p>
-            <a class="button primary" href="/">Torna alla homepage</a>
+        <article class="vw-card vw-card--shadow">
+          <div class="vw-card__media" style="aspect-ratio: auto; height: 100%;">
+            <img src="/immagini/figma-museo-facciata.png" alt="Facciata del Museo Verga a Vizzini" loading="lazy" decoding="async" />
           </div>
-        </section>
-      </main>
+        </article>
+      </div>
 
+      <div class="vw-page__home">
+        <a class="vw-page__home-btn" href="/">Torna alla Home</a>
+      </div>
+    </div>
+  </main>
 
+  <Footer />
 </BaseLayout>
