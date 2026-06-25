@@ -1,0 +1,148 @@
+---
+// Video & Quiz (Area Docenti): consultazione SOLA LETTURA dei contenuti delle 7
+// storie. Il docente visiona i video e i quiz (domande + opzioni con la risposta
+// corretta evidenziata) ma non può MAI modificare: nessun form, nessun pulsante di
+// scrittura, nessuna API. I dati arrivano via getStoriesContent (service_role,
+// import dinamico). SSR protetto come le altre pagine docente.
+export const prerender = false;
+
+import DocenteLayout from "../../../layouts/DocenteLayout.astro";
+import { getTeacherProfile } from "../../../lib/docenti/session";
+import { getStoriesContent } from "../../../lib/docenti/data";
+import { youtubeEmbed } from "../../../lib/youtube";
+
+const teacher = await getTeacherProfile(Astro.cookies);
+if (!teacher) return Astro.redirect("/insegnante/login");
+
+const stories = await getStoriesContent();
+const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
+---
+
+<DocenteLayout
+  title="Video & Quiz | Area Docenti"
+  active="/insegnante/contenuti"
+  teacherName={teacherName}
+  teacherSubtitle="Docente"
+>
+  <header class="mb-4">
+    <h1 class="font-heading d-title display-6 mb-1">Video & Quiz</h1>
+    <p class="mb-0" style="color:var(--d-ink)">
+      I contenuti delle 7 storie che i tuoi alunni affrontano nell'avventura. Solo consultazione.
+    </p>
+  </header>
+
+  {
+    stories.length === 0 ? (
+      <section class="d-card p-5 text-center" style="color:rgba(55,65,81,.6)">
+        I contenuti non sono ancora disponibili. Il museo li pubblicherà a breve.
+      </section>
+    ) : (
+      <div class="accordion" id="storieAccordion">
+        {stories.map((s, i) => {
+          const headingId = `heading-${s.story.id}`;
+          const collapseId = `collapse-${s.story.id}`;
+          return (
+            <div class="accordion-item d-card border-0 mb-3 overflow-hidden">
+              <h2 class="accordion-header" id={headingId}>
+                <button
+                  class:list={["accordion-button", { collapsed: i !== 0 }]}
+                  type="button"
+                  data-bs-toggle="collapse"
+                  data-bs-target={`#${collapseId}`}
+                  aria-expanded={i === 0 ? "true" : "false"}
+                  aria-controls={collapseId}
+                >
+                  <span class="d-flex align-items-center gap-3">
+                    <span class="pill-blue">Storia {s.story.numero}</span>
+                    <span class="fw-semibold">{s.story.titolo}</span>
+                  </span>
+                </button>
+              </h2>
+              <div
+                id={collapseId}
+                class:list={["accordion-collapse collapse", { show: i === 0 }]}
+                aria-labelledby={headingId}
+                data-bs-parent="#storieAccordion"
+              >
+                <div class="accordion-body">
+                  {/* ---- VIDEO ---- */}
+                  <h3 class="font-heading d-accent h5 mb-3">Video</h3>
+                  {s.videos.length === 0 ? (
+                    <p class="mb-4" style="color:rgba(55,65,81,.6)">
+                      Nessun video disponibile per questa storia.
+                    </p>
+                  ) : (
+                    <div class="row g-4 mb-4">
+                      {s.videos.map((v) => (
+                        <div class="col-md-6">
+                          <div class="mb-2 fw-semibold">{v.titolo}</div>
+                          {v.source_type === "youtube" ? (
+                            <div class="ratio ratio-16x9 rounded overflow-hidden">
+                              <iframe
+                                src={youtubeEmbed(v.url_or_path)}
+                                title={v.titolo}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                                loading="lazy"
+                              />
+                            </div>
+                          ) : (
+                            <div>
+                              <div class="ratio ratio-16x9 rounded overflow-hidden">
+                                <video src={v.url_or_path} controls preload="metadata" />
+                              </div>
+                              <a class="small d-inline-block mt-1" href={v.url_or_path} target="_blank" rel="noopener">
+                                Apri il video in una nuova scheda
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* ---- QUIZ ---- */}
+                  <h3 class="font-heading d-accent h5 mb-3">Quiz</h3>
+                  {!s.hasQuiz ? (
+                    <p class="mb-0" style="color:rgba(55,65,81,.6)">
+                      Nessun quiz disponibile per questa storia.
+                    </p>
+                  ) : s.questions.length === 0 ? (
+                    <p class="mb-0" style="color:rgba(55,65,81,.6)">
+                      Il quiz non contiene ancora domande.
+                    </p>
+                  ) : (
+                    <ol class="ps-3 mb-0">
+                      {s.questions.map((q) => (
+                        <li class="mb-4">
+                          <div class="fw-semibold mb-2">{q.testo}</div>
+                          <ul class="list-unstyled mb-0">
+                            {q.options.map((o) => (
+                              <li
+                                class:list={[
+                                  "d-flex align-items-center gap-2 py-2 px-3 mb-2 rounded",
+                                  o.is_correct ? "bg-success-subtle" : "bg-light",
+                                ]}
+                              >
+                                {o.is_correct ? (
+                                  <span class="badge text-bg-success">✓ Corretta</span>
+                                ) : (
+                                  <span class="badge text-bg-light text-secondary border">Opzione</span>
+                                )}
+                                <span class:list={[{ "fw-semibold": o.is_correct }]}>{o.testo}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )
+  }
+</DocenteLayout>

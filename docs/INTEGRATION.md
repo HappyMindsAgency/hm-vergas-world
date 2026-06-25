@@ -149,6 +149,7 @@ Un subagent che ha bisogno di toccare un contratto **scrive qui una richiesta** 
 - **Provisioning docente** — `POST /api/docenti/invito` (Admin) crea `profiles(role='teacher', status='inactive')` + email con link a `/invito`. Il completamento (scelta password + `status='active'`) avviene in Fase 3: `POST /api/insegnante/completa-registrazione`.
 - **Reset password** — riusa `POST /api/docenti/reset-password` (firma congelata), redirect a `/invito?reset=1` (la stessa pagina gestisce invito e recovery).
 - **Materiali assegnati** — lettura via RLS `materials_assigned`; URL di download **firmati temporanei** generati server-side (service_role) in `getAssignedMaterials`. Sola lettura/download, nessuna scrittura.
+- **Video & Quiz delle 7 storie** — lettura diretta di `stories/videos/quizzes/quiz_questions/quiz_options` (RLS `authenticated`, `is_correct` incluso). Sola lettura: nessuna API, nessuna scrittura. La risposta corretta è mostrata ai docenti (voluto: la restrizione `is_correct` vale solo per il client alunni). Aggregata in `getStoriesContent` (`src/lib/docenti/data.ts`), service_role, import dinamico.
 
 **Espone verso Alunni:**
 - **Identità classe/alunno** — `classes.access_code` (codice classe univoco, ADR-5) + `students.display_name` (formato `Marco R.` via `formatStudentName`). Sono le credenziali del login alunno (ADR-2: `access_code + display_name`). Univocità in classe garantita dal vincolo `UNIQUE(class_id, display_name)`; univocità del codice dal vincolo `UNIQUE(classes.access_code)` + suffisso numerico.
@@ -163,8 +164,10 @@ Un subagent che ha bisogno di toccare un contratto **scrive qui una richiesta** 
 - `src/lib/docenti/{importStudents,classCodeAlloc}.ts` (import alunni in classe; allocazione codice con retry su collisione UNIQUE).
 - `src/lib/password.ts` (generatore password forte, Web Crypto — proponibile come utility condivisa se servirà altrove).
 - `src/lib/studentImport.ts` (parsing file import alunni, ADR-7 — vedi sotto).
-- `src/layouts/DocenteLayout.astro`, `src/styles/docenti.css`, `src/components/docenti/DocenteIcon.astro`.
-- Pagine: `/insegnante/{login,index,classi,classe/[id],materiali,impostazioni}`, `/invito`.
+- `src/lib/youtube.ts` (`youtubeEmbed`: URL di embed da watch?v=/youtu.be/id nudo). **Helper nuovo, non contratto congelato:** estratto per non duplicare la regex già presente inline nella pagina Alunni `passaporto`; l'agente Alunni può adottarlo al posto della sua copia locale.
+- `src/layouts/DocenteLayout.astro`, `src/styles/docenti.css`, `src/components/docenti/DocenteIcon.astro` (icona `contenuti`).
+- Pagine: `/insegnante/{login,index,classi,classe/[id],contenuti,materiali,impostazioni}`, `/invito`.
+- **`/insegnante/contenuti`** (`src/pages/insegnante/contenuti/index.astro`): consultazione **SOLA LETTURA** di Video & Quiz delle 7 storie (Figma area Docenti). Voce di menu "Video & Quiz" in `DOCENTE_NAV` (tra "Le mie classi" e "Materiali"). Video YouTube in `<iframe>` di embed, video asset in `<video controls>` + link; quiz con domande per `ordine` e opzioni con la corretta evidenziata (badge verde "✓ Corretta" + sfondo `bg-success-subtle`). Stati vuoti neutri se storia senza video/quiz/domande. Nessun form/pulsante di modifica.
 - API docente-specifiche: `/api/insegnante/{session,logout,completa-registrazione,impostazioni}`, `/api/classi` (crea classe + import opzionale), `/api/classi/[id]` (PATCH dati/codice/composizione, DELETE).
 
 **Auth Docenti (meccanismo scelto):** specchio dell'Admin. Login client `supabaseBrowser.signInWithPassword` → scambio con cookie **HttpOnly `sb-teacher-token`** (`POST /api/insegnante/session`), che verifica `role='teacher'` **e** `status='active'`. Le pagine `/insegnante/*` sono SSR e reindirizzano a `/insegnante/login` se non autenticate. Logout = cancellazione cookie.

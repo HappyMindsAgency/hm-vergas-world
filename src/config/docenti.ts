@@ -2,7 +2,7 @@
 // niente magic string sparse nelle pagine. Riusa i token di museo.css (palette
 // condivisa); aggiunge solo ciò che è specifico dei Docenti.
 
-export type DocenteIcon = "dashboard" | "classi" | "materiali" | "impostazioni" | "logout";
+export type DocenteIcon = "dashboard" | "classi" | "contenuti" | "materiali" | "impostazioni" | "logout";
 
 /** Voce del menu laterale. `match` decide lo stato attivo per prefisso di path. */
 export interface DocenteNavItem {
@@ -15,6 +15,7 @@ export interface DocenteNavItem {
 export const DOCENTE_NAV: DocenteNavItem[] = [
   { label: "Dashboard", href: "/insegnante", match: "/insegnante", icon: "dashboard" },
   { label: "Le mie classi", href: "/insegnante/classi", match: "/insegnante/classi", icon: "classi" },
+  { label: "Video & Quiz", href: "/insegnante/contenuti", match: "/insegnante/contenuti", icon: "contenuti" },
   { label: "Materiali", href: "/insegnante/materiali", match: "/insegnante/materiali", icon: "materiali" },
   { label: "Impostazioni", href: "/insegnante/impostazioni", match: "/insegnante/impostazioni", icon: "impostazioni" },
 ];

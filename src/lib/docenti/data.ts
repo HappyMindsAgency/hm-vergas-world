@@ -3,7 +3,7 @@
 // per teacher_id del docente loggato: leggiamo solo i suoi dati, coerente con la
 // RLS (classes_owner/students_owner/sqa_owner/badges_owner). Le pagine degradano
 // a stato vuoto se le env mancano.
-import type { Class, Institute, Material, Student, Story } from "../../types/db";
+import type { Class, Institute, Material, Student, Story, Video, Quiz, QuizQuestion, QuizOption } from "../../types/db";
 import { STORIES_COUNT } from "../../config/game";
 import { formatStudentName } from "../format";
 
@@ -284,6 +284,96 @@ export async function getAssignedMaterials(teacherId: string): Promise<MaterialD
     result.push({ ...m, downloadUrl: signed?.signedUrl ?? null });
   }
   return result;
+}
+
+// ---------- Contenuti didattici (sola lettura) ----------
+// Il docente consulta video e quiz delle 7 storie (popolati dall'Admin). SOLA
+// LETTURA: nessuna scrittura, nessuna API. La risposta corretta (is_correct) è
+// visibile ai DOCENTI per scopo didattico (la restrizione vale solo per il client
+// alunni). Ordinamenti stabili: storie per numero, domande per ordine, opzioni per id.
+export interface StoryQuestion extends QuizQuestion {
+  options: QuizOption[];
+}
+
+export interface StoryContentView {
+  story: Story;
+  videos: Video[];
+  hasQuiz: boolean;
+  questions: StoryQuestion[];
+}
+
+export async function getStoriesContent(): Promise<StoryContentView[]> {
+  let supabase;
+  try {
+    supabase = await server();
+  } catch {
+    return [];
+  }
+
+  const stories = await getStories(supabase);
+  if (stories.length === 0) return [];
+  const storyIds = stories.map((s) => s.id);
+
+  const [{ data: videos }, { data: quizzes }] = await Promise.all([
+    supabase.from("videos").select("*").in("story_id", storyIds).order("titolo"),
+    supabase.from("quizzes").select("*").in("story_id", storyIds),
+  ]);
+
+  const videosByStory = new Map<string, Video[]>();
+  for (const v of (videos as Video[]) ?? []) {
+    const arr = videosByStory.get(v.story_id) ?? [];
+    arr.push(v);
+    videosByStory.set(v.story_id, arr);
+  }
+
+  const quizByStory = new Map<string, Quiz>();
+  const quizIds: string[] = [];
+  for (const q of (quizzes as Quiz[]) ?? []) {
+    quizByStory.set(q.story_id, q);
+    quizIds.push(q.id);
+  }
+
+  // domande + opzioni di tutti i quiz in due query, poi raggruppate in memoria.
+  const questionsByQuiz = new Map<string, StoryQuestion[]>();
+  if (quizIds.length) {
+    const { data: questions } = await supabase
+      .from("quiz_questions")
+      .select("*")
+      .in("quiz_id", quizIds)
+      .order("ordine");
+    const questionList = (questions as QuizQuestion[]) ?? [];
+    const questionIds = questionList.map((q) => q.id);
+
+    const optionsByQuestion = new Map<string, QuizOption[]>();
+    if (questionIds.length) {
+      const { data: options } = await supabase
+        .from("quiz_options")
+        .select("*")
+        .in("question_id", questionIds)
+        .order("id");
+      for (const o of (options as QuizOption[]) ?? []) {
+        const arr = optionsByQuestion.get(o.question_id) ?? [];
+        arr.push(o);
+        optionsByQuestion.set(o.question_id, arr);
+      }
+    }
+
+    for (const q of questionList) {
+      const arr = questionsByQuiz.get(q.quiz_id) ?? [];
+      arr.push({ ...q, options: optionsByQuestion.get(q.id) ?? [] });
+      questionsByQuiz.set(q.quiz_id, arr);
+    }
+  }
+
+  return stories.map((s) => {
+    const quiz = quizByStory.get(s.id);
+    return {
+      story: s,
+      videos: videosByStory.get(s.id) ?? [],
+      hasQuiz: Boolean(quiz),
+      questions: quiz ? questionsByQuiz.get(quiz.id) ?? [] : [],
+    };
+  });
 }
 
 // ---------- istituti (per il form classe) ----------
