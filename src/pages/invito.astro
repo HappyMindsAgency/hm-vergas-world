@@ -22,8 +22,8 @@ import "../styles/docenti.css";
   <div class="d-auth">
     <div class="d-auth-card">
       <div class="text-center mb-4">
-        <h1 class="font-heading d-title h2 mb-2">Completa la registrazione</h1>
-        <p class="mb-0" style="color:rgba(55,65,81,.75)">Conferma la tua email e scegli una password sicura.</p>
+        <h1 id="page-title" class="font-heading d-title h2 mb-2">Completa la registrazione</h1>
+        <p id="page-sub" class="mb-0" style="color:rgba(55,65,81,.75)">Conferma la tua email e scegli una password sicura.</p>
       </div>
 
       <div id="invito-alert" class="alert d-none" role="alert"></div>
@@ -77,6 +77,19 @@ import "../styles/docenti.css";
     const pw2Input = document.getElementById("password2") as HTMLInputElement;
     const submitBtn = document.getElementById("invito-submit") as HTMLButtonElement;
     const alertBox = document.getElementById("invito-alert")!;
+
+    // Stesso flusso (imposta password dal token in hash), ma il reset password ha
+    // copy dedicata: ?reset=1 (da /api/docenti/reset-password) o type=recovery nell'hash.
+    const isReset =
+      new URLSearchParams(location.search).get("reset") === "1" ||
+      location.hash.includes("type=recovery");
+    const submitLabel = isReset ? "Salva nuova password" : "Attiva il mio account";
+    if (isReset) {
+      document.getElementById("page-title")!.textContent = "Reimposta la password";
+      document.getElementById("page-sub")!.textContent =
+        "Scegli una nuova password per il tuo account.";
+      submitBtn.textContent = submitLabel;
+    }
 
     function notify(msg: string, ok = false) {
       alertBox.classList.remove("d-none", "alert-danger", "alert-success");
@@ -139,7 +152,7 @@ import "../styles/docenti.css";
         notify("Errore di rete. Riprova.");
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Attiva il mio account";
+        submitBtn.textContent = submitLabel;
       }
     });
   </script>

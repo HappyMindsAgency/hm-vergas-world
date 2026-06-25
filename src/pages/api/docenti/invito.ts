@@ -9,6 +9,7 @@
 //     il docente completa la registrazione su /invito (Fase 3).
 import type { APIRoute } from "astro";
 import { json, badRequest, serverError, getServer, guardAdmin } from "../../../lib/admin/api";
+import { siteOrigin } from "../../../lib/siteUrl";
 
 export const prerender = false;
 
@@ -74,7 +75,7 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
   }
 
   // 3) link di invito + email (nodemailer). redirectTo verso la route /invito.
-  const redirectTo = new URL("/invito", url.origin).toString();
+  const redirectTo = new URL("/invito", siteOrigin(url)).toString();
   const { data: linkData } = await supabase.auth.admin.generateLink({
     type: "invite",
     email: body.email,

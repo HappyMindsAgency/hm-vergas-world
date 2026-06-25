@@ -4,6 +4,7 @@
 // quali email sono registrate. Email via sendMail (nodemailer, ADR-3).
 import type { APIRoute } from "astro";
 import { json, badRequest, serverError, getServer } from "../../../lib/admin/api";
+import { siteOrigin } from "../../../lib/siteUrl";
 
 export const prerender = false;
 
@@ -25,7 +26,7 @@ export const POST: APIRoute = async ({ request, url }) => {
     return serverError("Configurazione server mancante");
   }
 
-  const redirectTo = new URL("/invito?reset=1", url.origin).toString();
+  const redirectTo = new URL("/invito?reset=1", siteOrigin(url)).toString();
   const { data, error } = await supabase.auth.admin.generateLink({
     type: "recovery",
     email,
