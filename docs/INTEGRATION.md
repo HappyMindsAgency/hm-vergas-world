@@ -120,7 +120,14 @@ Un subagent che ha bisogno di toccare un contratto **scrive qui una richiesta** 
 - `src/config/admin.ts` (nav, label categorie/stato, opzioni ordinamento, bucket).
 - `src/lib/admin/{session,api,data,content}.ts` (guard admin via cookie HttpOnly `sb-admin-token`, helper risposte JSON, letture aggregate SSR).
 - `src/layouts/MuseoLayout.astro`, `src/styles/museo.css`, `src/components/admin/{AdminIcon,StatCards}.astro`.
-- API admin-specifiche: `/api/museo/{session,logout,impostazioni}`, `/api/docenti/:id`, `/api/materiali` + `/api/materiali/:id`, `/api/video-quiz`.
+- API admin-specifiche: `/api/museo/{session,logout,impostazioni}`, `/api/docenti/:id`, `/api/materiali` + `/api/materiali/:id`, `/api/video-quiz`, `/api/museo/istituti` + `/api/museo/istituti/:id`.
+
+**Gestione Istituti (CRUD) — aggiunta 2026-06-25 (agente Admin):**
+- **Pagina** `/museo/istituti` (`src/pages/museo/istituti/index.astro`): SSR auth-gated (guard `sb-admin-token` → redirect `/museo/login`), Bootstrap via `MuseoLayout`. Tabella Nome · Città · n. docenti · n. classi · azioni (Modifica/Elimina), ricerca client-side per nome/città. Voce di menu "Istituti" aggiunta in `ADMIN_NAV` (`src/config/admin.ts`, accanto a Docenti) + icona `istituti` in `AdminIcon.astro`.
+- **API** `POST /api/museo/istituti` `{ nome, citta }` → 201 `{ ok, id }`. `PATCH /api/museo/istituti/:id` `{ nome?, citta? }` → `{ ok }`. `DELETE /api/museo/istituti/:id` → `{ ok }` | **409** `{ error }` se l'istituto ha classi collegate. Tutte: guard admin, `supabaseServer` (service_role, import dinamico), helper JSON di `src/lib/admin/api.ts`. **Nessun contratto condiviso toccato** (schema/RLS/tipi intatti: `institutes_read`/`institutes_admin` già abilitano il CRUD admin).
+- **Delete con FK `RESTRICT`:** `classes.institute_id → institutes ON DELETE RESTRICT` ⇒ il DELETE intercetta il codice Postgres `23503`, conta le classi collegate e risponde **409** con messaggio "Impossibile eliminare: ci sono N classi collegate". `profiles.institute_id → ON DELETE SET NULL` ⇒ i docenti collegati restano con istituto nullo (gestito dal DB); la UI avvisa quanti docenti resteranno senza istituto.
+- **Aggregati** in `src/lib/admin/data.ts`: `getInstitutesWithCounts()` (riusa i pattern di `getTeachers`, conteggi docenti/classi per istituto). `getInstitutes()` invariata.
+- **Select "Istituto" nella modale Nuovo docente** (`/museo/docenti`) invariato: legge da `getInstitutes()` → mostra anche gli istituti creati da questa sezione (stessa tabella `institutes`). Verificato.
 
 **Auth Admin (meccanismo scelto):** login client con `supabaseBrowser.signInWithPassword`; l'access_token viene scambiato con un cookie **HttpOnly `sb-admin-token`** (`POST /api/museo/session`), che verifica `role='admin'`. Le pagine `/museo/*` sono SSR (`prerender=false`) e fanno da guard reindirizzando a `/museo/login`. Logout = cancellazione cookie.
 

@@ -1,0 +1,270 @@
+---
+// Gestione Istituti (CRUD): tabella con nome, città, n. docenti, n. classi e
+// azioni (modifica/elimina). Ricerca nome/città client-side sui dati SSR.
+// "Nuovo istituto" / "Modifica" → modale → POST/PATCH /api/museo/istituti(/:id).
+// Elimina → modale di conferma → DELETE; se l'istituto ha classi collegate
+// (FK RESTRICT) l'API risponde 409 e mostriamo il messaggio.
+export const prerender = false;
+
+import MuseoLayout from "../../../layouts/MuseoLayout.astro";
+import { getAdminProfile } from "../../../lib/admin/session";
+import { getInstitutesWithCounts } from "../../../lib/admin/data";
+
+const admin = await getAdminProfile(Astro.cookies);
+if (!admin) return Astro.redirect("/museo/login");
+
+const institutes = await getInstitutesWithCounts();
+const adminName = `${admin.nome} ${admin.cognome}`.trim();
+---
+
+<MuseoLayout title="Gestione Istituti | Area Museo" active="/museo/istituti" adminName={adminName} adminSubtitle="Coordinatore">
+  <nav class="breadcrumb-museo mb-3"><a href="/museo">Dashboard</a> / Istituti</nav>
+
+  <header class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h1 class="font-heading museo-title display-6 mb-1">Gestione Istituti</h1>
+      <p class="mb-0" style="color:var(--museo-ink)">Crea e gestisci gli istituti scolastici. Popolano il menu "Istituto" nell'invito docente.</p>
+    </div>
+    <button class="btn btn-museo-red px-3 py-2" data-bs-toggle="modal" data-bs-target="#istitutoModal" data-mode="create">+ Nuovo istituto</button>
+  </header>
+
+  <!-- Filtri -->
+  <section class="museo-card p-3 mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-lg">
+        <input id="f-search" class="form-control" type="search" placeholder="Cerca istituto per nome o città…" />
+      </div>
+      <div class="col-6 col-lg-auto">
+        <button id="f-reset" class="btn btn-link" style="color:var(--museo-red);text-decoration:none">Azzera filtri</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabella -->
+  <section class="museo-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="font-heading museo-title h4 mb-0">Elenco Istituti</h2>
+      <span class="pill-blue"><span id="count-visibile">{institutes.length}</span> istituti</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table align-middle" id="istituti-table">
+        <thead>
+          <tr class="stat-label">
+            <th>Nome</th>
+            <th>Città</th>
+            <th>Docenti</th>
+            <th>Classi</th>
+            <th class="text-end">Azioni</th>
+          </tr>
+        </thead>
+        <tbody>
+          {institutes.map((i) => (
+            <tr
+              class="istituto-row"
+              data-id={i.id}
+              data-nome={i.nome}
+              data-citta={i.citta}
+              data-docenti={i.docentiCount}
+              data-classi={i.classiCount}
+              data-search={`${i.nome} ${i.citta}`.toLowerCase()}
+            >
+              <td class="fw-semibold">{i.nome}</td>
+              <td>{i.citta}</td>
+              <td>{i.docentiCount}</td>
+              <td><span class="fw-semibold" style="color:var(--museo-blue)">{i.classiCount}</span></td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-museo-blue me-1 js-edit" type="button">Modifica</button>
+                <button class="btn btn-sm btn-outline-danger js-delete" type="button">Elimina</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <p id="no-results" class="d-none text-center py-4 mb-0" style="color:rgba(55,65,81,.6)">Nessun istituto corrisponde alla ricerca.</p>
+    {institutes.length === 0 && (
+      <p class="text-center py-4 mb-0" style="color:rgba(55,65,81,.6)">Nessun istituto ancora. Crea il primo con "+ Nuovo istituto".</p>
+    )}
+  </section>
+
+  <!-- Modale Nuovo / Modifica istituto -->
+  <div class="modal fade" id="istitutoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0" id="istituto-modal-title">Nuovo istituto</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <form id="istituto-form">
+          <input type="hidden" id="ist-id" />
+          <div class="modal-body">
+            <div id="ist-alert" class="alert d-none" role="alert"></div>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label stat-label" for="ist-nome">Nome</label>
+                <input class="form-control" id="ist-nome" name="nome" required />
+              </div>
+              <div class="col-12">
+                <label class="form-label stat-label" for="ist-citta">Città</label>
+                <input class="form-control" id="ist-citta" name="citta" required />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+            <button type="submit" class="btn btn-museo-red px-4" id="ist-submit">Crea istituto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modale Elimina istituto -->
+  <div class="modal fade" id="eliminaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius:18px">
+        <div class="modal-header border-0">
+          <h2 class="h5 font-heading museo-title mb-0">Elimina istituto</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Chiudi"></button>
+        </div>
+        <div class="modal-body">
+          <div id="del-alert" class="alert d-none" role="alert"></div>
+          <p class="mb-2">Stai per eliminare <strong id="del-nome"></strong>.</p>
+          <p id="del-docenti-warn" class="small d-none mb-0" style="color:rgba(55,65,81,.75)"></p>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annulla</button>
+          <button type="button" class="btn btn-danger px-4" id="del-confirm">Elimina</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { Modal } from "bootstrap";
+
+    // Ricerca client-side (dataset piccolo: tutto SSR-renderizzato).
+    const tbody = document.querySelector("#istituti-table tbody") as HTMLTableSectionElement;
+    const rows = () => Array.from(tbody.querySelectorAll<HTMLTableRowElement>(".istituto-row"));
+    const search = document.getElementById("f-search") as HTMLInputElement;
+    const reset = document.getElementById("f-reset")!;
+    const counter = document.getElementById("count-visibile")!;
+    const noResults = document.getElementById("no-results")!;
+
+    function apply() {
+      const q = search.value.trim().toLowerCase();
+      let visible = 0;
+      for (const r of rows()) {
+        const ok = !q || (r.dataset.search ?? "").includes(q);
+        r.style.display = ok ? "" : "none";
+        if (ok) visible++;
+      }
+      counter.textContent = String(visible);
+      noResults.classList.toggle("d-none", visible !== 0 || rows().length === 0);
+    }
+    search.addEventListener("input", apply);
+    reset.addEventListener("click", () => {
+      search.value = "";
+      apply();
+    });
+    apply();
+
+    // Modale create/edit
+    const istModalEl = document.getElementById("istitutoModal")!;
+    const istModal = Modal.getOrCreateInstance(istModalEl);
+    const form = document.getElementById("istituto-form") as HTMLFormElement;
+    const idField = document.getElementById("ist-id") as HTMLInputElement;
+    const nomeField = document.getElementById("ist-nome") as HTMLInputElement;
+    const cittaField = document.getElementById("ist-citta") as HTMLInputElement;
+    const title = document.getElementById("istituto-modal-title")!;
+    const submitBtn = document.getElementById("ist-submit")!;
+    const istAlert = document.getElementById("ist-alert")!;
+
+    // "+ Nuovo istituto" apre la modale in modalità create: ripuliamo i campi.
+    document.querySelector('[data-mode="create"]')?.addEventListener("click", () => {
+      idField.value = "";
+      nomeField.value = "";
+      cittaField.value = "";
+      title.textContent = "Nuovo istituto";
+      submitBtn.textContent = "Crea istituto";
+      istAlert.classList.add("d-none");
+    });
+
+    // "Modifica" → pre-compila e apre la modale.
+    tbody.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest(".js-edit") as HTMLElement | null;
+      if (!btn) return;
+      const row = btn.closest(".istituto-row") as HTMLElement;
+      idField.value = row.dataset.id ?? "";
+      nomeField.value = row.dataset.nome ?? "";
+      cittaField.value = row.dataset.citta ?? "";
+      title.textContent = "Modifica istituto";
+      submitBtn.textContent = "Salva modifiche";
+      istAlert.classList.add("d-none");
+      istModal.show();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      istAlert.classList.add("d-none");
+      const id = idField.value;
+      const payload = { nome: nomeField.value.trim(), citta: cittaField.value.trim() };
+      const url = id ? `/api/museo/istituti/${id}` : "/api/museo/istituti";
+      const res = await fetch(url, {
+        method: id ? "PATCH" : "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        istAlert.classList.remove("d-none", "alert-success");
+        istAlert.classList.add("alert-danger");
+        istAlert.textContent = body.error ?? "Operazione non riuscita.";
+      }
+    });
+
+    // Modale elimina
+    const delModalEl = document.getElementById("eliminaModal")!;
+    const delModal = Modal.getOrCreateInstance(delModalEl);
+    const delNome = document.getElementById("del-nome")!;
+    const delDocentiWarn = document.getElementById("del-docenti-warn")!;
+    const delAlert = document.getElementById("del-alert")!;
+    const delConfirm = document.getElementById("del-confirm") as HTMLButtonElement;
+    let deleteId = "";
+
+    tbody.addEventListener("click", (e) => {
+      const btn = (e.target as HTMLElement).closest(".js-delete") as HTMLElement | null;
+      if (!btn) return;
+      const row = btn.closest(".istituto-row") as HTMLElement;
+      deleteId = row.dataset.id ?? "";
+      delNome.textContent = row.dataset.nome ?? "";
+      delAlert.classList.add("d-none");
+      const docenti = Number(row.dataset.docenti ?? "0");
+      if (docenti > 0) {
+        delDocentiWarn.textContent = `${docenti} ${docenti === 1 ? "docente collegato resterà" : "docenti collegati resteranno"} senza istituto.`;
+        delDocentiWarn.classList.remove("d-none");
+      } else {
+        delDocentiWarn.classList.add("d-none");
+      }
+      delModal.show();
+    });
+
+    delConfirm.addEventListener("click", async () => {
+      if (!deleteId) return;
+      delAlert.classList.add("d-none");
+      delConfirm.disabled = true;
+      const res = await fetch(`/api/museo/istituti/${deleteId}`, { method: "DELETE" });
+      const body = await res.json().catch(() => ({}));
+      delConfirm.disabled = false;
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        delAlert.classList.remove("d-none", "alert-success");
+        delAlert.classList.add("alert-danger");
+        delAlert.textContent = body.error ?? "Eliminazione non riuscita.";
+      }
+    });
+  </script>
+</MuseoLayout>

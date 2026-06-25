@@ -12,11 +12,12 @@ export interface AdminNavItem {
   icon: AdminIcon;
 }
 
-export type AdminIcon = "dashboard" | "docenti" | "materiali" | "video" | "impostazioni" | "logout";
+export type AdminIcon = "dashboard" | "docenti" | "istituti" | "materiali" | "video" | "impostazioni" | "logout";
 
 export const ADMIN_NAV: AdminNavItem[] = [
   { label: "Dashboard", href: "/museo", match: "/museo", icon: "dashboard" },
   { label: "Docenti", href: "/museo/docenti", match: "/museo/docenti", icon: "docenti" },
+  { label: "Istituti", href: "/museo/istituti", match: "/museo/istituti", icon: "istituti" },
   { label: "Materiali", href: "/museo/materiali", match: "/museo/materiali", icon: "materiali" },
   { label: "Video & Quiz", href: "/museo/video-quiz", match: "/museo/video-quiz", icon: "video" },
   { label: "Impostazioni", href: "/museo/impostazioni", match: "/museo/impostazioni", icon: "impostazioni" },

@@ -20,7 +20,8 @@ export const POST: APIRoute = async ({ request, url }) => {
   let supabase;
   try {
     supabase = await getServer();
-  } catch {
+  } catch (e) {
+    console.error("[reset-password] getServer:", e);
     return serverError("Configurazione server mancante");
   }
 
@@ -31,8 +32,12 @@ export const POST: APIRoute = async ({ request, url }) => {
     options: { redirectTo },
   });
 
-  // Se l'email non esiste, non lo riveliamo: rispondiamo ok comunque.
+  // Email inesistente → non lo riveliamo: rispondiamo ok. Ma se è un errore di
+  // configurazione (non "user not found"), loggalo: altrimenti resta invisibile.
   if (error || !data?.properties?.action_link) {
+    if (error && error.status !== 404) {
+      console.error("[reset-password] generateLink:", error.status, error.message);
+    }
     return json({ ok: true });
   }
 
@@ -46,7 +51,10 @@ export const POST: APIRoute = async ({ request, url }) => {
         <p>Se non sei stato tu, ignora questa email.</p>`,
       text: `Reimposta la password: ${data.properties.action_link}`,
     });
-  } catch {
+  } catch (e) {
+    // Causa reale lato server (es. SMTP host/cert/auth); al client risposta generica.
+    const err = e as { code?: string; message?: string };
+    console.error("[reset-password] sendMail:", err.code ?? "", err.message ?? e);
     return serverError("Invio email non riuscito");
   }
 

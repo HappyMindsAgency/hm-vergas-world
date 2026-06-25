@@ -107,6 +107,43 @@ export async function getInstitutes(): Promise<Institute[]> {
   return (data as Institute[]) ?? [];
 }
 
+export interface InstituteRow extends Institute {
+  docentiCount: number;
+  classiCount: number;
+}
+
+/** Lista istituti con conteggio docenti e classi collegati (per la tabella admin). */
+export async function getInstitutesWithCounts(): Promise<InstituteRow[]> {
+  let supabase;
+  try {
+    supabase = await server();
+  } catch {
+    return [];
+  }
+  const { data: institutes } = await supabase.from("institutes").select("*").order("nome");
+  if (!institutes) return [];
+
+  const [{ data: profiles }, { data: classes }] = await Promise.all([
+    supabase.from("profiles").select("institute_id").eq("role", "teacher"),
+    supabase.from("classes").select("institute_id"),
+  ]);
+
+  const docentiByInst = new Map<string, number>();
+  for (const p of profiles ?? []) {
+    if (p.institute_id) docentiByInst.set(p.institute_id, (docentiByInst.get(p.institute_id) ?? 0) + 1);
+  }
+  const classiByInst = new Map<string, number>();
+  for (const c of classes ?? []) {
+    classiByInst.set(c.institute_id, (classiByInst.get(c.institute_id) ?? 0) + 1);
+  }
+
+  return (institutes as Institute[]).map((i) => ({
+    ...i,
+    docentiCount: docentiByInst.get(i.id) ?? 0,
+    classiCount: classiByInst.get(i.id) ?? 0,
+  }));
+}
+
 export async function getTeacherDetail(id: string): Promise<TeacherRow | null> {
   const all = await getTeachers();
   return all.find((t) => t.id === id) ?? null;
