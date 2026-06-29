@@ -152,3 +152,5 @@ dist
 
 # Windows root CA bundle (local npm TLS fix, not a secret but local-only)
 .system-ca.pem
+
+testi-vergasworld.pdf

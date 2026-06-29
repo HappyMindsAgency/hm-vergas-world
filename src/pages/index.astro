@@ -28,38 +28,146 @@ const TAPPE = [
   "Verga, il ritratto",
 ];
 
-// Personaggi (Figma 75:850). Immagini dagli asset esistenti in /public/immagini.
+// Personaggi (Figma 75:850). Testi e immagini da testi-vergasworld.pdf
+// (sezione "Personaggi"); immagini in /public/immagini/personaggi.
 const PERSONAGGI = [
-  { nome: "Carletto", ruolo: "Il viaggiatore", img: "/immagini/carletto.jpg",
+  { nome: "Carletto", ruolo: "Il viaggiatore", img: "/immagini/personaggi/carletto.jpg",
     desc: "Arriva da Milano con il vestito in ordine e la testa piena di noia. A Vizzini scopre che anche un sasso può contenere una storia intera." },
-  { nome: "Caterina", ruolo: "La guida", img: "/immagini/Caterina.jpg",
+  { nome: "Caterina", ruolo: "La guida", img: "/immagini/personaggi/caterina.jpg",
     desc: "Conosce vicoli, cortili e scorci nascosti. Non spiega troppo: prende Carletto per mano e lo porta dove iniziano le avventure." },
-  { nome: "Giovanni Verga", ruolo: "Il padrone di casa", img: "/immagini/palazzo di verga.jpg",
+  { nome: "Giovanni Verga", ruolo: "Il padrone di casa", img: "/immagini/personaggi/giovanni-verga.jpg",
     desc: "Nel suo palazzo gli adulti parlano e brindano. Fuori, intanto, le sue storie prendono vita tra i vicoli di Vizzini." },
-  { nome: "Gesualdo", ruolo: "Il collezionista", img: "/immagini/incontro con gesualdo.jpg",
+  { nome: "Pina", ruolo: "La Lupa", img: "/immagini/personaggi/pina.jpg",
+    desc: "Non ha bisogno di urlare per farsi ascoltare. Le basta uno sguardo per fermare i bulli e far capire a Carletto che il coraggio può essere silenzioso." },
+  { nome: "Gesualdo", ruolo: "Il collezionista", img: "/immagini/personaggi/gesualdo.jpg",
     desc: "Vive in un cortile pieno di oggetti dimenticati. Difende il suo regno con diffidenza, finché un dono gli mostra che le cose diventano più belle quando si condividono." },
-  { nome: "Rosso Malpelo", ruolo: "Il genio incompreso", img: "/immagini/malpelo.jpg",
+  { nome: "Rosso", ruolo: "Il genio incompreso", img: "/immagini/personaggi/rosso.jpg",
     desc: "Disegna nella sabbia canali, numeri e mappe. Ha mani sporche e capelli rossi, ma dentro la grotta accende la lezione più luminosa." },
+  { nome: "Turiddu", ruolo: "Lo sfidante", img: "/immagini/personaggi/turiddu.jpg",
+    desc: "Gioca alla morra con tutta la voce e tutta l'energia che ha. Per lui la sfida è vera, ma quando finisce, finisce davvero." },
+  { nome: "Alfio", ruolo: "Il rivale leale", img: "/immagini/personaggi/alfio.jpg",
+    desc: "Litiga forte, gioca fino all'ultimo punto e poi ride di cuore. Con Turiddu mostra a Carletto che fare pace è una forma di coraggio." },
+  { nome: "I Malavoglia", ruolo: "La famiglia sulla barca", img: "/immagini/personaggi/i malavoglia.jpg",
+    desc: "Remano su una barca ferma, in cima a una collina. Sognano il mare, ma sanno che il loro nespolo è il posto da cui partire e a cui tornare." },
+  { nome: "Il padre di Carletto", ruolo: "L'adulto che capisce", img: "/immagini/personaggi/padre-di-carletto.jpg",
+    desc: "All'inizio sembra lontano dal mondo dei bambini. Alla fine, davanti al sasso di Pina, intuisce che Carletto non è solo sporco di polvere: è pieno di storie." },
 ];
 
-// Slide dello slider storie (Figma 75:946). La copy di storia 1 è quella del
-// design; per le altre usiamo titolo della tappa + sinossi della storia seedata.
-// ponytail: l'editoria riempirà le sinossi definitive; qui riusiamo INDIZI.
-const STORIE = TAPPE.map((tappa, i) => ({
-  numero: i + 1,
-  tappa,
-  titolo: i === 0 ? "L'inizio del viaggio" : INDIZI[i]?.storiaTitolo ?? tappa,
-  immagine: INDIZI[i]?.immagine ?? "/immagini/figma-mappa-vizzini.png",
-  descrizione:
-    i === 0
-      ? "Carletto è tornato a Milano, ma ha ancora Vizzini nella testa. Nella valigia trova un sasso colorato e il ricordo si apre: Palazzo Verga, una tavola piena di adulti, un panino rubato sotto la tovaglia e Caterina, pronta a portarlo fuori, dove comincia davvero l'avventura."
-      : INDIZI[i]?.descrizioneStoria ?? "",
-}));
+// Slide dello slider storie (Figma 75:946). Copy autorevole da testi-vergasworld.pdf
+// (titoli carosello + testi delle 7 storie). Le immagini riusano asset esistenti
+// in /public/immagini (il PDF non fornisce le immagini dello slider).
+const STORIE = [
+  {
+    numero: 1,
+    titolo: "L'inizio del viaggio",
+    immagine: "/immagini/palazzo di verga.jpg",
+    descrizione:
+      "Carletto è tornato a Milano, ma ha ancora Vizzini nella testa. Nella valigia trova un sasso colorato e il ricordo si apre: Palazzo Verga, una tavola piena di adulti, un panino rubato sotto la tovaglia e Caterina, pronta a portarlo fuori, dove comincia davvero l'avventura.",
+  },
+  {
+    numero: 2,
+    titolo: "L'incontro con la Lupa",
+    immagine: "/immagini/figma-piazza-cunziria.png",
+    descrizione:
+      "Nei vicoli della Cunziria, Carletto si sente fuori posto. Due ragazzi più grandi lo prendono in giro e lui ha paura. Poi arriva Pina, che tutti chiamano la Lupa: non urla, non colpisce, ma protegge con uno sguardo fermo. Prima di andare via, gli lascia un sasso colorato.",
+  },
+  {
+    numero: 3,
+    titolo: "L'incontro con Gesualdo",
+    immagine: "/immagini/incontro con gesualdo.jpg",
+    descrizione:
+      "Carletto e Caterina trovano una montagna di oggetti dimenticati. In cima c'è Gesualdo, seduto come un piccolo re, con il suo soldatino stretto al petto. Non vuole far passare nessuno. Poi Carletto gli dona la bussola: la montagna smette di essere un muro e diventa un passaggio.",
+  },
+  {
+    numero: 4,
+    titolo: "L'incontro con Rosso",
+    immagine: "/immagini/malpelo.jpg",
+    descrizione:
+      "Caterina porta Carletto dentro una grotta scavata nella roccia. All'inizio lui vede solo il buio, la polvere e un bambino dai capelli rossi. Poi guarda meglio: sulla sabbia ci sono mappe, numeri e progetti per portare l'acqua fino al paese. Rosso gli mostra che il talento può nascondersi dove nessuno si ferma a guardare.",
+  },
+  {
+    numero: 5,
+    titolo: "L'incontro con Turiddu e Alfio",
+    immagine: "/immagini/vizzini.jpg",
+    descrizione:
+      "Nella piazza di Vizzini, due bambini gridano e gesticolano sotto un grande albero. Carletto pensa che stiano litigando, ma Caterina ha già capito: Turiddu e Alfio stanno giocando alla Morra. La sfida è accesa, le regole sono importanti. Quando la partita finisce, finiscono anche i rancori: si ride, si fa pace e si dividono i cannoli.",
+  },
+  {
+    numero: 6,
+    titolo: "L'incontro con i Malavoglia",
+    immagine: "/immagini/malavoglia.jpg",
+    descrizione:
+      "Fuori dal paese, su una collina, Carletto vede una cosa impossibile: una barca sull'erba, lontana dal mare. Dentro ci sono bambini che remano e immaginano di navigare. Accanto a loro cresce un nespolo, con le radici nella terra. Carletto capisce che si può sognare di partire e, allo stesso tempo, avere un posto a cui tornare.",
+  },
+  {
+    numero: 7,
+    titolo: "Il ritorno di Carletto",
+    immagine: "/immagini/vizzini.jpg",
+    descrizione:
+      "Il sole tramonta su Vizzini e Carletto torna a Palazzo Verga con i vestiti sporchi, i capelli in disordine e il sasso di Pina in mano. Non racconta subito tutto: appoggia il sasso sul tavolo, tra bicchieri e posate eleganti. Dentro quell'oggetto ci sono tutti gli incontri del viaggio. Quando torna a Milano, la stanza è la stessa, ma lui guarda il mondo con occhi diversi.",
+  },
+];
+
+// 7 pin dei luoghi sulla mappa (Figma 75:801, testi da testi-vergasworld.pdf).
+// Distinti dalle 3 lenti "indizio" (iniettate a caso da indizio.js).
+// leftPct/topPct = posizione sulla mappa stimata dal layout Figma.
+// L'abbinamento nome↔posizione è modificabile qui senza toccare il markup.
+const LUOGHI = [
+  {
+    nome: "Palazzo Verga",
+    leftPct: 41.3,
+    topPct: 58.7,
+    testo:
+      "Qui Carletto incontra Caterina, nascosta sotto il tavolo con un panino in mano. È il primo passo fuori dal mondo degli adulti: da questo palazzo comincia la corsa nei vicoli di Vizzini.",
+  },
+  {
+    nome: "I vicoli della Cunziria",
+    leftPct: 59.9,
+    topPct: 74.9,
+    testo:
+      "Tra queste strade strette Carletto si sente fuori posto e ha paura. Poi arriva Pina, che tutti chiamano la Lupa: non urla, non colpisce, ma protegge con uno sguardo fermo.",
+  },
+  {
+    nome: "Il vicolo degli oggetti",
+    leftPct: 46.6,
+    topPct: 48.4,
+    testo:
+      "In questo vicolo Gesualdo custodisce il suo regno: ruote, bauli, corde, legni e cose dimenticate. Per lui sono un tesoro. Quando Carletto gli dona la bussola, la montagna smette di essere un muro e diventa un passaggio.",
+  },
+  {
+    nome: "La grotta di Rosso",
+    leftPct: 15.1,
+    topPct: 64.6,
+    testo:
+      "Fuori c'è il sole, dentro sembra notte. In fondo alla grotta Carletto trova Rosso, con i capelli rossi e le mani sporche di terra. Poi guarda meglio: nella sabbia ci sono mappe, numeri e un progetto per portare l'acqua al paese.",
+  },
+  {
+    nome: "La piazza della Morra",
+    leftPct: 14.4,
+    topPct: 41.5,
+    testo:
+      "Sotto il grande albero, Turiddu e Alfio gridano, gesticolano e sembrano litigare. In realtà stanno giocando alla Morra. La sfida è forte, ma ha regole precise: quando finisce, si ride, si fa pace e si dividono i cannoli.",
+  },
+  {
+    nome: "La collina del nespolo",
+    leftPct: 26.3,
+    topPct: 36.5,
+    testo:
+      "Qui Carletto trova una barca sull'erba, lontana dal mare. I bambini Malavoglia remano e immaginano di partire, ma accanto a loro c'è il nespolo: il segno delle radici, della casa e del posto a cui tornare.",
+  },
+  {
+    nome: "Il panorama del ritorno",
+    leftPct: 47.7,
+    topPct: 20.5,
+    testo:
+      "Al tramonto, Carletto guarda Vizzini con occhi diversi. Ha i vestiti sporchi, il sasso di Pina in mano e la testa piena di incontri. Il viaggio sta finendo, ma le storie restano con lui.",
+  },
+];
 ---
 
 <BaseLayout
-  title="Verga's World | Casa Verga Vizzini"
-  description="Esplora Vizzini attraverso 7 storie animate, indizi nascosti e attività da sbloccare durante la visita al museo R.I.V.I.V.I."
+  title="Verga's World: storie e giochi al Museo R.I.VI.VI."
+  description="Scopri Verga's World a Vizzini: 7 storie animate, indizi, personaggi e attività per vivere il Museo R.I.VI.VI. con famiglie e scuole."
   fonts="none"
   scripts={[
     { src: "/scripts/indizio.js", defer: true },
@@ -102,7 +210,21 @@ const STORIE = TAPPE.map((tappa, i) => ({
            Il box indizio le galleggia sopra l'angolo top-right (desktop). -->
       <div class="vw-map-overlay">
         <div class="vw-map-stage" data-clue-map aria-label="Mappa illustrata interattiva di Vizzini">
-          <img class="vw-map-stage__img" src="/immagini/figma-mappa-vizzini.png" alt="Mappa illustrata del paese di Vizzini con le tappe del museo" decoding="async" />
+          <img class="vw-map-stage__img" src="/immagini/mappa-vizzini.png" alt="Mappa illustrata del paese di Vizzini con le tappe del museo" decoding="async" />
+
+          <!-- I 7 pin dei luoghi (statici). Aprono la modale con titolo + testo. -->
+          {LUOGHI.map((l) => (
+            <button
+              type="button"
+              class="vw-map-pointer"
+              data-luogo
+              data-titolo={l.nome}
+              data-testo={l.testo}
+              style={`left:${l.leftPct}%;top:${l.topPct}%`}
+              aria-haspopup="dialog"
+            >{l.nome}</button>
+          ))}
+
           <!-- Le lenti "indizio" sono iniettate da /scripts/indizio.js,
                a posizione seedata dalla data del giorno (ADR-4). -->
           <p class="vw-map-note">
@@ -194,7 +316,7 @@ const STORIE = TAPPE.map((tappa, i) => ({
       <div class="vw-stories__inner">
         <div class="vw-stories__head">
           <span class="vw-pill vw-pill--gold">Le tappe</span>
-          <h2 id="stories-title">Sette storie, ti aspettano al museo</h2>
+          <h2 id="stories-title">Sette storie ti aspettano al museo</h2>
           <p>
             Ogni stanza racconta una tappa del viaggio di Carletto a Vizzini.
             Si parte da una camera grigia di Milano, si entra nei vicoli, nelle grotte, nelle piazze e sulle colline, fino al ritorno a casa.
@@ -223,7 +345,7 @@ const STORIE = TAPPE.map((tappa, i) => ({
           <button type="button" class="vw-stories__arrow" data-stories-prev aria-label="Storia precedente">←</button>
           <div class="vw-stories__dots" role="tablist" aria-label="Seleziona storia">
             {STORIE.map((s, i) => (
-              <button type="button" class="vw-stories__dot" data-stories-dot aria-current={i === 0 ? "true" : "false"} aria-label={`Vai alla tappa ${s.numero}: ${s.tappa}`}>{s.numero}</button>
+              <button type="button" class="vw-stories__dot" data-stories-dot aria-current={i === 0 ? "true" : "false"} aria-label={`Vai alla storia ${s.numero}: ${s.titolo}`}>{s.numero}</button>
             ))}
           </div>
           <button type="button" class="vw-stories__arrow" data-stories-next aria-label="Storia successiva">→</button>
@@ -243,13 +365,13 @@ const STORIE = TAPPE.map((tappa, i) => ({
           <span class="vw-pill vw-pill--teal" style="background:#f4f8f2;">Famiglie</span>
           <h3>Vengo con la famiglia</h3>
           <p>Un percorso per bambini e adulti, con storie animate, indizi da cercare e attività semplici da fare insieme prima, durante e dopo la visita.</p>
-          <a class="vw-btn vw-btn--primary" href="/famiglie">Prenota la visita</a>
+          <a class="vw-btn vw-btn--primary" href="/visite-in-famiglia">Prenota la visita</a>
         </article>
         <article id="scuole" class="vw-visit-card vw-visit-card--scuole">
           <span class="vw-pill vw-pill--teal">Scuole</span>
           <h3>Porto la mia classe</h3>
           <p>Materiali didattici, attività guidate e contenuti collegati alle stanze del museo, per preparare la visita e continuare il lavoro in classe.</p>
-          <a class="vw-btn vw-btn--gold" href="/scuole">Organizza la gita</a>
+          <a class="vw-btn vw-btn--gold" href="/visite-scolastiche">Organizza la gita</a>
         </article>
       </div>
     </section>
@@ -267,6 +389,53 @@ const STORIE = TAPPE.map((tappa, i) => ({
       </div>
     </div>
   </div>
+
+  <!-- Modale dei pin "luogo" (riusa lo stile di .clue-success-modal) -->
+  <div class="clue-success-modal vw-luogo-modal" data-luogo-modal aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="luogo-modal-title">
+    <div class="modal-overlay" data-luogo-overlay></div>
+    <div class="modal-panel" role="document">
+      <button class="modal-close" data-luogo-close aria-label="Chiudi">×</button>
+      <div class="modal-content">
+        <h3 id="luogo-modal-title" data-luogo-title></h3>
+        <p data-luogo-text></p>
+        <a class="vw-btn vw-btn--primary" href="/#storie">Scopri la storia</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Apertura/chiusura modale dei pin "luogo" sulla mappa.
+    const modal = document.querySelector("[data-luogo-modal]");
+    if (modal) {
+      const m = modal;
+      const titleEl = m.querySelector("[data-luogo-title]");
+      const textEl = m.querySelector("[data-luogo-text]");
+      const closeBtn = m.querySelector("[data-luogo-close]");
+      const overlay = m.querySelector("[data-luogo-overlay]");
+      let lastFocused: HTMLElement | null = null;
+
+      const close = () => {
+        m.setAttribute("aria-hidden", "true");
+        if (lastFocused) lastFocused.focus();
+      };
+
+      document.querySelectorAll("[data-luogo]").forEach((pin) => {
+        pin.addEventListener("click", () => {
+          lastFocused = pin as HTMLElement;
+          if (titleEl) titleEl.textContent = pin.getAttribute("data-titolo");
+          if (textEl) textEl.textContent = pin.getAttribute("data-testo");
+          m.setAttribute("aria-hidden", "false");
+          if (closeBtn instanceof HTMLElement) closeBtn.focus();
+        });
+      });
+
+      closeBtn?.addEventListener("click", close);
+      overlay?.addEventListener("click", close);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && m.getAttribute("aria-hidden") === "false") close();
+      });
+    }
+  </script>
 
   <Footer />
 </BaseLayout>
