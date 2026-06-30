@@ -1,0 +1,77 @@
+---
+// Verifica del link email lato webapp (mai sul dominio Supabase).
+// Riceve token_hash + type (+ next) costruiti in src/lib/email/template.ts,
+// esegue verifyOtp client-side (stesso pattern auth del resto del progetto:
+// la sessione finisce nello storage di supabaseBrowser) e reindirizza a `next`.
+// /invito legge poi la sessione da lì, senza più dipendere dai token nell'hash.
+import ReservedLayout from "../../layouts/ReservedLayout.astro";
+import "../../styles/docenti.css";
+---
+
+<ReservedLayout title="Verifica del link | Verga's World" bodyClass="docenti">
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <div class="d-auth">
+    <div class="d-auth-card">
+      <div id="loading" class="text-center py-3" style="color:rgba(55,65,81,.7)">
+        Verifica del link in corso…
+      </div>
+
+      <div id="error" class="d-none text-center">
+        <h1 class="font-heading d-title h2 mb-2">Link non valido</h1>
+        <div class="d-help-box mb-3" id="error-msg">
+          Questo link non è valido o è scaduto. Chiedi al museo un nuovo invito, oppure usa
+          "Hai problemi ad accedere?" dalla pagina di login.
+        </div>
+        <a class="btn btn-outline-d-blue w-100" href="/insegnante/login">Vai al login</a>
+        <div class="mt-3">
+          <a href="/" style="color:rgba(55,65,81,.6);font-size:.875rem">← Torna alla home pubblica</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    import { supabaseBrowser } from "../../lib/supabase/browser";
+    import type { EmailOtpType } from "@supabase/supabase-js";
+
+    const params = new URLSearchParams(location.search);
+    const tokenHash = params.get("token_hash");
+    const type = params.get("type") as EmailOtpType | null;
+    const next = params.get("next");
+
+    // Default per type, se `next` non è passato o non è sicuro.
+    function defaultNext(t: string | null): string {
+      if (t === "recovery") return "/invito?reset=1";
+      if (t === "invite") return "/invito";
+      if (t === "signup") return "/insegnante";
+      return "/";
+    }
+    // Solo path interni assoluti ("/x"), mai "//host" o URL esterni.
+    function safeNext(n: string | null, t: string | null): string {
+      return n && /^\/(?!\/)/.test(n) ? n : defaultNext(t);
+    }
+
+    function showError(msg?: string) {
+      document.getElementById("loading")!.classList.add("d-none");
+      const box = document.getElementById("error")!;
+      if (msg) document.getElementById("error-msg")!.textContent = msg;
+      box.classList.remove("d-none");
+    }
+
+    async function run() {
+      if (!tokenHash || !type) return showError();
+      const { error } = await supabaseBrowser.auth.verifyOtp({ token_hash: tokenHash, type });
+      if (error) return showError("Questo link non è più valido o è scaduto. Richiedine uno nuovo.");
+      location.replace(safeNext(next, type));
+    }
+    run();
+  </script>
+</ReservedLayout>

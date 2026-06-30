@@ -5,6 +5,7 @@
 import type { APIRoute } from "astro";
 import { json, badRequest, serverError, getServer } from "../../../lib/admin/api";
 import { siteOrigin } from "../../../lib/siteUrl";
+import { confirmUrl, renderEmail } from "../../../lib/email/template";
 
 export const prerender = false;
 
@@ -26,16 +27,20 @@ export const POST: APIRoute = async ({ request, url }) => {
     return serverError("Configurazione server mancante");
   }
 
-  const redirectTo = new URL("/invito?reset=1", siteOrigin(url)).toString();
+  const origin = siteOrigin(url);
+  const redirectTo = new URL("/invito?reset=1", origin).toString();
   const { data, error } = await supabase.auth.admin.generateLink({
     type: "recovery",
     email,
     options: { redirectTo },
   });
 
+  // Link a /auth/confirm sul dominio webapp (mai *.supabase.co), torna su /invito?reset=1.
+  const resetLink = confirmUrl(origin, data?.properties, "/invito?reset=1");
+
   // Email inesistente → non lo riveliamo: rispondiamo ok. Ma se è un errore di
   // configurazione (non "user not found"), loggalo: altrimenti resta invisibile.
-  if (error || !data?.properties?.action_link) {
+  if (error || !resetLink) {
     if (error && error.status !== 404) {
       console.error("[reset-password] generateLink:", error.status, error.message);
     }
@@ -44,13 +49,21 @@ export const POST: APIRoute = async ({ request, url }) => {
 
   try {
     const { sendMail } = await import("../../../lib/mail");
+    const { html, text } = renderEmail({
+      origin,
+      preheader: "Reimposta la password del tuo account Verga's World.",
+      title: "Reimposta la tua password",
+      bodyHtml: `<p>Hai richiesto di reimpostare la password del tuo account.</p>
+        <p>Scegli una nuova password dal pulsante qui sotto. Se non sei stato tu, ignora questa email.</p>`,
+      ctaLabel: "Reimposta la password",
+      ctaUrl: resetLink,
+      text: "Hai richiesto di reimpostare la password del tuo account Verga's World. Apri questo link per sceglierne una nuova:",
+    });
     await sendMail({
       to: email,
       subject: "Reimposta la tua password — Verga's World",
-      html: `<p>Hai richiesto di reimpostare la password.</p>
-        <p><a href="${data.properties.action_link}">Reimposta la password</a></p>
-        <p>Se non sei stato tu, ignora questa email.</p>`,
-      text: `Reimposta la password: ${data.properties.action_link}`,
+      html,
+      text,
     });
   } catch (e) {
     // Causa reale lato server (es. SMTP host/cert/auth); al client risposta generica.

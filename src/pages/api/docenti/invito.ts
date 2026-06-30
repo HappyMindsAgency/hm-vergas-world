@@ -10,6 +10,7 @@
 import type { APIRoute } from "astro";
 import { json, badRequest, serverError, getServer, guardAdmin } from "../../../lib/admin/api";
 import { siteOrigin } from "../../../lib/siteUrl";
+import { confirmUrl, renderEmail } from "../../../lib/email/template";
 
 export const prerender = false;
 
@@ -74,26 +75,35 @@ export const POST: APIRoute = async ({ request, cookies, url }) => {
     return serverError("Impossibile creare il profilo docente");
   }
 
-  // 3) link di invito + email (nodemailer). redirectTo verso la route /invito.
-  const redirectTo = new URL("/invito", siteOrigin(url)).toString();
+  // 3) link di invito + email (nodemailer). Il link punta a /auth/confirm sul
+  // dominio webapp (mai *.supabase.co): verifica il token e torna su /invito.
+  const origin = siteOrigin(url);
+  const redirectTo = new URL("/invito", origin).toString();
   const { data: linkData } = await supabase.auth.admin.generateLink({
     type: "invite",
     email: body.email,
     options: { redirectTo },
   });
 
-  const inviteLink = linkData?.properties?.action_link ?? redirectTo;
+  const inviteLink = confirmUrl(origin, linkData?.properties, "/invito") ?? redirectTo;
 
   try {
     const { sendMail } = await import("../../../lib/mail");
+    const { html, text } = renderEmail({
+      origin,
+      preheader: "Completa la registrazione alla tua Area Docenti.",
+      title: `Ciao ${body.nome}, benvenuto!`,
+      bodyHtml: `<p>Il Museo ti ha invitato all'Area Docenti di Verga's World.</p>
+        <p>Completa la registrazione e scegli la tua password dal pulsante qui sotto.</p>`,
+      ctaLabel: "Completa la registrazione",
+      ctaUrl: inviteLink,
+      text: `Ciao ${body.nome}, completa la registrazione alla tua Area Docenti di Verga's World aprendo questo link:`,
+    });
     await sendMail({
       to: body.email,
       subject: "Invito all'Area Docenti — Verga's World",
-      html: `<p>Ciao ${body.nome},</p>
-        <p>il Museo ti ha invitato a Verga's World. Completa la registrazione dal link qui sotto:</p>
-        <p><a href="${inviteLink}">Completa la registrazione</a></p>
-        <p>A presto,<br/>Il team di Verga's World</p>`,
-      text: `Ciao ${body.nome}, completa la registrazione: ${inviteLink}`,
+      html,
+      text,
     });
   } catch {
     // L'account è creato; segnaliamo solo il mancato invio così l'admin può reinviare.
