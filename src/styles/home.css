@@ -9,6 +9,16 @@
  *   crema-verde #f4f8f2 · crema indizio #fefbf3 · testo #374151 · bordo #e5e7eb
  */
 .vw-home {
+  /* WCAG 2.2 AA — deviazione NOTA e accettata (priorità fedeltà Figma).
+     Il brand teal #3e85a9 non raggiunge 4.5:1 per testo normale (max 4.09 con
+     bianco puro). Restano sotto soglia, per scelta di design:
+       · .vw-pill--teal (testo #3e85a9)            ~3.65–3.81
+       · .vw-pill--gold (testo #275b78 su oro)      4.15
+       · .vw-btn--ghost (testo #3e85a9 su bianco)   4.09
+       · nav-CTA "Area docenti" (#fcfcf8 su teal)   3.98
+       · banda codice-avventura lead/sub            3.98
+     Per conformità piena servirebbe scurire il token teal (~#336f8e ≈5:1):
+     decisione di design-system, non applicata. Tutto il resto è AA-conforme. */
   --vw-teal: #3e85a9;
   --vw-teal-dark: #275b78;
   --vw-gold: #f3b94c;
@@ -117,9 +127,13 @@
   align-items: center;
   gap: 20px;
 }
+/* L'h1 è un wrapper trasparente attorno al logo: niente spaziatura/colore extra,
+   serve solo a dare alla pagina un titolo di livello 1 (WCAG 1.3.1 / 2.4.6). */
+.vw-hero__title { margin: 0; line-height: 0; }
 .vw-hero__logo {
   width: min(560px, 90%);
   height: auto;
+  margin-inline: auto;
 }
 .vw-hero__lead {
   font-size: 20px;
@@ -237,6 +251,16 @@
   background: var(--vw-gold);
   border: 2px solid #fff;
 }
+/* Cerchio numerato dorato: nascosto su desktop (lì si usa la pill di testo). */
+.vw-map-pointer__num { display: none; }
+/* Focus ring INSET sui pin: lo stage ha overflow:hidden, un outline esterno
+   verrebbe tagliato sui pin a bordo mappa (WCAG 2.4.7 / 2.4.11). box-shadow
+   interno + esterno resta visibile entro il clip. */
+.vw-map-pointer:focus-visible {
+  outline: 2px solid var(--vw-teal-dark);
+  outline-offset: -2px;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--vw-teal-dark);
+}
 
 /* Disclaimer in fondo alla mappa (Figma 174:2403) */
 .vw-map-note {
@@ -253,32 +277,37 @@
   z-index: 3;
 }
 
-/* Lenti "indizio" iniettate da indizio.js — invariate nella logica */
-.vw-map-stage .clue-marker {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
-  display: grid;
-  place-items: center;
-  border-radius: 9999px;
-  border: 2px solid #fff;
-  background: rgba(62, 133, 169, 0.92);
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px -6px rgba(31, 41, 55, 0.5);
-  z-index: 4;
-  animation: vw-clue-pulse 1.8s ease-in-out infinite;
+/* Blocco "oggetto trovato" dentro la modale del luogo (indizio del giorno) */
+.vw-luogo-found {
+  margin: 8px 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
-.vw-map-stage .clue-marker:hover,
-.vw-map-stage .clue-marker:focus-visible { outline: 3px solid var(--vw-gold); }
-.vw-map-stage .clue-marker.is-correct { background: var(--vw-teal); animation: none; }
-.vw-map-stage .clue-marker.is-wrong { background: #c0392b; animation: none; }
-@keyframes vw-clue-pulse {
-  0%, 100% { box-shadow: 0 6px 16px -6px rgba(31, 41, 55, 0.5), 0 0 0 0 rgba(62, 133, 169, 0.5); }
-  50% { box-shadow: 0 6px 16px -6px rgba(31, 41, 55, 0.5), 0 0 0 10px rgba(62, 133, 169, 0); }
+/* display:flex batte l'attributo hidden (display:none UA): senza questo il blocco
+   "oggetto trovato" resterebbe visibile anche nei luoghi senza oggetto. */
+.vw-luogo-found[hidden] { display: none; }
+.vw-luogo-found__frame {
+  transform: rotate(-5deg);
+  background: #fcfaf5;
+  border: 1px solid rgba(45, 27, 10, 0.12);
+  border-radius: 14px;
+  padding: 8px;
 }
+.vw-luogo-found__frame img {
+  display: block;
+  width: 120px;
+  aspect-ratio: 226 / 193;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.vw-luogo-found__congrats {
+  color: var(--vw-teal);
+  font-weight: 700;
+  font-size: 17px;
+}
+.vw-luogo-found__text { font-size: 15px; line-height: 1.5; }
 
 /* ============ BOX INDIZIO DI VERGA (75:1016) ============ */
 /* Card verticale STRETTA (~502px su mappa 1920 → ~26%). Desktop: galleggia
@@ -396,11 +425,23 @@
   background: linear-gradient(158deg, #3e85a9 0%, #275b78 100%);
   box-shadow: var(--vw-shadow-card);
 }
-.vw-cta-code__inner { max-width: 822px; margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+/* Illustrazione di brand sotto al gradiente, 20% (Figma 40:41). Decorativa. */
+.vw-cta-code__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.2;
+  pointer-events: none;
+}
+.vw-cta-code__inner { position: relative; z-index: 1; max-width: 822px; margin-inline: auto; display: flex; flex-direction: column; align-items: center; gap: 24px; }
 .vw-cta-code__icon { width: 80px; height: auto; }
 .vw-cta-code h2 { color: var(--vw-paper); font-size: clamp(36px, 6vw, 60px); line-height: 1; letter-spacing: -0.72px; }
-.vw-cta-code__lead { font-size: 22px; line-height: 1.25; color: rgba(252, 252, 248, 0.85); }
-.vw-cta-code__sub { font-size: 18px; color: rgba(252, 252, 248, 0.8); }
+/* Testo bianco pieno (no opacità) per il massimo contrasto sul gradiente teal
+   (WCAG 1.4.3): la versione translucida scendeva a 3.1–3.3:1. */
+.vw-cta-code__lead { font-size: 22px; line-height: 1.25; color: var(--vw-paper); }
+.vw-cta-code__sub { font-size: 18px; color: var(--vw-paper); }
 .vw-cta-code__actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
 
 /* ---- Slider storie (75:937) ---- */
@@ -448,7 +489,7 @@
   font-weight: 700;
   font-size: 14px;
 }
-.vw-story-card h4 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.72px; line-height: 1; }
+.vw-story-card h3 { font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.72px; line-height: 1; margin: 0; }
 .vw-story-card__desc { font-size: 16px; line-height: 1.6; font-weight: 500; }
 
 /* Slider: una storia per slide con scroll-snap (ponytail: niente libreria carousel) */
@@ -537,4 +578,109 @@
 @media (max-width: 1099px) {
   .vw-map-overlay { display: flex; flex-direction: column; gap: 28px; }
   .vw-indizio { max-width: 502px; margin-inline: auto; }
+}
+
+/* ============ Mobile: mappa + pointer + box oggetto ============ */
+/* La mappa illustrata su telefono è una card verticale (Figma 37:11/37:18,
+   335×524, bordo crema, angoli arrotondati). L'illustrazione panoramica viene
+   ritagliata in ritratto (object-fit: cover). Le 7 pill di testo del desktop
+   non ci stanno: i pointer diventano cerchi dorati numerati 1–7 (il nome resta
+   nell'aria accessibile e compare nella modale al tap, Figma 37:20–37:32). */
+@media (max-width: 640px) {
+  /* Hero: i due CTA impilati a piena larghezza (Figma 40:8, ~335px in margini 20px,
+     ~48px alti, gap 12px). Primario teal pieno, secondario pill bianca bordo teal. */
+  .vw-hero { padding: 48px 20px 32px; }
+  .vw-hero__actions {
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+  }
+  .vw-hero__actions .vw-btn {
+    width: 100%;
+    min-height: 48px;
+  }
+  .vw-hero__actions .vw-btn.vw-btn--ghost {
+    background: #fff;
+    border: 1px solid var(--vw-teal);
+  }
+
+  /* Card verticale crema arrotondata, margini laterali 20px */
+  .vw-map-section { padding: 24px 0 56px; }
+  .vw-map-overlay { padding-inline: 20px; gap: 20px; }
+  .vw-map-stage {
+    aspect-ratio: 335 / 524;
+    border: 1px solid var(--vw-border);
+    border-radius: 20px;
+  }
+  /* L'immagine landscape va zoomata e spostata come nel Figma (img 277.99% di
+     larghezza, left -45.09%) così il borgo riempie il riquadro ritratto E i pin
+     (con %da Figma, sotto) cadono sui punti giusti. object-fit:cover centrato
+     non basta: inquadrerebbe il crop in modo diverso e i pin sballerebbero. */
+  /* .vw-home prefix per specificità: deve battere `.vw-home img{max-width:100%}`,
+     altrimenti la larghezza si ferma a 100% e il crop si dimezza (metà bianca). */
+  .vw-home .vw-map-stage__img {
+    inset: auto;
+    left: -45.09%;
+    top: 0;
+    width: 277.99%;
+    max-width: none;
+    height: 100%;
+    object-fit: fill;
+  }
+
+  /* Pointer → cerchio dorato numerato (44px, Figma). grid+place-items per
+     centrare il numero: il base è inline-flex con justify-content flex-start
+     (numero in alto a sinistra, illeggibile). */
+  .vw-map-pointer {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 0;
+    gap: 0;
+    background: var(--vw-gold);
+    border: 2px solid #fff;
+    border-radius: 9999px;
+    box-shadow: 0 8px 12px rgba(31, 41, 55, 0.12);
+  }
+  .vw-map-pointer::before { display: none; }
+  .vw-map-pointer__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .vw-map-pointer__num {
+    display: block;
+    font-family: "Outfit", system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--vw-ink);
+    line-height: 1;
+  }
+
+  /* Posizioni ricalcolate sul crop ritratto 335×524 (centri pin / Figma 37:11).
+     Sostituiscono le %inline pensate per il panorama landscape del desktop. */
+  .vw-map-pointer:nth-of-type(1) { left: 13.7% !important; top: 29.2% !important; }
+  .vw-map-pointer:nth-of-type(2) { left: 72.5% !important; top: 30.1% !important; }
+  .vw-map-pointer:nth-of-type(3) { left: 30.1% !important; top: 52.6% !important; }
+  .vw-map-pointer:nth-of-type(4) { left: 9.9%  !important; top: 69.8% !important; }
+  .vw-map-pointer:nth-of-type(5) { left: 77.9% !important; top: 52.6% !important; }
+  .vw-map-pointer:nth-of-type(6) { left: 86.6% !important; top: 62.8% !important; }
+  .vw-map-pointer:nth-of-type(7) { left: 62.7% !important; top: 68.9% !important; }
+
+  /* La card mappa mobile (Figma 37:18) non contiene il disclaimer: nascondilo. */
+  .vw-map-note { display: none; }
+
+  /* Box oggetto: meno padding laterale, testi più piccoli a schermo stretto */
+  .vw-indizio { padding: 20px 18px; gap: 16px; }
+  .vw-indizio__title { font-size: 26px; gap: 10px; }
+  .vw-indizio__desc { font-size: 15px; }
+  .vw-indizio__countdown { font-size: 32px; letter-spacing: 2px; }
+  .vw-indizio__objlabel { font-size: 15px; letter-spacing: 1px; padding: 10px 14px; }
 }

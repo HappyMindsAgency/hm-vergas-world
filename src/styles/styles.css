@@ -1098,41 +1098,6 @@ h3 {
   .modal-media { min-height: 200px; }
 }
 
-/* "L'indizio di Verga": le tre lenti sulla mappa (ADR-4) */
-.clue-marker {
-  position: absolute;
-  z-index: 6;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 3px solid #fff;
-  border-radius: 50%;
-  background: var(--color-warm);
-  box-shadow: 0 6px 16px rgba(26, 58, 92, 0.28);
-  color: var(--color-brand);
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-  transform: translate(-50%, -50%);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-.clue-marker:hover,
-.clue-marker:focus-visible {
-  transform: translate(-50%, -50%) scale(1.12);
-  box-shadow: 0 8px 22px rgba(26, 58, 92, 0.36);
-}
-.clue-marker.is-correct {
-  background: var(--color-success);
-  color: #fff;
-}
-.clue-marker.is-wrong {
-  background: #d9534f;
-  color: #fff;
-  opacity: 0.85;
-}
-
 /* Clue game section */
 .clue-game {
   padding: 28px clamp(18px, 5vw, 64px);
@@ -1232,9 +1197,15 @@ h3 {
   position: absolute;
   top: 12px;
   right: 12px;
+  /* WCAG 2.5.8: area cliccabile ≥ 24×24 px (qui 44×44, comoda al tocco). */
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: 0;
   font-size: 24px;
+  line-height: 1;
   color: var(--color-brand);
   cursor: pointer;
 }
@@ -1358,5 +1329,25 @@ h3 {
 @media (max-width: 800px) {
   .footer-inner { flex-direction: column; align-items: flex-start; }
   .footer-funding { flex-basis: auto; }
+}
+
+/* Mobile (Figma 40:129): footer centrato — wordmark, indirizzo, riga 3 loghi,
+   nota PNRR. Tutto incolonnato e allineato al centro. */
+@media (max-width: 640px) {
+  /* Mobile: via lo sfondo acquerello, resta solo il colore carta. */
+  .site-footer { text-align: center; background-image: none; }
+  .footer-inner {
+    align-items: center;
+    gap: 28px;
+  }
+  .footer-museo {
+    align-items: center;
+    max-width: 100%;
+  }
+  .footer-funding {
+    align-items: center;
+    max-width: 100%;
+  }
+  .footer-funding-logos { max-width: 320px; }
 }
 

@@ -3,7 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import { INDIZI } from "../data/indizi.ts";
-import { GAME_TIMEZONE, INDIZIO_MARKERS } from "../config/game.ts";
+import { GAME_TIMEZONE } from "../config/game.ts";
 import "../styles/styles.css"; // token + stili di Header/Footer condivisi
 import "../styles/home.css"; // stili specifici della home (Figma 75-766)
 
@@ -13,7 +13,6 @@ import "../styles/home.css"; // stili specifici della home (Figma 75-766)
 const indizioData = {
   indizi: INDIZI,
   timeZone: GAME_TIMEZONE,
-  markerCount: INDIZIO_MARKERS,
 };
 
 // Le 7 tappe del museo (Figma 75:773–75:800). Sono etichette di presentazione
@@ -180,7 +179,9 @@ const LUOGHI = [
     <!-- HERO (75:928) -->
     <section class="vw-hero" aria-labelledby="hero-title">
       <div class="vw-hero__intro">
-        <img class="vw-hero__logo" src="/immagini/figma-logo-vergas-world.png" alt="Verga's World" id="hero-title" width="606" height="243" fetchpriority="high" />
+        <h1 id="hero-title" class="vw-hero__title">
+          <img class="vw-hero__logo" src="/immagini/figma-logo-vergas-world.png" alt="Verga's World" width="606" height="243" fetchpriority="high" />
+        </h1>
         <p class="vw-hero__lead">
           Esplora Vizzini attraverso <strong>7 storie animate, indizi nascosti</strong>
           e attività da sbloccare durante la visita al museo R.I.V.I.V.I.
@@ -212,8 +213,10 @@ const LUOGHI = [
         <div class="vw-map-stage" data-clue-map aria-label="Mappa illustrata interattiva di Vizzini">
           <img class="vw-map-stage__img" src="/immagini/mappa-vizzini.png" alt="Mappa illustrata del paese di Vizzini con le tappe del museo" decoding="async" />
 
-          <!-- I 7 pin dei luoghi (statici). Aprono la modale con titolo + testo. -->
-          {LUOGHI.map((l) => (
+          <!-- I 7 pin dei luoghi (statici). Aprono la modale con titolo + testo.
+               L'oggetto del giorno si nasconde nel pin del suo luogo: indizio.js
+               marca quel pin con data-found-* e la modale rivela l'oggetto. -->
+          {LUOGHI.map((l, i) => (
             <button
               type="button"
               class="vw-map-pointer"
@@ -222,11 +225,9 @@ const LUOGHI = [
               data-testo={l.testo}
               style={`left:${l.leftPct}%;top:${l.topPct}%`}
               aria-haspopup="dialog"
-            >{l.nome}</button>
+            ><span class="vw-map-pointer__num" aria-hidden="true">{i + 1}</span><span class="vw-map-pointer__label">{l.nome}</span></button>
           ))}
 
-          <!-- Le lenti "indizio" sono iniettate da /scripts/indizio.js,
-               a posizione seedata dalla data del giorno (ADR-4). -->
           <p class="vw-map-note">
             Verga's World è un mondo di fantasia, la Vizzini che nasce quando un luogo incontra l'immaginazione.
             Non cercare strade esatte o confini precisi: segui i vicoli come indizi, entra nelle storie e lasciati guidare da ciò che ogni tappa custodisce.
@@ -264,6 +265,27 @@ const LUOGHI = [
 
     <script is:inline type="application/json" id="indizio-data" set:html={JSON.stringify(indizioData)}></script>
 
+    <!-- CTA CODICE AVVENTURA (75:1005) -->
+    <section class="vw-cta-code" aria-labelledby="cta-code-title">
+      <!-- Sfondo illustrato sotto al gradiente teal (Figma 40:41, opacità 20%) -->
+      <img class="vw-cta-code__bg" src="/immagini/figma-codice-avventura-bg.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" />
+      <div class="vw-cta-code__inner">
+        <img class="vw-cta-code__icon" src="/immagini/figma-penna-calamaio.png" alt="" width="100" height="119" loading="lazy" />
+        <h2 id="cta-code-title">Hai un codice avventura?</h2>
+        <p class="vw-cta-code__lead">
+          Il codice apre l'area riservata di Verga's World: video, attività interattive e materiali didattici
+          per continuare l'esperienza durante la visita, a casa o in classe.
+        </p>
+        <p class="vw-cta-code__sub">
+          Durante la visita al museo e anche dopo, i visitatori possono usare il codice avventura per sbloccare i contenuti video e fare giochi didattici.
+        </p>
+        <div class="vw-cta-code__actions">
+          <a class="vw-btn vw-btn--gold" href="/avventura">Inserisci il codice</a>
+          <a class="vw-btn vw-btn--ghost-light" href="/avventura">Scopri come funziona →</a>
+        </div>
+      </div>
+    </section>
+
     <!-- PERSONAGGI (75:842 + 75:850) -->
     <section class="vw-section vw-characters" aria-labelledby="characters-title">
       <div class="vw-section__head">
@@ -292,25 +314,6 @@ const LUOGHI = [
       </div>
     </section>
 
-    <!-- CTA CODICE AVVENTURA (75:1005) -->
-    <section class="vw-cta-code" aria-labelledby="cta-code-title">
-      <div class="vw-cta-code__inner">
-        <img class="vw-cta-code__icon" src="/immagini/figma-penna-calamaio.png" alt="" width="100" height="119" loading="lazy" />
-        <h2 id="cta-code-title">Hai un codice avventura?</h2>
-        <p class="vw-cta-code__lead">
-          Il codice apre l'area riservata di Verga's World: video, attività interattive e materiali didattici
-          per continuare l'esperienza durante la visita, a casa o in classe.
-        </p>
-        <p class="vw-cta-code__sub">
-          Durante la visita al museo e anche dopo, i visitatori possono usare il codice avventura per sbloccare i contenuti video e fare giochi didattici.
-        </p>
-        <div class="vw-cta-code__actions">
-          <a class="vw-btn vw-btn--gold" href="/avventura">Inserisci il codice</a>
-          <a class="vw-btn vw-btn--ghost-light" href="/avventura">Scopri come funziona →</a>
-        </div>
-      </div>
-    </section>
-
     <!-- SLIDER 7 STORIE (75:937) -->
     <section class="vw-stories" id="storie" data-stories aria-labelledby="stories-title">
       <div class="vw-stories__inner">
@@ -333,7 +336,7 @@ const LUOGHI = [
                   <span class="vw-story-card__badge">{String(s.numero).padStart(2, "0")}</span>
                 </div>
                 <span class="vw-pill vw-pill--teal">Storia {s.numero} / 7</span>
-                <h4>{s.titolo}</h4>
+                <h3>{s.titolo}</h3>
                 <p class="vw-story-card__desc">{s.descrizione}</p>
                 <a class="vw-btn vw-btn--primary" href="/avventura">Sblocca con il Codice Avventura</a>
               </article>
@@ -377,20 +380,9 @@ const LUOGHI = [
     </section>
   </main>
 
-  <!-- Modale "indizio trovato" (markup invariato per indizio.js) -->
-  <div class="clue-success-modal" data-clue-success-modal aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="clue-success-heading">
-    <div class="modal-overlay" data-modal-overlay></div>
-    <div class="modal-panel" role="document">
-      <button class="modal-close" data-clue-close aria-label="Chiudi">×</button>
-      <div class="modal-icon" aria-hidden="true">✨</div>
-      <div class="modal-content">
-        <h3 id="clue-success-heading" data-clue-success-title>Bravo! Hai trovato l'indizio!</h3>
-        <p data-clue-success-text>Esamina le lenti sulla mappa per scoprire l'indizio.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modale dei pin "luogo" (riusa lo stile di .clue-success-modal) -->
+  <!-- Modale dei pin "luogo" (riusa lo stile di .clue-success-modal).
+       Se il luogo nasconde l'oggetto del giorno, indizio.js marca il pin con
+       data-found-* e qui appare il blocco "oggetto trovato". -->
   <div class="clue-success-modal vw-luogo-modal" data-luogo-modal aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="luogo-modal-title">
     <div class="modal-overlay" data-luogo-overlay></div>
     <div class="modal-panel" role="document">
@@ -398,6 +390,15 @@ const LUOGHI = [
       <div class="modal-content">
         <h3 id="luogo-modal-title" data-luogo-title></h3>
         <p data-luogo-text></p>
+
+        <div class="vw-luogo-found" data-luogo-found hidden>
+          <div class="vw-luogo-found__frame">
+            <img data-luogo-found-img alt="" width="120" height="102" loading="lazy" decoding="async" />
+          </div>
+          <p class="vw-luogo-found__congrats">✨ Complimenti, hai trovato l'oggetto del giorno!</p>
+          <p class="vw-luogo-found__text" data-luogo-found-text></p>
+        </div>
+
         <a class="vw-btn vw-btn--primary" href="/#storie">Scopri la storia</a>
       </div>
     </div>
@@ -412,7 +413,22 @@ const LUOGHI = [
       const textEl = m.querySelector("[data-luogo-text]");
       const closeBtn = m.querySelector("[data-luogo-close]");
       const overlay = m.querySelector("[data-luogo-overlay]");
+      const found = m.querySelector("[data-luogo-found]");
+      const foundImg = m.querySelector("[data-luogo-found-img]") as HTMLImageElement | null;
+      const foundText = m.querySelector("[data-luogo-found-text]");
       let lastFocused: HTMLElement | null = null;
+
+      const panel = m.querySelector(".modal-panel") as HTMLElement | null;
+
+      // Elementi focalizzabili visibili nel pannello (per il focus trap, WCAG 2.1.2).
+      const focusables = (): HTMLElement[] => {
+        if (!panel) return [];
+        return Array.from(
+          panel.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter((el) => el.offsetParent !== null);
+      };
 
       const close = () => {
         m.setAttribute("aria-hidden", "true");
@@ -421,9 +437,22 @@ const LUOGHI = [
 
       document.querySelectorAll("[data-luogo]").forEach((pin) => {
         pin.addEventListener("click", () => {
-          lastFocused = pin as HTMLElement;
-          if (titleEl) titleEl.textContent = pin.getAttribute("data-titolo");
-          if (textEl) textEl.textContent = pin.getAttribute("data-testo");
+          const p = pin as HTMLElement;
+          lastFocused = p;
+          if (titleEl) titleEl.textContent = p.getAttribute("data-titolo");
+          if (textEl) textEl.textContent = p.getAttribute("data-testo");
+
+          // Oggetto del giorno nascosto qui? (indizio.js ha marcato il pin)
+          const name = p.dataset.foundName;
+          if (found && name && foundImg && foundText) {
+            foundImg.src = p.dataset.foundImage || "";
+            foundImg.alt = name;
+            foundText.textContent = p.dataset.foundText || "";
+            (found as HTMLElement).hidden = false;
+          } else if (found) {
+            (found as HTMLElement).hidden = true;
+          }
+
           m.setAttribute("aria-hidden", "false");
           if (closeBtn instanceof HTMLElement) closeBtn.focus();
         });
@@ -432,7 +461,26 @@ const LUOGHI = [
       closeBtn?.addEventListener("click", close);
       overlay?.addEventListener("click", close);
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && m.getAttribute("aria-hidden") === "false") close();
+        if (m.getAttribute("aria-hidden") !== "false") return;
+        if (e.key === "Escape") {
+          close();
+          return;
+        }
+        // Focus trap: Tab/Shift+Tab restano dentro il pannello (WCAG 2.1.2).
+        if (e.key === "Tab") {
+          const items = focusables();
+          if (items.length === 0) return;
+          const first = items[0];
+          const last = items[items.length - 1];
+          const active = document.activeElement as HTMLElement | null;
+          if (e.shiftKey && (active === first || !panel?.contains(active))) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && active === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
       });
     }
   </script>
