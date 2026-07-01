@@ -4,9 +4,10 @@
 // il bypass. Il bypass si attiva aprendo un URL con ?bypass=<token>: viene poi
 // memorizzato in un cookie per le pagine successive.
 //
-// Gira a runtime su OGNI pagina perché il sito è SSR (astro.config: output:'server')
-// e il build lo estrae come Vercel Edge Middleware (vercel({ edgeMiddleware: true })).
-// Perciò qui usiamo solo Web API (niente Node).
+// Gira a runtime su OGNI pagina DENTRO la funzione SSR, perché il sito è SSR
+// (astro.config: output:'server'). NIENTE edgeMiddleware: all'edge il `context.rewrite`
+// verso /maintenance dava pagina bianca in produzione; nella funzione SSR (come in dev)
+// funziona. Tutte le route sono on-demand, quindi non serve un gate all'edge.
 //
 // NB storico: con le pagine PRERENDERIZZATE il middleware NON girava a runtime (le
 // serviva il filesystem prima del middleware) → manutenzione/bypass inefficaci sul
