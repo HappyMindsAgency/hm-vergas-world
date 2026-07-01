@@ -4,14 +4,14 @@
 // il bypass. Il bypass si attiva aprendo un URL con ?bypass=<token>: viene poi
 // memorizzato in un cookie per le pagine successive.
 //
-// NB: gira anche sulle pagine statiche perché il build lo estrae come Vercel Edge
-// Middleware (astro.config: vercel({ edgeMiddleware: true })). Perciò qui usiamo
-// solo Web API (niente Node).
+// Gira a runtime su OGNI pagina perché il sito è SSR (astro.config: output:'server')
+// e il build lo estrae come Vercel Edge Middleware (vercel({ edgeMiddleware: true })).
+// Perciò qui usiamo solo Web API (niente Node).
 //
-// ⚠️ Dev vs prod: in `astro dev` le pagine PRERENDERIZZATE (frontend pubblico)
-// arrivano al middleware SENZA query né cookie → il blocco 503 funziona ma il
-// bypass NO. In produzione (edge middleware Vercel) la richiesta è completa e il
-// bypass funziona. Quindi il bypass va testato sul sito deployato, non in dev.
+// NB storico: con le pagine PRERENDERIZZATE il middleware NON girava a runtime (le
+// serviva il filesystem prima del middleware) → manutenzione/bypass inefficaci sul
+// pubblico. Risolto passando a output:'server'. Non reintrodurre `prerender = true`
+// sulle pagine pubbliche senza ripensare questo gate.
 import { defineMiddleware } from "astro:middleware";
 import {
   MAINTENANCE_ENABLED,

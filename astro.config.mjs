@@ -3,6 +3,11 @@ import vercel from "@astrojs/vercel";
 
 // https://astro.build/config
 export default defineConfig({
+  // On-demand (SSR) di default: il frontend pubblico non è più prerenderizzato, così
+  // il middleware (modalità manutenzione) gira a RUNTIME su ogni pagina. Senza questo
+  // le pagine statiche sono servite dal filesystem PRIMA del middleware → manutenzione
+  // e bypass non si applicherebbero al pubblico. Le aree riservate erano già SSR.
+  output: "server",
   // Output statico di default (frontend pubblico prerenderizzato); le route che
   // richiedono server (Area Museo/Admin: SSR auth-gated + /api) usano
   // `export const prerender = false`. L'adapter Vercel serve queste route on-demand.
