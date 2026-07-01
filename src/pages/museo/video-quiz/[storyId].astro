@@ -80,15 +80,24 @@ const adminName = `${admin.nome} ${admin.cognome}`.trim();
           <li class="mb-4 question-block" data-question-id={q.id}>
             <div class="d-flex justify-content-between align-items-start gap-2">
               <strong>{q.testo}</strong>
-              <button class="btn btn-sm btn-outline-museo-red btn-del-question" data-id={q.id}>Elimina</button>
+              <div class="d-flex gap-2 flex-shrink-0">
+                <button class="btn btn-sm btn-outline-museo-blue btn-edit-question" data-id={q.id} data-testo={q.testo}>Modifica</button>
+                <button class="btn btn-sm btn-outline-museo-red btn-del-question" data-id={q.id}>Elimina</button>
+              </div>
             </div>
             <ul class="list-unstyled mt-2 mb-2">
               {q.options.map((o) => (
                 <li class="d-flex align-items-center gap-2 py-1">
-                  <span class={`badge ${o.is_correct ? "text-bg-success" : "text-bg-light text-dark"}`}>
+                  <button
+                    class={`badge border-0 btn-toggle-option ${o.is_correct ? "text-bg-success" : "text-bg-light text-dark"}`}
+                    data-id={o.id}
+                    data-correct={String(o.is_correct)}
+                    title="Segna come corretta/errata"
+                  >
                     {o.is_correct ? "✓ corretta" : "errata"}
-                  </span>
-                  <span>{o.testo}</span>
+                  </button>
+                  <span class="flex-grow-1">{o.testo}</span>
+                  <button class="btn btn-sm btn-link p-0 ms-2 btn-edit-option" data-id={o.id} data-testo={o.testo}>modifica</button>
                   <button class="btn btn-sm btn-link text-danger p-0 ms-2 btn-del-option" data-id={o.id}>rimuovi</button>
                 </li>
               ))}
@@ -193,6 +202,13 @@ const adminName = `${admin.nome} ${admin.cognome}`.trim();
       if (!testo) return;
       if (await call("add-question", { quizId, testo })) window.location.reload();
     });
+    document.querySelectorAll(".btn-edit-question").forEach((b) =>
+      b.addEventListener("click", async () => {
+        const testo = prompt("Testo della domanda:", b.dataset.testo || "");
+        if (testo == null || !testo.trim()) return;
+        if (await call("edit-question", { questionId: b.dataset.id, testo: testo.trim() })) window.location.reload();
+      })
+    );
     document.querySelectorAll(".btn-del-question").forEach((b) =>
       b.addEventListener("click", async () => {
         if (await call("delete-question", { questionId: b.dataset.id })) window.location.reload();
@@ -208,6 +224,19 @@ const adminName = `${admin.nome} ${admin.cognome}`.trim();
           isCorrect: fd.get("isCorrect") === "on",
         });
         if (ok) window.location.reload();
+      })
+    );
+    document.querySelectorAll(".btn-edit-option").forEach((b) =>
+      b.addEventListener("click", async () => {
+        const testo = prompt("Testo dell'opzione:", b.dataset.testo || "");
+        if (testo == null || !testo.trim()) return;
+        if (await call("edit-option", { optionId: b.dataset.id, testo: testo.trim() })) window.location.reload();
+      })
+    );
+    document.querySelectorAll(".btn-toggle-option").forEach((b) =>
+      b.addEventListener("click", async () => {
+        const isCorrect = b.dataset.correct !== "true";
+        if (await call("edit-option", { optionId: b.dataset.id, isCorrect })) window.location.reload();
       })
     );
     document.querySelectorAll(".btn-del-option").forEach((b) =>

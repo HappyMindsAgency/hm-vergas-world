@@ -90,6 +90,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return json({ ok: true, questionId: data.id }, 201);
     }
 
+    case "edit-question": {
+      const questionId = str("questionId");
+      const testo = str("testo");
+      if (!questionId || !testo) return badRequest("Campi mancanti");
+      const { error } = await supabase.from("quiz_questions").update({ testo }).eq("id", questionId);
+      if (error) return serverError("Modifica domanda non riuscita");
+      return json({ ok: true });
+    }
+
     case "delete-question": {
       const questionId = str("questionId");
       if (!questionId) return badRequest("ID domanda mancante");
@@ -108,6 +117,19 @@ export const POST: APIRoute = async ({ request, cookies }) => {
         .insert({ question_id: questionId, testo, is_correct: isCorrect });
       if (error) return serverError("Inserimento opzione non riuscito");
       return json({ ok: true }, 201);
+    }
+
+    case "edit-option": {
+      const optionId = str("optionId");
+      if (!optionId) return badRequest("ID opzione mancante");
+      // Aggiorna solo i campi passati: testo e/o correttezza.
+      const patch: { testo?: string; is_correct?: boolean } = {};
+      if (typeof body.testo === "string" && body.testo.trim()) patch.testo = body.testo.trim();
+      if (typeof body.isCorrect === "boolean") patch.is_correct = body.isCorrect;
+      if (Object.keys(patch).length === 0) return badRequest("Nessun campo da aggiornare");
+      const { error } = await supabase.from("quiz_options").update(patch).eq("id", optionId);
+      if (error) return serverError("Modifica opzione non riuscita");
+      return json({ ok: true });
     }
 
     case "delete-option": {
