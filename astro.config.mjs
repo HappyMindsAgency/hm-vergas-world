@@ -9,9 +9,10 @@ export default defineConfig({
   // NB: aggiunta richiesta dalla Sezione 2 — vedi "Richieste di modifica" in
   // docs/INTEGRATION.md (l'intera area riservata è strutturalmente server-side).
   adapter: vercel(),
-  // URL provvisorio Vercel: aggiornare col dominio finale (custom o .vercel.app reale)
-  // quando il progetto sara' creato. Usato per canonical e Open Graph.
-  site: "https://hm-vergas-world.vercel.app",
+  // Dominio custom di produzione. Usato per canonical, Open Graph e come origine
+  // dei link nelle email (via import.meta.env.SITE in src/lib/siteUrl.ts).
+  // Override runtime possibile con la env var PUBLIC_SITE_URL su Vercel.
+  site: "https://vergasworld.incunziria.eu",
   build: {
     inlineStylesheets: "auto",
   },
