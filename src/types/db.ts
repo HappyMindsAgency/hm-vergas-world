@@ -115,3 +115,8 @@ export interface MaterialAssignment {
   material_id: string;
   teacher_id: string;
 }
+
+export interface TeacherInstitute {
+  teacher_id: string;
+  institute_id: string;
+}

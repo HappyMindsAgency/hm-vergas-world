@@ -34,9 +34,10 @@ export const PATCH: APIRoute = async ({ params, request, cookies }) => {
     if (!VALID_STATUS.includes(raw.status as ProfileStatus)) return badRequest("Stato non valido");
     patch.status = raw.status;
   }
-  if (typeof raw.instituteId === "string") patch.institute_id = raw.instituteId || null;
+  const hasInstituteIds = Array.isArray(raw.instituteIds);
+  if (typeof raw.instituteId === "string" && !hasInstituteIds) patch.institute_id = raw.instituteId || null;
 
-  if (Object.keys(patch).length === 0) return badRequest("Nessun campo da aggiornare");
+  if (!hasInstituteIds && Object.keys(patch).length === 0) return badRequest("Nessun campo da aggiornare");
 
   let supabase;
   try {
@@ -45,8 +46,27 @@ export const PATCH: APIRoute = async ({ params, request, cookies }) => {
     return serverError("Configurazione server mancante");
   }
 
-  const { error } = await supabase.from("profiles").update(patch).eq("id", id).eq("role", "teacher");
-  if (error) return serverError("Aggiornamento non riuscito");
+  // Associazioni multi-istituto: sostituisce l'intero insieme e riallinea l'istituto
+  // primario (profiles.institute_id resta se ancora selezionato, altrimenti il primo).
+  if (hasInstituteIds) {
+    const ids = (raw.instituteIds as unknown[]).filter((x): x is string => typeof x === "string" && !!x);
+    const { error: delErr } = await supabase.from("teacher_institutes").delete().eq("teacher_id", id);
+    if (delErr) return serverError("Aggiornamento istituti non riuscito");
+    if (ids.length) {
+      const { error: insErr } = await supabase
+        .from("teacher_institutes")
+        .insert(ids.map((institute_id) => ({ teacher_id: id, institute_id })));
+      if (insErr) return serverError("Aggiornamento istituti non riuscito");
+    }
+    const { data: prof } = await supabase.from("profiles").select("institute_id").eq("id", id).single();
+    const current = prof?.institute_id as string | null | undefined;
+    patch.institute_id = current && ids.includes(current) ? current : (ids[0] ?? null);
+  }
+
+  if (Object.keys(patch).length) {
+    const { error } = await supabase.from("profiles").update(patch).eq("id", id).eq("role", "teacher");
+    if (error) return serverError("Aggiornamento non riuscito");
+  }
   return json({ ok: true });
 };
 

@@ -7,7 +7,7 @@ export const prerender = false;
 
 import MuseoLayout from "../../../layouts/MuseoLayout.astro";
 import { getAdminProfile } from "../../../lib/admin/session";
-import { getTeacherDetail, getMaterials, getAssignedMaterialIds } from "../../../lib/admin/data";
+import { getTeacherDetail, getMaterials, getAssignedMaterialIds, getInstitutes, getTeacherInstituteIds } from "../../../lib/admin/data";
 import { MATERIAL_CATEGORY_LABELS, PROFILE_STATUS_LABELS, PROFILE_STATUS_BADGE } from "../../../config/admin";
 
 const admin = await getAdminProfile(Astro.cookies);
@@ -17,10 +17,17 @@ const { id } = Astro.params;
 const teacher = id ? await getTeacherDetail(id) : null;
 if (!teacher) return Astro.redirect("/museo/docenti");
 
-const [materials, assignedIds] = await Promise.all([
+const [materials, assignedIds, allInstitutes, teacherInstituteIds] = await Promise.all([
   getMaterials(),
   getAssignedMaterialIds(teacher.id),
+  getInstitutes(),
+  getTeacherInstituteIds(teacher.id),
 ]);
+// Fallback: docente senza associazioni esplicite → pre-seleziona l'istituto di registrazione.
+const checkedInstituteIds =
+  teacherInstituteIds.size > 0
+    ? teacherInstituteIds
+    : new Set(teacher.institute_id ? [teacher.institute_id] : []);
 
 const adminName = `${admin.nome} ${admin.cognome}`.trim();
 const fullName = `${teacher.nome} ${teacher.cognome}`;
@@ -151,6 +158,24 @@ function fmtDate(iso: string | null): string {
                 <label class="form-label stat-label" for="ed-email">Email</label>
                 <input class="form-control" id="ed-email" name="email" type="email" value={teacher.email} required />
               </div>
+              <div class="col-12">
+                <label class="form-label stat-label">Istituti associati</label>
+                <div class="border rounded p-2" style="max-height:180px;overflow:auto">
+                  {allInstitutes.length === 0 ? (
+                    <p class="small mb-0" style="color:rgba(55,65,81,.6)">Nessun istituto disponibile.</p>
+                  ) : (
+                    allInstitutes.map((i) => (
+                      <div class="form-check">
+                        <input class="form-check-input ed-institute" type="checkbox" id={`ed-inst-${i.id}`} value={i.id} checked={checkedInstituteIds.has(i.id)} />
+                        <label class="form-check-label" for={`ed-inst-${i.id}`}>
+                          {i.nome} <span style="color:rgba(55,65,81,.5)">· {i.citta}</span>
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <p class="small mt-1 mb-0" style="color:rgba(55,65,81,.6)">Il docente potrà creare classi solo negli istituti selezionati.</p>
+              </div>
             </div>
           </div>
           <div class="modal-footer border-0">
@@ -228,10 +253,11 @@ function fmtDate(iso: string | null): string {
     modForm?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(modForm);
+      const instituteIds = Array.from(document.querySelectorAll(".ed-institute:checked")).map((cb) => cb.value);
       const res = await fetch(`/api/docenti/${teacherId}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ nome: fd.get("nome"), cognome: fd.get("cognome"), email: fd.get("email") }),
+        body: JSON.stringify({ nome: fd.get("nome"), cognome: fd.get("cognome"), email: fd.get("email"), instituteIds }),
       });
       if (res.ok) window.location.reload();
       else notify("Salvataggio non riuscito.", false);

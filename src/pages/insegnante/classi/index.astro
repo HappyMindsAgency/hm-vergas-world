@@ -7,13 +7,13 @@ export const prerender = false;
 
 import DocenteLayout from "../../../layouts/DocenteLayout.astro";
 import { getTeacherProfile } from "../../../lib/docenti/session";
-import { getTeacherClasses, getInstitutes } from "../../../lib/docenti/data";
+import { getTeacherClasses, getTeacherInstitutes } from "../../../lib/docenti/data";
 import { STUDENT_IMPORT_ACCEPT } from "../../../config/docenti";
 
 const teacher = await getTeacherProfile(Astro.cookies);
 if (!teacher) return Astro.redirect("/insegnante/login");
 
-const [classes, institutes] = await Promise.all([getTeacherClasses(teacher.id), getInstitutes()]);
+const [classes, institutes] = await Promise.all([getTeacherClasses(teacher.id), getTeacherInstitutes(teacher.id)]);
 const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
 const currentYear = new Date().getFullYear();
 const defaultInstituteId = teacher.institute_id ?? "";

@@ -7,7 +7,7 @@ export const prerender = false;
 
 import DocenteLayout from "../../../layouts/DocenteLayout.astro";
 import { getTeacherProfile } from "../../../lib/docenti/session";
-import { getClassDetail, getInstitutes } from "../../../lib/docenti/data";
+import { getClassDetail, getTeacherInstitutes } from "../../../lib/docenti/data";
 import { STUDENT_IMPORT_ACCEPT } from "../../../config/docenti";
 
 const teacher = await getTeacherProfile(Astro.cookies);
@@ -17,7 +17,7 @@ const { id } = Astro.params;
 const detail = id ? await getClassDetail(teacher.id, id) : null;
 if (!detail) return Astro.redirect("/insegnante/classi");
 
-const institutes = await getInstitutes();
+const institutes = await getTeacherInstitutes(teacher.id);
 const teacherName = `${teacher.nome} ${teacher.cognome}`.trim();
 const { classe, istitutoNome, alunni, alunniAttivi, missioniTotaliPerAlunno } = detail;
 

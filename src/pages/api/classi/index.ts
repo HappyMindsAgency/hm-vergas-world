@@ -7,6 +7,7 @@ import type { APIRoute } from "astro";
 import { json, badRequest, serverError, getServer, guardTeacher } from "../../../lib/docenti/api";
 import { insertClassWithUniqueCode } from "../../../lib/docenti/classCodeAlloc";
 import { importStudentsIntoClass } from "../../../lib/docenti/importStudents";
+import { getTeacherInstitutes } from "../../../lib/docenti/data";
 
 export const prerender = false;
 
@@ -39,9 +40,11 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return serverError("Configurazione server mancante");
   }
 
-  // l'istituto serve per costruire il codice; verifica anche che esista.
-  const { data: institute } = await supabase.from("institutes").select("nome").eq("id", instituteId).single();
-  if (!institute) return badRequest("Istituto inesistente");
+  // l'istituto deve esistere ED essere tra quelli associati al docente (no spoofing
+  // di instituteId nel form: un docente crea classi solo nei propri istituti).
+  const allowed = await getTeacherInstitutes(teacher.id);
+  const institute = allowed.find((i) => i.id === instituteId);
+  if (!institute) return badRequest("Istituto non associato al docente");
 
   let created;
   try {

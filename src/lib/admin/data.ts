@@ -160,6 +160,18 @@ export async function getMaterials(): Promise<Material[]> {
   return (data as Material[]) ?? [];
 }
 
+/** Istituti a cui il docente è associato (per le checkbox nella scheda docente). */
+export async function getTeacherInstituteIds(teacherId: string): Promise<Set<string>> {
+  let supabase;
+  try {
+    supabase = await server();
+  } catch {
+    return new Set();
+  }
+  const { data } = await supabase.from("teacher_institutes").select("institute_id").eq("teacher_id", teacherId);
+  return new Set((data ?? []).map((r) => r.institute_id));
+}
+
 /** Materiali assegnati a un docente (lista di material_id). */
 export async function getAssignedMaterialIds(teacherId: string): Promise<Set<string>> {
   let supabase;

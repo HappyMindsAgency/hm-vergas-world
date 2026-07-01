@@ -10,6 +10,7 @@
 import type { APIRoute } from "astro";
 import { json, badRequest, serverError, getServer, guardTeacher } from "../../../lib/docenti/api";
 import { formatStudentName } from "../../../lib/format";
+import { getTeacherInstitutes } from "../../../lib/docenti/data";
 
 export const prerender = false;
 
@@ -55,8 +56,9 @@ export const PATCH: APIRoute = async ({ params, request, cookies }) => {
         patch.anno = anno;
       }
       if (typeof body.instituteId === "string" && body.instituteId.trim()) {
-        const { data: inst } = await supabase.from("institutes").select("id").eq("id", body.instituteId).single();
-        if (!inst) return badRequest("Istituto inesistente");
+        // deve essere tra gli istituti associati al docente (no spoofing).
+        const allowed = await getTeacherInstitutes(teacher.id);
+        if (!allowed.some((i) => i.id === body.instituteId)) return badRequest("Istituto non associato al docente");
         patch.institute_id = body.instituteId;
       }
       if (Object.keys(patch).length === 0) return badRequest("Nessun campo da aggiornare");

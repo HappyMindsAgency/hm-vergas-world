@@ -37,10 +37,12 @@ const { title, topbar = true, studentName } = Astro.props;
         </a>
         <div class="d-flex align-items-center gap-3">
           {studentName && <span class="d-none d-sm-inline fw-semibold">{studentName}</span>}
-          {/* Niente logout (ADR-2): "Cambia codice" torna al login. */}
-          <a href="/avventura" class="btn btn-a-outline btn-sm" style="color:#fff;border-color:#fff">
-            Cambia codice
-          </a>
+          {/* Esci: chiude la sessione effimera PRIMA della naturale scadenza (PC condiviso). */}
+          <form method="POST" action="/api/alunni/logout" class="m-0">
+            <button type="submit" class="btn btn-a-outline btn-sm" style="color:#fff;border-color:#fff">
+              Esci
+            </button>
+          </form>
         </div>
       </header>
     )

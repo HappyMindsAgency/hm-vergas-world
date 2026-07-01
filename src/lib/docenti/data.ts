@@ -377,14 +377,30 @@ export async function getStoriesContent(): Promise<StoryContentView[]> {
 }
 
 // ---------- istituti (per il form classe) ----------
-export async function getInstitutes(): Promise<Institute[]> {
+/**
+ * Istituti a cui il docente è associato (teacher_institutes) — è ciò che vede nel
+ * form "nuova classe". Fallback all'istituto di registrazione (profiles.institute_id)
+ * se non ha ancora associazioni esplicite, così il dropdown non resta mai vuoto.
+ * Unica fonte di verità: la POST /api/classi valida instituteId contro questa lista.
+ */
+export async function getTeacherInstitutes(teacherId: string): Promise<Institute[]> {
   let supabase;
   try {
     supabase = await server();
   } catch {
     return [];
   }
-  const { data } = await supabase.from("institutes").select("*").order("nome");
+  const { data: links } = await supabase
+    .from("teacher_institutes")
+    .select("institute_id")
+    .eq("teacher_id", teacherId);
+  let ids = (links ?? []).map((r) => r.institute_id);
+  if (!ids.length) {
+    const { data: prof } = await supabase.from("profiles").select("institute_id").eq("id", teacherId).single();
+    if (prof?.institute_id) ids = [prof.institute_id];
+  }
+  if (!ids.length) return [];
+  const { data } = await supabase.from("institutes").select("*").in("id", ids).order("nome");
   return (data as Institute[]) ?? [];
 }
 
