@@ -563,6 +563,12 @@
 
 /* ============ Layout desktop: indizio stretto, sovrapposto top-right ============ */
 @media (min-width: 1100px) {
+  /* La mappa resta FULL-WIDTH; limitiamo solo l'altezza a max 100vh. Superata la
+     soglia lo stage si comporta come una fascia panoramica (object-fit:cover
+     ritaglia in alto/basso), senza margini laterali. */
+  .vw-map-stage {
+    max-height: 100vh;
+  }
   .vw-indizio {
     position: absolute;
     top: 28px;
