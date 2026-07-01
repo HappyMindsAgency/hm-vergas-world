@@ -500,7 +500,6 @@
   cursor: pointer;
 }
 .vw-story-card__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.vw-story-card__thumb[aria-current="true"] { outline: 2px solid var(--vw-teal); border-color: var(--vw-teal); }
 .vw-story-card__thumb:focus-visible { outline: 2px solid var(--vw-teal-dark); outline-offset: 2px; }
 /* Mobile: solo l'immagine principale, thumbnail nascoste */
 @media (max-width: 700px) {
@@ -525,7 +524,15 @@
 .vw-story-card__desc { font-size: 16px; line-height: 1.6; font-weight: 500; }
 
 /* Slider: una storia per slide con scroll-snap (ponytail: niente libreria carousel) */
+/* Viewport = frecce ai lati + track al centro (flex). */
+.vw-stories__viewport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 .vw-stories__track {
+  flex: 1;
+  min-width: 0;
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -557,17 +564,19 @@
   cursor: pointer;
 }
 .vw-stories__dot[aria-current="true"] { background: var(--vw-gold); }
-.vw-stories__nav { display: flex; gap: 12px; justify-content: center; align-items: center; }
 .vw-stories__arrow {
+  flex: none;
   width: 48px;
-  height: 44px;
+  height: 48px;
   border-radius: 9999px;
   border: 1px solid var(--vw-border);
   background: #fff;
   font-size: 20px;
   cursor: pointer;
   color: var(--vw-teal);
+  box-shadow: var(--vw-shadow-card);
 }
+.vw-stories__arrow:focus-visible { outline: 2px solid var(--vw-teal-dark); outline-offset: 2px; }
 
 /* ---- Pianifica visita (75:896) ---- */
 .vw-visit { background: #fff; }

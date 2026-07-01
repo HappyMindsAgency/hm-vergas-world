@@ -53,55 +53,48 @@ const PERSONAGGI = [
 ];
 
 // Slide dello slider storie (Figma 75:946). Copy autorevole da testi-vergasworld.pdf
-// (titoli carosello + testi delle 7 storie). Le immagini riusano asset esistenti
-// in /public/immagini (il PDF non fornisce le immagini dello slider).
+// (titoli carosello + testi delle 7 storie). Le immagini della galleria si trovano
+// in /public/immagini/storie/storia-N/immagine-1..4.jpg (derivate da `numero`).
 const STORIE = [
   {
     numero: 1,
     titolo: "L'inizio del viaggio",
-    immagine: "/immagini/palazzo di verga.jpg",
     descrizione:
       "Carletto è tornato a Milano, ma ha ancora Vizzini nella testa. Nella valigia trova un sasso colorato e il ricordo si apre: Palazzo Verga, una tavola piena di adulti, un panino rubato sotto la tovaglia e Caterina, pronta a portarlo fuori, dove comincia davvero l'avventura.",
   },
   {
     numero: 2,
     titolo: "L'incontro con la Lupa",
-    immagine: "/immagini/figma-piazza-cunziria.png",
     descrizione:
       "Nei vicoli della Cunziria, Carletto si sente fuori posto. Due ragazzi più grandi lo prendono in giro e lui ha paura. Poi arriva Pina, che tutti chiamano la Lupa: non urla, non colpisce, ma protegge con uno sguardo fermo. Prima di andare via, gli lascia un sasso colorato.",
   },
   {
     numero: 3,
     titolo: "L'incontro con Gesualdo",
-    immagine: "/immagini/incontro con gesualdo.jpg",
     descrizione:
       "Carletto e Caterina trovano una montagna di oggetti dimenticati. In cima c'è Gesualdo, seduto come un piccolo re, con il suo soldatino stretto al petto. Non vuole far passare nessuno. Poi Carletto gli dona la bussola: la montagna smette di essere un muro e diventa un passaggio.",
   },
   {
     numero: 4,
     titolo: "L'incontro con Rosso",
-    immagine: "/immagini/malpelo.jpg",
     descrizione:
       "Caterina porta Carletto dentro una grotta scavata nella roccia. All'inizio lui vede solo il buio, la polvere e un bambino dai capelli rossi. Poi guarda meglio: sulla sabbia ci sono mappe, numeri e progetti per portare l'acqua fino al paese. Rosso gli mostra che il talento può nascondersi dove nessuno si ferma a guardare.",
   },
   {
     numero: 5,
     titolo: "L'incontro con Turiddu e Alfio",
-    immagine: "/immagini/vizzini.jpg",
     descrizione:
       "Nella piazza di Vizzini, due bambini gridano e gesticolano sotto un grande albero. Carletto pensa che stiano litigando, ma Caterina ha già capito: Turiddu e Alfio stanno giocando alla Morra. La sfida è accesa, le regole sono importanti. Quando la partita finisce, finiscono anche i rancori: si ride, si fa pace e si dividono i cannoli.",
   },
   {
     numero: 6,
     titolo: "L'incontro con i Malavoglia",
-    immagine: "/immagini/malavoglia.jpg",
     descrizione:
       "Fuori dal paese, su una collina, Carletto vede una cosa impossibile: una barca sull'erba, lontana dal mare. Dentro ci sono bambini che remano e immaginano di navigare. Accanto a loro cresce un nespolo, con le radici nella terra. Carletto capisce che si può sognare di partire e, allo stesso tempo, avere un posto a cui tornare.",
   },
   {
     numero: 7,
     titolo: "Il ritorno di Carletto",
-    immagine: "/immagini/vizzini.jpg",
     descrizione:
       "Il sole tramonta su Vizzini e Carletto torna a Palazzo Verga con i vestiti sporchi, i capelli in disordine e il sasso di Pina in mano. Non racconta subito tutto: appoggia il sasso sul tavolo, tra bicchieri e posate eleganti. Dentro quell'oggetto ci sono tutti gli incontri del viaggio. Quando torna a Milano, la stanza è la stessa, ma lui guarda il mondo con occhi diversi.",
   },
@@ -327,7 +320,9 @@ const LUOGHI = [
           </p>
         </div>
 
-        <div class="vw-stories__track" data-stories-track>
+        <div class="vw-stories__viewport">
+          <button type="button" class="vw-stories__arrow vw-stories__arrow--prev" data-stories-prev aria-label="Storia precedente">←</button>
+          <div class="vw-stories__track" data-stories-track>
           {STORIE.map((s) => {
             // 4 immagini per storia in /public/immagini/storie/storia-N/ (immagine-1..4).
             // immagine-1 = principale; le altre 3 = thumbnail cliccabili.
@@ -342,7 +337,7 @@ const LUOGHI = [
                   </div>
                   <div class="vw-story-card__thumbs" role="group" aria-label={`Altre immagini di ${s.titolo}`}>
                     {imgs.slice(1).map((src, i) => (
-                      <button type="button" class="vw-story-card__thumb" data-story-thumb data-full={src} aria-label={`Mostra immagine ${i + 2} di ${s.titolo}`}>
+                      <button type="button" class="vw-story-card__thumb" data-story-thumb aria-label={`Mostra immagine ${i + 2} di ${s.titolo}`}>
                         <img src={src} alt="" width="120" height="68" loading="lazy" decoding="async" />
                       </button>
                     ))}
@@ -356,16 +351,14 @@ const LUOGHI = [
             </div>
             );
           })}
+          </div>
+          <button type="button" class="vw-stories__arrow vw-stories__arrow--next" data-stories-next aria-label="Storia successiva">→</button>
         </div>
 
-        <div class="vw-stories__nav">
-          <button type="button" class="vw-stories__arrow" data-stories-prev aria-label="Storia precedente">←</button>
-          <div class="vw-stories__dots" role="tablist" aria-label="Seleziona storia">
-            {STORIE.map((s, i) => (
-              <button type="button" class="vw-stories__dot" data-stories-dot aria-current={i === 0 ? "true" : "false"} aria-label={`Vai alla storia ${s.numero}: ${s.titolo}`}>{s.numero}</button>
-            ))}
-          </div>
-          <button type="button" class="vw-stories__arrow" data-stories-next aria-label="Storia successiva">→</button>
+        <div class="vw-stories__dots" role="tablist" aria-label="Seleziona storia">
+          {STORIE.map((s, i) => (
+            <button type="button" class="vw-stories__dot" data-stories-dot aria-current={i === 0 ? "true" : "false"} aria-label={`Vai alla storia ${s.numero}: ${s.titolo}`}>{s.numero}</button>
+          ))}
         </div>
       </div>
     </section>
@@ -419,16 +412,18 @@ const LUOGHI = [
   </div>
 
   <script>
-    // Slider storie: click su una thumbnail → cambia l'immagine principale della slide.
+    // Slider storie: click su una thumbnail → SCAMBIA principale ↔ thumbnail.
+    // Così l'immagine iniziale (principale allo stato di partenza) resta sempre
+    // raggiungibile: finisce nello slot della thumb cliccata, ed è reversibile.
     document.querySelectorAll<HTMLButtonElement>("[data-story-thumb]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const media = btn.closest(".vw-story-card__gallery");
         const main = media?.querySelector<HTMLImageElement>("[data-story-main]");
-        const full = btn.dataset.full;
-        if (main && full) main.src = full;
-        media?.querySelectorAll("[data-story-thumb]").forEach((b) =>
-          b.setAttribute("aria-current", b === btn ? "true" : "false")
-        );
+        const thumbImg = btn.querySelector<HTMLImageElement>("img");
+        if (!main || !thumbImg) return;
+        const tmp = main.src;
+        main.src = thumbImg.src;
+        thumbImg.src = tmp;
       });
     });
   </script>
