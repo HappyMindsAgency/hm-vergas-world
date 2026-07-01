@@ -328,12 +328,25 @@ const LUOGHI = [
         </div>
 
         <div class="vw-stories__track" data-stories-track>
-          {STORIE.map((s) => (
+          {STORIE.map((s) => {
+            // 4 immagini per storia in /public/immagini/storie/storia-N/ (immagine-1..4).
+            // immagine-1 = principale; le altre 3 = thumbnail cliccabili.
+            const imgs = [1, 2, 3, 4].map((n) => `/immagini/storie/storia-${s.numero}/immagine-${n}.jpg`);
+            return (
             <div class="vw-stories__slide" data-stories-slide>
               <article class="vw-story-card">
-                <div class="vw-story-card__media">
-                  <img src={s.immagine} alt={s.titolo} width="954" height="536" loading="lazy" decoding="async" />
-                  <span class="vw-story-card__badge">{String(s.numero).padStart(2, "0")}</span>
+                <div class="vw-story-card__gallery">
+                  <div class="vw-story-card__media">
+                    <img data-story-main src={imgs[0]} alt={s.titolo} width="954" height="536" loading="lazy" decoding="async" />
+                    <span class="vw-story-card__badge">{String(s.numero).padStart(2, "0")}</span>
+                  </div>
+                  <div class="vw-story-card__thumbs" role="group" aria-label={`Altre immagini di ${s.titolo}`}>
+                    {imgs.slice(1).map((src, i) => (
+                      <button type="button" class="vw-story-card__thumb" data-story-thumb data-full={src} aria-label={`Mostra immagine ${i + 2} di ${s.titolo}`}>
+                        <img src={src} alt="" width="120" height="68" loading="lazy" decoding="async" />
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <span class="vw-pill vw-pill--teal">Storia {s.numero} / 7</span>
                 <h3>{s.titolo}</h3>
@@ -341,7 +354,8 @@ const LUOGHI = [
                 <a class="vw-btn vw-btn--primary" href="/avventura">Sblocca con il Codice Avventura</a>
               </article>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div class="vw-stories__nav">
@@ -403,6 +417,21 @@ const LUOGHI = [
       </div>
     </div>
   </div>
+
+  <script>
+    // Slider storie: click su una thumbnail → cambia l'immagine principale della slide.
+    document.querySelectorAll<HTMLButtonElement>("[data-story-thumb]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const media = btn.closest(".vw-story-card__gallery");
+        const main = media?.querySelector<HTMLImageElement>("[data-story-main]");
+        const full = btn.dataset.full;
+        if (main && full) main.src = full;
+        media?.querySelectorAll("[data-story-thumb]").forEach((b) =>
+          b.setAttribute("aria-current", b === btn ? "true" : "false")
+        );
+      });
+    });
+  </script>
 
   <script>
     // Apertura/chiusura modale dei pin "luogo" sulla mappa.
